@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A Trip to the City - Shuffle Quiz!</title>
+    <title>A Trip to the City - Activity Center</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
@@ -26,9 +26,18 @@
         }
 
         .container { max-width: 800px; width: 100%; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: #1565c0; font-size: 2.2rem; margin-bottom: 10px; }
 
-        header { text-align: center; margin-bottom: 40px; }
-        h1 { color: #1565c0; font-size: 2.5rem; }
+        .tab-container { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .tab-btn {
+            padding: 12px 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            border: none; border-radius: 50px; background: #cfd8dc; color: #546e7a; transition: 0.3s;
+        }
+        .tab-btn.active { background: var(--primary-blue); color: white; box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4); }
+
+        .activity-section { display: none; }
+        .activity-section.active { display: block; }
 
         .quiz-card {
             background: var(--card-bg); border-radius: 25px;
@@ -42,196 +51,265 @@
             padding-left: 15px; border-left: 5px solid var(--primary-blue);
         }
 
-        .image-grid {
-            display: grid; grid-template-columns: repeat(2, 1fr);
-            gap: 15px; margin-bottom: 25px;
-        }
-
-        .img-option {
-            width: 100%; aspect-ratio: 16/9; border-radius: 15px;
-            cursor: pointer; transition: transform 0.2s, border 0.2s;
-            border: 4px solid transparent; background-color: #f5f5f5;
-            object-fit: cover;
-        }
-
-        .img-option:hover { transform: scale(1.03); }
+        .image-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 25px; }
+        .img-option { width: 100%; aspect-ratio: 16/9; border-radius: 15px; cursor: pointer; border: 4px solid transparent; object-fit: cover; transition: 0.2s; }
         .img-option.selected-correct { border-color: var(--success-green); }
         .img-option.selected-wrong { border-color: var(--error-red); }
 
-        .choice-list { display: flex; flex-direction: column; gap: 10px; }
+        .follow-up { margin-top: 20px; padding-top: 20px; border-top: 1px solid #eee; }
+        .choice-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
         .choice-btn {
-            padding: 15px; font-size: 1.2rem; font-weight: bold;
+            padding: 15px; font-size: 1.1rem; font-weight: bold;
             border: 2px solid #ddd; border-radius: 12px;
-            background: white; cursor: pointer; transition: 0.2s;
-            text-align: left;
+            background: white; cursor: pointer; transition: 0.2s; text-align: left;
         }
-
-        .choice-btn:hover { background: #f8f9fa; border-color: var(--primary-blue); }
         .choice-btn.correct { background-color: #e8f5e9; border-color: var(--success-green); color: #2e7d32; }
         .choice-btn.wrong { background-color: #ffebee; border-color: var(--error-red); color: #c62828; }
 
-        .feedback-msg {
-            margin-top: 15px; font-weight: bold; font-size: 1.2rem;
-            text-align: center; height: 1.5rem;
-        }
+        /* Story Order & Fill in the gaps */
+        .sortable-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+        .sort-item { cursor: grab; border: 3px solid #ddd; border-radius: 12px; overflow: hidden; background: white; }
+        .sort-item img { width: 100%; aspect-ratio: 1/1; object-fit: cover; pointer-events: none; }
+        .sort-item.dragging { opacity: 0.5; }
+        .story-fill { font-size: 1.4rem; line-height: 2.2; background: #fffde7; padding: 25px; border-radius: 15px; border: 2px dashed #fbc02d; }
+        .drop-zone { display: inline-block; min-width: 160px; border-bottom: 3px solid #ccc; text-align: center; color: var(--primary-blue); font-weight: bold; cursor: pointer; margin: 0 5px; }
+        .drop-zone.active-zone { border-bottom-color: var(--primary-blue); background: #e3f2fd; }
+        .drop-zone.filled { border-bottom-color: var(--success-green); color: #2e7d32; }
+        .story-choices { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
+
+        .feedback-msg { margin-top: 15px; font-weight: bold; font-size: 1.2rem; text-align: center; min-height: 1.5rem; }
+        .check-all-btn { display: block; width: 100%; padding: 15px; margin-top: 20px; background: var(--primary-blue); color: white; border: none; border-radius: 12px; font-size: 1.2rem; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>Quiz Time! 🏙️</h1>
-        <p>絵をみて答えをえらんでね！（並び順がかわるよ）</p>
+        <h1>A Trip to the City 🏙️</h1>
+        <div class="tab-container">
+            <button class="tab-btn active" onclick="showTab('quiz')">1. Quick Quiz</button>
+            <button class="tab-btn" onclick="showTab('story')">2. Story Order</button>
+        </div>
     </header>
 
-    <div class="quiz-card">
-        <div class="question-title">Q1-A. "Bear likes the pink hat." どの絵かな？</div>
-        <div class="image-grid" id="grid-q1">
-            <img src="images_city/pink_hat.jpg" class="img-option" data-correct="true">
-            <img src="images_city/big_book.jpg" class="img-option" data-correct="false">
-            <img src="images_city/eat.jpg" class="img-option" data-correct="false">
-            <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+    <section id="quiz-section" class="activity-section active">
+        <div class="quiz-card" id="q1-card">
+            <div class="question-title">Question 1. Bear likes the pink hat. どれかな？</div>
+            <div class="image-grid" id="grid-q1">
+                <img src="images_city/pink_hat.jpg" class="img-option" data-correct="true">
+                <img src="images_city/big_book.jpg" class="img-option" data-correct="false">
+                <img src="images_city/eat.jpg" class="img-option" data-correct="false">
+                <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+            </div>
+            <div class="follow-up">
+                <div class="question-title" style="border:none; padding:0;">What does Pig say?</div>
+                <div class="choice-list" id="choices-q1">
+                    <button class="choice-btn" data-correct="true">"It is a nice hat."</button>
+                    <button class="choice-btn" data-correct="false">"It is a nice book."</button>
+                    <button class="choice-btn" data-correct="false">"We can eat!"</button>
+                </div>
+            </div>
+            <div id="fb-q1" class="feedback-msg"></div>
         </div>
-        <div id="q1a-feedback" class="feedback-msg"></div>
 
-        <div style="margin-top: 30px;" class="question-title">Q1-B. What does Pig say?</div>
-        <div class="choice-list">
-            <button class="choice-btn" onclick="checkText(this, false, 'q1b-feedback')">"It is a nice book."</button>
-            <button class="choice-btn" onclick="checkText(this, true, 'q1b-feedback')">"It is a nice hat."</button>
-            <button class="choice-btn" onclick="checkText(this, false, 'q1b-feedback')">"Look down!"</button>
+        <div class="quiz-card" id="q2-card">
+            <div class="question-title">Question 2. Pig likes the big book. どれかな？</div>
+            <div class="image-grid" id="grid-q2">
+                <img src="images_city/pink_hat.jpg" class="img-option" data-correct="false">
+                <img src="images_city/big_book.jpg" class="img-option" data-correct="true">
+                <img src="images_city/eat.jpg" class="img-option" data-correct="false">
+                <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+            </div>
+            <div class="follow-up">
+                <div class="question-title" style="border:none; padding:0;">What does Bear say?</div>
+                <div class="choice-list" id="choices-q2">
+                    <button class="choice-btn" data-correct="true">"It is a nice book."</button>
+                    <button class="choice-btn" data-correct="false">"It is a nice hat."</button>
+                    <button class="choice-btn" data-correct="false">"Look up!"</button>
+                </div>
+            </div>
+            <div id="fb-q2" class="feedback-msg"></div>
         </div>
-        <div id="q1b-feedback" class="feedback-msg"></div>
-    </div>
 
-    <div class="quiz-card">
-        <div class="question-title">Q2-A. "Pig likes the big book." どの絵かな？</div>
-        <div class="image-grid" id="grid-q2">
-            <img src="images_city/pink_hat.jpg" class="img-option" data-correct="false">
-            <img src="images_city/big_book.jpg" class="img-option" data-correct="true">
-            <img src="images_city/eat.jpg" class="img-option" data-correct="false">
-            <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+        <div class="quiz-card" id="q3-card">
+            <div class="question-title">Question 3. "Look!" says Bear. "We can eat!" 次のシーンは？</div>
+            <div class="image-grid" id="grid-q3">
+                <img src="images_city/pink_hat.jpg" class="img-option" data-correct="false">
+                <img src="images_city/big_book.jpg" class="img-option" data-correct="false">
+                <img src="images_city/eat.jpg" class="img-option" data-correct="true">
+                <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+            </div>
+            <div class="follow-up">
+                <div class="question-title" style="border:none; padding:0;">What are they doing?</div>
+                <div class="choice-list" id="choices-q3">
+                    <button class="choice-btn" data-correct="true">They are eating lunch.</button>
+                    <button class="choice-btn" data-correct="false">They are buying books.</button>
+                    <button class="choice-btn" data-correct="true">It is a very fun day!</button>
+                </div>
+            </div>
+            <div id="fb-q3" class="feedback-msg"></div>
         </div>
-        <div id="q2a-feedback" class="feedback-msg"></div>
+    </section>
 
-        <div style="margin-top: 30px;" class="question-title">Q2-B. What does Bear say?</div>
-        <div class="choice-list">
-            <button class="choice-btn" onclick="checkText(this, false, 'q2b-feedback')">"Look up!"</button>
-            <button class="choice-btn" onclick="checkText(this, false, 'q2b-feedback')">"It is a nice hat."</button>
-            <button class="choice-btn" onclick="checkText(this, true, 'q2b-feedback')">"It is a nice book."</button>
+    <section id="story-section" class="activity-section">
+        <div class="quiz-card">
+            <div class="question-title">Step 1: Put the pictures in order!</div>
+            <div class="sortable-grid" id="sort-grid">
+                <div class="sort-item" draggable="true" data-id="take_a_trip"><img src="images_city/take_a_trip.jpg"></div>
+                <div class="sort-item" draggable="true" data-id="pink_hat"><img src="images_city/pink_hat.jpg"></div>
+                <div class="sort-item" draggable="true" data-id="big_book"><img src="images_city/big_book.jpg"></div>
+                <div class="sort-item" draggable="true" data-id="eat"><img src="images_city/eat.jpg"></div>
+            </div>
+            <button class="check-all-btn" onclick="checkOrder()">Check Order</button>
+            <div id="order-feedback" class="feedback-msg"></div>
         </div>
-        <div id="q2b-feedback" class="feedback-msg"></div>
-    </div>
 
-    <div class="quiz-card">
-        <div class="question-title">Q3-A. "Look!" says Bear. "We can eat!" の後の絵を選ぼう！</div>
-        <div class="image-grid" id="grid-q3">
-            <img src="images_city/pink_hat.jpg" class="img-option" data-correct="false">
-            <img src="images_city/big_book.jpg" class="img-option" data-correct="false">
-            <img src="images_city/eat.jpg" class="img-option" data-correct="true">
-            <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+        <div class="quiz-card">
+            <div class="question-title">Step 2: Complete the story!</div>
+            <p style="text-align: center; color: #666;">（カッコをクリックしてから、下の言葉をえらんでね）</p>
+            <div class="story-fill">
+                1. <b>First</b>, they <span class="drop-zone" id="gap-1" onclick="setActiveGap(1)">_______</span>.<br>
+                2. <b>Then</b>, they <span class="drop-zone" id="gap-2" onclick="setActiveGap(2)">_______</span>.<br>
+                3. <b>Next</b>, they <span class="drop-zone" id="gap-3" onclick="setActiveGap(3)">_______</span>.<br>
+                4. <b>Finally</b>, they <span class="drop-zone" id="gap-4" onclick="setActiveGap(4)">_______</span>.
+            </div>
+            <div class="story-choices" id="choice-container"></div>
+            <div id="story-feedback" class="feedback-msg"></div>
         </div>
-        <div id="q3a-feedback" class="feedback-msg"></div>
-
-        <div style="margin-top: 30px;" class="question-title">Q3-B. What are they doing?</div>
-        <div class="choice-list">
-            <button class="choice-btn" onclick="checkText(this, true, 'q3b-feedback')">They are eating lunch.</button>
-            <button class="choice-btn" onclick="checkText(this, false, 'q3b-feedback')">They are buying hats.</button>
-            <button class="choice-btn" onclick="checkText(this, true, 'q3b-feedback', 'It is a very fun day!')">It is a very fun day!</button>
-        </div>
-        <div id="q3b-feedback" class="feedback-msg"></div>
-    </div>
+    </section>
 </div>
 
 <script>
-    // --- 音声設定 ---
-    function getFemaleVoice() {
-        const voices = window.speechSynthesis.getVoices();
-        const preferred = ["Google US English", "Microsoft Zira", "Samantha", "Female"];
-        let selected = null;
-        for (let name of preferred) {
-            selected = voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && v.name.includes(name));
-            if (selected) break;
-        }
-        return selected || voices.find(v => v.lang.startsWith('en'));
-    }
+    let activeGapId = null;
+    const storyAnswers = { 1: 'take a trip', 2: 'go to a hat store', 3: 'go to a book store', 4: 'eat lunch' };
 
-    function playSound(isCorrect) {
+    function playSound(text) {
         window.speechSynthesis.cancel();
-        const msg = new SpeechSynthesisUtterance();
-        msg.lang = 'en-US';
-        msg.rate = 0.8;
-        msg.pitch = 1.0;
-        
-        const voice = getFemaleVoice();
-        if (voice) msg.voice = voice;
-        
-        msg.text = isCorrect ? "That's right! Great job!" : "Try again!";
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'en-US'; msg.rate = 0.8;
         window.speechSynthesis.speak(msg);
     }
 
-    // --- シャッフル機能 ---
-    function shuffleImages() {
-        const grids = document.querySelectorAll('.image-grid');
-        grids.forEach(grid => {
-            const images = Array.from(grid.children);
-            // フィッシャー・イェーツのシャッフル
-            for (let i = images.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [images[i], images[j]] = [images[j], images[i]];
-            }
-            // 並び替えた要素を再配置
-            images.forEach(img => {
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.activity-section').forEach(s => s.classList.remove('active'));
+        if(tabName === 'quiz') {
+            document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+            document.getElementById('quiz-section').classList.add('active');
+            initQuiz();
+        } else {
+            document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+            document.getElementById('story-section').classList.add('active');
+            initSortable();
+            initStoryChoices();
+        }
+    }
+
+    function initQuiz() {
+        document.querySelectorAll('.image-grid').forEach(grid => {
+            const imgs = Array.from(grid.children);
+            imgs.sort(() => Math.random() - 0.5).forEach(img => {
                 grid.appendChild(img);
-                // クリックイベントをここで付与
                 img.onclick = function() {
-                    const isCorrect = this.getAttribute('data-correct') === 'true';
-                    const feedbackId = grid.nextElementSibling.id;
-                    checkImg(this, isCorrect, feedbackId);
+                    const isCorrect = this.dataset.correct === 'true';
+                    grid.querySelectorAll('.img-option').forEach(i => i.classList.remove('selected-correct', 'selected-wrong'));
+                    this.classList.add(isCorrect ? 'selected-correct' : 'selected-wrong');
+                    playSound(isCorrect ? "Correct!" : "Try again.");
+                };
+            });
+        });
+
+        document.querySelectorAll('.choice-list').forEach(list => {
+            const btns = Array.from(list.children);
+            btns.sort(() => Math.random() - 0.5).forEach(btn => {
+                list.appendChild(btn);
+                btn.onclick = function() {
+                    const isCorrect = this.dataset.correct === 'true';
+                    const fb = list.closest('.quiz-card').querySelector('.feedback-msg');
+                    list.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('correct', 'wrong'));
+                    this.classList.add(isCorrect ? 'correct' : 'wrong');
+                    fb.innerText = isCorrect ? "✨ Perfect! ✨" : "❌ Try again!";
+                    playSound(isCorrect ? "That's right!" : "Not quite.");
                 };
             });
         });
     }
 
-    // --- 正誤判定 ---
-    function checkImg(el, isCorrect, feedbackId) {
-        const feedback = document.getElementById(feedbackId);
-        const siblings = el.parentElement.querySelectorAll('.img-option');
-        siblings.forEach(s => s.classList.remove('selected-correct', 'selected-wrong'));
+    // --- Story Order のシャッフル初期化 ---
+    function initSortable() {
+        const grid = document.getElementById('sort-grid');
+        let items = Array.from(grid.children);
+        // Step 1 の画像をシャッフル
+        items.sort(() => Math.random() - 0.5).forEach(i => grid.appendChild(i));
+        
+        items.forEach(item => {
+            item.addEventListener('dragstart', () => item.classList.add('dragging'));
+            item.addEventListener('dragend', () => item.classList.remove('dragging'));
+        });
+        
+        grid.addEventListener('dragover', e => {
+            e.preventDefault();
+            const dragging = document.querySelector('.dragging');
+            const siblings = [...grid.querySelectorAll('.sort-item:not(.dragging)')];
+            const next = siblings.find(s => e.clientX <= s.offsetLeft + s.offsetWidth / 2);
+            grid.insertBefore(dragging, next);
+        });
+    }
 
-        if (isCorrect) {
-            el.classList.add('selected-correct');
-            feedback.innerText = "✨ Correct! ✨";
-            feedback.style.color = "var(--success-green)";
-            playSound(true);
+    // --- Step 2 選択肢のシャッフル初期化 ---
+    function initStoryChoices() {
+        const container = document.getElementById('choice-container');
+        container.innerHTML = '';
+        // 言葉をシャッフル
+        const choices = Object.values(storyAnswers).sort(() => Math.random() - 0.5);
+        choices.forEach(text => {
+            const btn = document.createElement('button');
+            btn.className = 'choice-btn';
+            btn.style.padding = '10px 20px';
+            btn.innerText = text;
+            btn.onclick = () => selectChoice(text, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function checkOrder() {
+        const current = [...document.querySelectorAll('.sort-item')].map(i => i.dataset.id);
+        const correct = ['take_a_trip', 'pink_hat', 'big_book', 'eat'];
+        const fb = document.getElementById('order-feedback');
+        const isCorrect = JSON.stringify(current) === JSON.stringify(correct);
+        fb.innerText = isCorrect ? "✨ Perfect Order! ✨" : "❌ Not quite. Try again!";
+        fb.style.color = isCorrect ? "var(--success-green)" : "var(--error-red)";
+        if(isCorrect) playSound("Perfect order!");
+    }
+
+    function setActiveGap(id) {
+        document.querySelectorAll('.drop-zone').forEach(z => z.classList.remove('active-zone'));
+        const zone = document.getElementById(`gap-${id}`);
+        if(zone.classList.contains('filled')) return;
+        activeGapId = id;
+        zone.classList.add('active-zone');
+    }
+
+    function selectChoice(text, btn) {
+        if(!activeGapId) { alert("先にカッコ（_______）をえらんでね！"); return; }
+        const zone = document.getElementById(`gap-${activeGapId}`);
+        const fb = document.getElementById('story-feedback');
+        if(text === storyAnswers[activeGapId]) {
+            zone.innerText = text; zone.classList.remove('active-zone'); zone.classList.add('filled');
+            btn.style.visibility = 'hidden';
+            activeGapId = null; fb.innerText = "✨ Good! ✨"; fb.style.color = "var(--success-green)";
+            playSound("Good job!");
+            if(document.querySelectorAll('.drop-zone.filled').length === 4) {
+                fb.innerText = "🎉 Excellent! The story is complete! 🎉";
+                playSound("Excellent! You finished the story!");
+            }
         } else {
-            el.classList.add('selected-wrong');
-            feedback.innerText = "❌ Try again!";
-            feedback.style.color = "var(--error-red)";
-            playSound(false);
+            fb.innerText = "❌ Try another one!"; fb.style.color = "var(--error-red)";
+            playSound("Try again.");
         }
     }
 
-    function checkText(el, isCorrect, feedbackId, customMsg) {
-        const feedback = document.getElementById(feedbackId);
-        const siblings = el.parentElement.querySelectorAll('.choice-btn');
-        siblings.forEach(s => s.classList.remove('correct', 'wrong'));
-
-        if (isCorrect) {
-            el.classList.add('correct');
-            feedback.innerText = customMsg ? "✨ " + customMsg + " ✨" : "✨ Correct! ✨";
-            feedback.style.color = "var(--success-green)";
-            playSound(true);
-        } else {
-            el.classList.add('wrong');
-            feedback.innerText = "❌ Try again!";
-            feedback.style.color = "var(--error-red)";
-            playSound(false);
-        }
-    }
-
-    // 初期化
-    window.onload = shuffleImages;
-    window.speechSynthesis.onvoiceschanged = getFemaleVoice;
+    window.onload = initQuiz;
 </script>
 </body>
 </html>
