@@ -72,7 +72,7 @@
         .sort-item img { width: 100%; aspect-ratio: 1/1; object-fit: cover; pointer-events: none; }
         .sort-item.dragging { opacity: 0.5; }
         .story-fill { font-size: 1.4rem; line-height: 2.2; background: #fffde7; padding: 25px; border-radius: 15px; border: 2px dashed #fbc02d; }
-        .drop-zone { display: inline-block; min-width: 160px; border-bottom: 3px solid #ccc; text-align: center; color: var(--primary-blue); font-weight: bold; cursor: pointer; margin: 0 5px; }
+        .drop-zone { display: inline-block; min-width: 180px; border-bottom: 3px solid #ccc; text-align: center; color: var(--primary-blue); font-weight: bold; cursor: pointer; margin: 0 5px; }
         .drop-zone.active-zone { border-bottom-color: var(--primary-blue); background: #e3f2fd; }
         .drop-zone.filled { border-bottom-color: var(--success-green); color: #2e7d32; }
         .story-choices { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px; }
@@ -168,9 +168,9 @@
             <div class="question-title">Step 2: Complete the story!</div>
             <p style="text-align: center; color: #666;">（カッコをクリックしてから、下の言葉をえらんでね）</p>
             <div class="story-fill">
-                1. <b>First</b>, they <span class="drop-zone" id="gap-1" onclick="setActiveGap(1)">_______</span>.<br>
-                2. <b>Then</b>, they <span class="drop-zone" id="gap-2" onclick="setActiveGap(2)">_______</span>.<br>
-                3. <b>Next</b>, they <span class="drop-zone" id="gap-3" onclick="setActiveGap(3)">_______</span>.<br>
+                1. <b>First</b>, Bear and Pig <span class="drop-zone" id="gap-1" onclick="setActiveGap(1)">_______</span>.<br>
+                2. <b>Then</b>, Bear <span class="drop-zone" id="gap-2" onclick="setActiveGap(2)">_______</span>.<br>
+                3. <b>Next</b>, Pig <span class="drop-zone" id="gap-3" onclick="setActiveGap(3)">_______</span>.<br>
                 4. <b>Finally</b>, they <span class="drop-zone" id="gap-4" onclick="setActiveGap(4)">_______</span>.
             </div>
             <div class="story-choices" id="choice-container"></div>
@@ -181,7 +181,13 @@
 
 <script>
     let activeGapId = null;
-    const storyAnswers = { 1: 'take a trip', 2: 'go to a hat store', 3: 'go to a book store', 4: 'eat lunch' };
+    // 修正：より具体的でストーリーに沿った表現
+    const storyAnswers = { 
+        1: 'go to the city', 
+        2: 'likes the pink hat', 
+        3: 'likes the big book', 
+        4: 'eat lunch' 
+    };
 
     function playSound(text) {
         window.speechSynthesis.cancel();
@@ -235,18 +241,14 @@
         });
     }
 
-    // --- Story Order のシャッフル初期化 ---
     function initSortable() {
         const grid = document.getElementById('sort-grid');
         let items = Array.from(grid.children);
-        // Step 1 の画像をシャッフル
         items.sort(() => Math.random() - 0.5).forEach(i => grid.appendChild(i));
-        
         items.forEach(item => {
             item.addEventListener('dragstart', () => item.classList.add('dragging'));
             item.addEventListener('dragend', () => item.classList.remove('dragging'));
         });
-        
         grid.addEventListener('dragover', e => {
             e.preventDefault();
             const dragging = document.querySelector('.dragging');
@@ -256,11 +258,9 @@
         });
     }
 
-    // --- Step 2 選択肢のシャッフル初期化 ---
     function initStoryChoices() {
         const container = document.getElementById('choice-container');
         container.innerHTML = '';
-        // 言葉をシャッフル
         const choices = Object.values(storyAnswers).sort(() => Math.random() - 0.5);
         choices.forEach(text => {
             const btn = document.createElement('button');
