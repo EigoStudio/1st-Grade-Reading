@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Trip to the City - Shuffle Quiz!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #2196f3;
+            --success-green: #4caf50;
+            --error-red: #f44336;
+            --bg-color: #f0f7ff;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: "Zen Maru Gothic", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0; padding: 20px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        .container { max-width: 800px; width: 100%; }
+
+        header { text-align: center; margin-bottom: 40px; }
+        h1 { color: #1565c0; font-size: 2.5rem; }
+
+        .quiz-card {
+            background: var(--card-bg); border-radius: 25px;
+            padding: 30px; margin-bottom: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid #e3f2fd;
+        }
+
+        .question-title {
+            font-size: 1.4rem; font-weight: bold; margin-bottom: 20px;
+            padding-left: 15px; border-left: 5px solid var(--primary-blue);
+        }
+
+        .image-grid {
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            gap: 15px; margin-bottom: 25px;
+        }
+
+        .img-option {
+            width: 100%; aspect-ratio: 16/9; border-radius: 15px;
+            cursor: pointer; transition: transform 0.2s, border 0.2s;
+            border: 4px solid transparent; background-color: #f5f5f5;
+            object-fit: cover;
+        }
+
+        .img-option:hover { transform: scale(1.03); }
+        .img-option.selected-correct { border-color: var(--success-green); }
+        .img-option.selected-wrong { border-color: var(--error-red); }
+
+        .choice-list { display: flex; flex-direction: column; gap: 10px; }
+        .choice-btn {
+            padding: 15px; font-size: 1.2rem; font-weight: bold;
+            border: 2px solid #ddd; border-radius: 12px;
+            background: white; cursor: pointer; transition: 0.2s;
+            text-align: left;
+        }
+
+        .choice-btn:hover { background: #f8f9fa; border-color: var(--primary-blue); }
+        .choice-btn.correct { background-color: #e8f5e9; border-color: var(--success-green); color: #2e7d32; }
+        .choice-btn.wrong { background-color: #ffebee; border-color: var(--error-red); color: #c62828; }
+
+        .feedback-msg {
+            margin-top: 15px; font-weight: bold; font-size: 1.2rem;
+            text-align: center; height: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Quiz Time! 🏙️</h1>
+        <p>絵をみて答えをえらんでね！（並び順がかわるよ）</p>
+    </header>
+
+    <div class="quiz-card">
+        <div class="question-title">Q1-A. "Bear likes the pink hat." どの絵かな？</div>
+        <div class="image-grid" id="grid-q1">
+            <img src="images_city/pink_hat.jpg" class="img-option" data-correct="true">
+            <img src="images_city/big_book.jpg" class="img-option" data-correct="false">
+            <img src="images_city/eat.jpg" class="img-option" data-correct="false">
+            <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+        </div>
+        <div id="q1a-feedback" class="feedback-msg"></div>
+
+        <div style="margin-top: 30px;" class="question-title">Q1-B. What does Pig say?</div>
+        <div class="choice-list">
+            <button class="choice-btn" onclick="checkText(this, false, 'q1b-feedback')">"It is a nice book."</button>
+            <button class="choice-btn" onclick="checkText(this, true, 'q1b-feedback')">"It is a nice hat."</button>
+            <button class="choice-btn" onclick="checkText(this, false, 'q1b-feedback')">"Look down!"</button>
+        </div>
+        <div id="q1b-feedback" class="feedback-msg"></div>
+    </div>
+
+    <div class="quiz-card">
+        <div class="question-title">Q2-A. "Pig likes the big book." どの絵かな？</div>
+        <div class="image-grid" id="grid-q2">
+            <img src="images_city/pink_hat.jpg" class="img-option" data-correct="false">
+            <img src="images_city/big_book.jpg" class="img-option" data-correct="true">
+            <img src="images_city/eat.jpg" class="img-option" data-correct="false">
+            <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+        </div>
+        <div id="q2a-feedback" class="feedback-msg"></div>
+
+        <div style="margin-top: 30px;" class="question-title">Q2-B. What does Bear say?</div>
+        <div class="choice-list">
+            <button class="choice-btn" onclick="checkText(this, false, 'q2b-feedback')">"Look up!"</button>
+            <button class="choice-btn" onclick="checkText(this, false, 'q2b-feedback')">"It is a nice hat."</button>
+            <button class="choice-btn" onclick="checkText(this, true, 'q2b-feedback')">"It is a nice book."</button>
+        </div>
+        <div id="q2b-feedback" class="feedback-msg"></div>
+    </div>
+
+    <div class="quiz-card">
+        <div class="question-title">Q3-A. "Look!" says Bear. "We can eat!" の後の絵を選ぼう！</div>
+        <div class="image-grid" id="grid-q3">
+            <img src="images_city/pink_hat.jpg" class="img-option" data-correct="false">
+            <img src="images_city/big_book.jpg" class="img-option" data-correct="false">
+            <img src="images_city/eat.jpg" class="img-option" data-correct="true">
+            <img src="images_city/take_a_trip.jpg" class="img-option" data-correct="false">
+        </div>
+        <div id="q3a-feedback" class="feedback-msg"></div>
+
+        <div style="margin-top: 30px;" class="question-title">Q3-B. What are they doing?</div>
+        <div class="choice-list">
+            <button class="choice-btn" onclick="checkText(this, true, 'q3b-feedback')">They are eating lunch.</button>
+            <button class="choice-btn" onclick="checkText(this, false, 'q3b-feedback')">They are buying hats.</button>
+            <button class="choice-btn" onclick="checkText(this, true, 'q3b-feedback', 'It is a very fun day!')">It is a very fun day!</button>
+        </div>
+        <div id="q3b-feedback" class="feedback-msg"></div>
+    </div>
+</div>
+
+<script>
+    // --- 音声設定 ---
+    function getFemaleVoice() {
+        const voices = window.speechSynthesis.getVoices();
+        const preferred = ["Google US English", "Microsoft Zira", "Samantha", "Female"];
+        let selected = null;
+        for (let name of preferred) {
+            selected = voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && v.name.includes(name));
+            if (selected) break;
+        }
+        return selected || voices.find(v => v.lang.startsWith('en'));
+    }
+
+    function playSound(isCorrect) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance();
+        msg.lang = 'en-US';
+        msg.rate = 0.8;
+        msg.pitch = 1.0;
+        
+        const voice = getFemaleVoice();
+        if (voice) msg.voice = voice;
+        
+        msg.text = isCorrect ? "That's right! Great job!" : "Try again!";
+        window.speechSynthesis.speak(msg);
+    }
+
+    // --- シャッフル機能 ---
+    function shuffleImages() {
+        const grids = document.querySelectorAll('.image-grid');
+        grids.forEach(grid => {
+            const images = Array.from(grid.children);
+            // フィッシャー・イェーツのシャッフル
+            for (let i = images.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [images[i], images[j]] = [images[j], images[i]];
+            }
+            // 並び替えた要素を再配置
+            images.forEach(img => {
+                grid.appendChild(img);
+                // クリックイベントをここで付与
+                img.onclick = function() {
+                    const isCorrect = this.getAttribute('data-correct') === 'true';
+                    const feedbackId = grid.nextElementSibling.id;
+                    checkImg(this, isCorrect, feedbackId);
+                };
+            });
+        });
+    }
+
+    // --- 正誤判定 ---
+    function checkImg(el, isCorrect, feedbackId) {
+        const feedback = document.getElementById(feedbackId);
+        const siblings = el.parentElement.querySelectorAll('.img-option');
+        siblings.forEach(s => s.classList.remove('selected-correct', 'selected-wrong'));
+
+        if (isCorrect) {
+            el.classList.add('selected-correct');
+            feedback.innerText = "✨ Correct! ✨";
+            feedback.style.color = "var(--success-green)";
+            playSound(true);
+        } else {
+            el.classList.add('selected-wrong');
+            feedback.innerText = "❌ Try again!";
+            feedback.style.color = "var(--error-red)";
+            playSound(false);
+        }
+    }
+
+    function checkText(el, isCorrect, feedbackId, customMsg) {
+        const feedback = document.getElementById(feedbackId);
+        const siblings = el.parentElement.querySelectorAll('.choice-btn');
+        siblings.forEach(s => s.classList.remove('correct', 'wrong'));
+
+        if (isCorrect) {
+            el.classList.add('correct');
+            feedback.innerText = customMsg ? "✨ " + customMsg + " ✨" : "✨ Correct! ✨";
+            feedback.style.color = "var(--success-green)";
+            playSound(true);
+        } else {
+            el.classList.add('wrong');
+            feedback.innerText = "❌ Try again!";
+            feedback.style.color = "var(--error-red)";
+            playSound(false);
+        }
+    }
+
+    // 初期化
+    window.onload = shuffleImages;
+    window.speechSynthesis.onvoiceschanged = getFemaleVoice;
+</script>
+</body>
+</html>
