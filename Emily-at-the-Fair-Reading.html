@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emily at the Fair - Reading Practice</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #6ab04c;
+            --accent-pink: #ff78ae;
+            --bg-color: #f0f7ff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 600px;
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 { color: var(--primary-blue); margin-bottom: 5px; font-size: 1.8rem; }
+        .author { color: #777; margin-bottom: 20px; font-weight: bold; font-size: 0.9rem; }
+
+        .scene-container { display: none; }
+        .scene-container.active { display: block; }
+
+        .sentence {
+            font-size: 1.8rem;
+            font-weight: 700;
+            line-height: 1.4;
+            margin: 25px 0;
+            min-height: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-box {
+            margin-top: 20px;
+            display: none;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .scene-image {
+            width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+            border-radius: 15px;
+            border: 3px solid #eee;
+        }
+
+        .translation {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #555;
+            background: #f9f9f9;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 5px solid var(--primary-blue);
+            text-align: left;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-family: inherit;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .speaker-btn {
+            background: var(--accent-pink);
+            color: white;
+            width: 65px; height: 65px;
+            border-radius: 50%;
+            font-size: 1.8rem;
+            box-shadow: 0 5px 0 #d64d8a;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .check-btn {
+            background: var(--primary-blue);
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 0 #357abd;
+        }
+
+        .next-btn {
+            background: var(--success-green);
+            color: white;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 0 #538d3d;
+            display: none;
+        }
+
+        button:active { transform: translateY(3px); box-shadow: none; }
+
+        .final-page {
+            display: none;
+            line-height: 1.8;
+        }
+
+        .buy-box {
+            text-align: left;
+            background: #fffbe6;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 1px dashed #ffd666;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="exercise">
+        <h1>Emily at the Fair</h1>
+        <p class="author">by Bruce Larkin</p>
+
+        <div id="scenes">
+            <div class="scene-container active" id="scene1">
+                <div class="sentence" id="txt1">The roller coaster takes us up.</div>
+                <div class="image-box" id="imgBox1">
+                    <img src="images-Emily/1.jpg" alt="Up" class="scene-image">
+                    <div class="translation">ジェットコースターが わたしたちを うえに つれていくよ。</div>
+                </div>
+                <div class="controls">
+                    <button class="speaker-btn" onclick="speakWord('txt1')">🔊</button>
+                    <button class="check-btn" id="check1" onclick="showImage(1)">Check!</button>
+                    <button class="next-btn" id="next1" onclick="nextScene(1)">Next ➔</button>
+                </div>
+            </div>
+
+            <div class="scene-container" id="scene2">
+                <div class="sentence" id="txt2">The roller coaster takes us down.</div>
+                <div class="image-box" id="imgBox2">
+                    <img src="images-Emily/2.jpg" alt="Down" class="scene-image">
+                    <div class="translation">ジェットコースターが わたしたちを したに つれていくよ。</div>
+                </div>
+                <div class="controls">
+                    <button class="speaker-btn" onclick="speakWord('txt2')">🔊</button>
+                    <button class="check-btn" id="check2" onclick="showImage(2)">Check!</button>
+                    <button class="next-btn" id="next2" onclick="nextScene(2)">Next ➔</button>
+                </div>
+            </div>
+
+            <div class="scene-container" id="scene3">
+                <div class="sentence" id="txt3">When we go up, we go slow.</div>
+                <div class="image-box" id="imgBox3">
+                    <img src="images-Emily/3.jpg" alt="Slow" class="scene-image">
+                    <div class="translation">のぼるときは、ゆっくり すすむよ。</div>
+                </div>
+                <div class="controls">
+                    <button class="speaker-btn" onclick="speakWord('txt3')">🔊</button>
+                    <button class="check-btn" id="check3" onclick="showImage(3)">Check!</button>
+                    <button class="next-btn" id="next3" onclick="nextScene(3)">Next ➔</button>
+                </div>
+            </div>
+
+            <div class="scene-container" id="scene4">
+                <div class="sentence" id="txt4">When we go down, we go fast.</div>
+                <div class="image-box" id="imgBox4">
+                    <img src="images-Emily/4.jpg" alt="Fast" class="scene-image">
+                    <div class="translation">くだるときは、はやく すすむよ！</div>
+                </div>
+                <div class="controls">
+                    <button class="speaker-btn" onclick="speakWord('txt4')">🔊</button>
+                    <button class="check-btn" id="check4" onclick="showImage(4)">Check!</button>
+                    <button class="next-btn" id="next4" onclick="nextScene(4)">Next ➔</button>
+                </div>
+            </div>
+
+            <div class="scene-container" id="scene5">
+                <div class="sentence" id="txt5">We ride the roller coaster into the tunnel.</div>
+                <div class="image-box" id="imgBox5">
+                    <img src="images-Emily/5.jpg" alt="Into Tunnel" class="scene-image">
+                    <div class="translation">わたしたちは ジェットコースターにのって トンネルの なかへ。</div>
+                </div>
+                <div class="controls">
+                    <button class="speaker-btn" onclick="speakWord('txt5')">🔊</button>
+                    <button class="check-btn" id="check5" onclick="showImage(5)">Check!</button>
+                    <button class="next-btn" id="next5" onclick="nextScene(5)">Next ➔</button>
+                </div>
+            </div>
+
+            <div class="scene-container" id="scene6">
+                <div class="sentence" id="txt6">We ride the roller coaster out of the tunnel.</div>
+                <div class="image-box" id="imgBox6">
+                    <img src="images-Emily/6.jpg" alt="Out of Tunnel" class="scene-image">
+                    <div class="translation">わたしたちは ジェットコースターにのって トンネルから そとへ。</div>
+                </div>
+                <div class="controls">
+                    <button class="speaker-btn" onclick="speakWord('txt6')">🔊</button>
+                    <button class="check-btn" id="check6" onclick="showImage(6)">Check!</button>
+                    <button class="next-btn" id="next6" onclick="nextScene(6)">Next ➔</button>
+                </div>
+            </div>
+
+            <div class="scene-container" id="scene7">
+                <div class="sentence" id="txt7">My friend and I have fun on the roller coaster.</div>
+                <div class="image-box" id="imgBox7">
+                    <img src="images-Emily/7.jpg" alt="Fun" class="scene-image">
+                    <div class="translation">ともだちと わたしは ジェットコースターを たのしんでいるよ。</div>
+                </div>
+                <div class="controls">
+                    <button class="speaker-btn" onclick="speakWord('txt7')">🔊</button>
+                    <button class="check-btn" id="check7" onclick="showImage(7)">Check!</button>
+                    <button class="next-btn" id="next7" onclick="finish()">Finish!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="final-page" class="final-page">
+        <h2>Great Job! 🌟</h2>
+        <p>ぜんぶ よめたね！すごい！</p>
+        <div class="buy-box">
+            <p><strong>邦題：えみりー、ゆうえんちへいく</strong></p>
+            <p style="font-size: 0.9rem; color: #666;">このお話の全編はこちらで購入いただけます（保護者の方へ）:</p>
+            <a href="https://www.wilbooks.com/emily-at-the-fair" target="_blank" style="color: var(--primary-blue); font-weight: bold;">Wilbooks Official Site (Emily at the Fair)</a>
+        </div>
+        <button class="check-btn" onclick="location.reload()">もういちど 練習する</button>
+    </div>
+</div>
+
+<script>
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira")));
+    }
+
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function speakWord(elementId) {
+        const text = document.getElementById(elementId).innerText;
+        if (!text) return;
+        const synth = window.speechSynthesis;
+        synth.cancel(); 
+        const uttr = new SpeechSynthesisUtterance(text);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        else uttr.lang = "en-US";
+        uttr.rate = 0.7;
+        uttr.pitch = 1.1;
+        synth.speak(uttr);
+    }
+
+    function showImage(num) {
+        document.getElementById('imgBox' + num).style.display = 'block';
+        document.getElementById('check' + num).style.display = 'none';
+        document.getElementById('next' + num).style.display = 'inline-block';
+    }
+
+    function nextScene(current) {
+        document.getElementById('scene' + current).classList.remove('active');
+        document.getElementById('scene' + (current + 1)).classList.add('active');
+    }
+
+    function finish() {
+        document.getElementById('exercise').style.display = 'none';
+        document.getElementById('final-page').style.display = 'block';
+    }
+</script>
+</body>
+</html>

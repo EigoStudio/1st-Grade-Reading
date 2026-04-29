@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emily at the Fair - Activity Time!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #6ab04c;
+            --accent-pink: #ff78ae;
+            --bg-color: #fdf6e3;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center; min-height: 100vh;
+        }
+
+        .container {
+            width: 100%; max-width: 700px;
+            background: white; padding: 30px; border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center;
+        }
+
+        h1 { color: var(--primary-blue); font-size: 2rem; margin-bottom: 20px; }
+        .section-title { background: #eee; padding: 5px 15px; border-radius: 10px; display: inline-block; margin-bottom: 20px; font-weight: bold; }
+
+        /* Quiz Layout */
+        .quiz-card { display: none; animation: fadeIn 0.5s; }
+        .quiz-card.active { display: block; }
+
+        /* Part 1: Select Image */
+        .image-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+        .option-img { width: 100%; border-radius: 10px; cursor: pointer; border: 4px solid transparent; transition: 0.2s; }
+        .option-img:hover { border-color: var(--accent-pink); }
+
+        /* Part 2: Fill in the blank */
+        .sentence { font-size: 1.8rem; font-weight: bold; margin: 20px 0; line-height: 1.5; }
+        .blank { border-bottom: 3px solid var(--primary-blue); color: var(--primary-pink); padding: 0 10px; min-width: 80px; display: inline-block; }
+        .main-img { width: 80%; border-radius: 15px; margin-bottom: 15px; border: 2px solid #eee; }
+
+        /* Buttons */
+        .controls { margin-top: 30px; display: flex; justify-content: center; gap: 10px; }
+        button { padding: 12px 25px; font-family: inherit; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; }
+        .speaker-btn { background: var(--accent-pink); color: white; font-size: 1.5rem; width: 60px; height: 60px; border-radius: 50%; box-shadow: 0 4px 0 #d64d8a; }
+        .check-btn { background: var(--primary-blue); color: white; font-size: 1.2rem; box-shadow: 0 4px 0 #357abd; }
+        .next-btn { background: var(--success-green); color: white; font-size: 1.2rem; box-shadow: 0 4px 0 #538d3d; }
+        button:active { transform: translateY(2px); box-shadow: none; }
+
+        /* Feedback */
+        .feedback { margin-top: 15px; font-size: 1.3rem; font-weight: bold; display: none; padding: 15px; border-radius: 10px; }
+        .correct { background: #e8f5e9; color: #2e7d32; }
+        .example-box { text-align: left; background: #f0f4f8; padding: 15px; border-radius: 10px; margin-top: 10px; font-size: 1rem; line-height: 1.6; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Emily's Activity 🎡</h1>
+
+    <div class="quiz-card active" id="q1">
+            <span class="section-title">Step 1: Choose the Image!</span>
+            <div class="sentence" id="t1">The roller coaster takes us up.</div>
+            <button class="speaker-btn" onclick="speak('t1')">🔊</button>
+            <div class="image-options">
+                <img src="images-Emily/1.jpg" class="option-img" onclick="checkImg(1, 1, 1)"> <img src="images-Emily/2.jpg" class="option-img" onclick="checkImg(1, 2, 1)"> <img src="images-Emily/5.jpg" class="option-img" onclick="checkImg(1, 5, 1)"> </div>
+            <div class="feedback" id="f1">Good job! It's going up! 🆙</div>
+            <div class="controls"><button class="next-btn" id="n1" style="display:none;" onclick="nextQ(1)">Next ➔</button></div>
+        </div>
+
+        <div class="quiz-card" id="q2">
+            <span class="section-title">Step 1: Choose the Image!</span>
+            <div class="sentence" id="t2">When we go down, we go fast.</div>
+            <button class="speaker-btn" onclick="speak('t2')">🔊</button>
+            <div class="image-options">
+                <img src="images-Emily/3.jpg" class="option-img" onclick="checkImg(2, 3, 4)">
+                <img src="images-Emily/4.jpg" class="option-img" onclick="checkImg(2, 4, 4)">
+                <img src="images-Emily/5.jpg" class="option-img" onclick="checkImg(2, 5, 4)">
+            </div>
+            <div class="feedback" id="f2">Yes! Going down is very fast! ⚡</div>
+            <div class="controls"><button class="next-btn" id="n2" style="display:none;" onclick="nextQ(2)">Next ➔</button></div>
+        </div>
+
+        <div class="quiz-card" id="q3">
+            <span class="section-title">Step 1: Choose the Image!</span>
+            <div class="sentence" id="t3">We ride into the tunnel.</div>
+            <button class="speaker-btn" onclick="speak('t3')">🔊</button>
+            <div class="image-options">
+                <img src="images-Emily/2.jpg" class="option-img" onclick="checkImg(3, 2, 5)">
+                <img src="images-Emily/6.jpg" class="option-img" onclick="checkImg(3, 6, 5)">
+                <img src="images-Emily/5.jpg" class="option-img" onclick="checkImg(3, 5, 5)">
+            </div>
+            <div class="feedback" id="f3">Correct! Into the dark tunnel! 🕳️</div>
+            <div class="controls"><button class="next-btn" id="n3" style="display:none;" onclick="nextQ(3)">Next ➔</button></div>
+        </div>
+
+        <div class="quiz-card" id="q4">
+            <span class="section-title">Step 2: Fill in the Blank!</span><br>
+            <img src="images-Emily/1.jpg" class="main-img">
+            <div class="sentence">The roller coaster takes us <span class="blank" id="b4">?</span>.</div>
+            <div class="feedback correct" id="f4">Answer: UP</div>
+            <div class="controls">
+                <button class="check-btn" id="c4" onclick="showBlank(4, 'up')">Check Answer</button>
+                <button class="next-btn" id="n4" style="display:none;" onclick="nextQ(4)">Next ➔</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q5">
+            <span class="section-title">Step 2: Fill in the Blank!</span><br>
+            <img src="images-Emily/2.jpg" class="main-img">
+            <div class="sentence">The roller coaster takes us <span class="blank" id="b5">?</span>.</div>
+            <div class="feedback correct" id="f5">Answer: DOWN</div>
+            <div class="controls">
+                <button class="check-btn" id="c5" onclick="showBlank(5, 'down')">Check Answer</button>
+                <button class="next-btn" id="n5" style="display:none;" onclick="nextQ(5)">Next ➔</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q6">
+            <span class="section-title">Step 2: Fill in the Blank!</span><br>
+            <img src="images-Emily/3.jpg" class="main-img">
+            <div class="sentence">When we go up, we go <span class="blank" id="b6">?</span>.</div>
+            <div class="feedback correct" id="f6">Answer: SLOW</div>
+            <div class="controls">
+                <button class="check-btn" id="c6" onclick="showBlank(6, 'slow')">Check Answer</button>
+                <button class="next-btn" id="n6" style="display:none;" onclick="nextQ(6)">Next ➔</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q7">
+            <span class="section-title">Step 2: Fill in the Blank!</span><br>
+            <img src="images-Emily/4.jpg" class="main-img">
+            <div class="sentence">When we go down, we go <span class="blank" id="b7">?</span>.</div>
+            <div class="feedback correct" id="f7">Answer: FAST</div>
+            <div class="controls">
+                <button class="check-btn" id="c7" onclick="showBlank(7, 'fast')">Check Answer</button>
+                <button class="next-btn" id="n7" style="display:none;" onclick="nextQ(7)">Next ➔</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q8">
+            <span class="section-title">Step 2: Fill in the Blank!</span><br>
+            <img src="images-Emily/5.jpg" class="main-img">
+            <div class="sentence">We ride <span class="blank" id="b8">?</span> the tunnel.</div>
+            <div class="feedback correct" id="f8">Answer: INTO</div>
+            <div class="controls">
+                <button class="check-btn" id="c8" onclick="showBlank(8, 'into')">Check Answer</button>
+                <button class="next-btn" id="n8" style="display:none;" onclick="nextQ(8)">Next ➔</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q9">
+            <span class="section-title">Step 2: Fill in the Blank!</span><br>
+            <img src="images-Emily/6.jpg" class="main-img">
+            <div class="sentence">We ride <span class="blank" id="b9">?</span> the tunnel.</div>
+            <div class="feedback correct" id="f9">Answer: OUT OF</div>
+            <div class="controls">
+                <button class="check-btn" id="c9" onclick="showBlank(9, 'out of')">Check Answer</button>
+                <button class="next-btn" id="n9" style="display:none;" onclick="nextQ(9)">Next ➔</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q10">
+            <span class="section-title">Step 2: Fill in the Blank!</span><br>
+            <img src="images-Emily/7.jpg" class="main-img">
+            <div class="sentence">We have fun <span class="blank" id="b10">?</span> the roller coaster.</div>
+            <div class="feedback correct" id="f10">Answer: ON</div>
+            <div class="controls">
+                <button class="check-btn" id="c10" onclick="showBlank(10, 'on')">Check Answer</button>
+                <button class="next-btn" id="n10" style="display:none;" onclick="nextQ(10)">Next ➔</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q11">
+            <span class="section-title">Step 3: Talking Time!</span><br>
+            <img src="images-Emily/Emily.jpg" class="main-img" style="width:50%">
+            <div class="sentence" id="t11">What is her name?</div>
+            <button class="speaker-btn" onclick="speak('t11')">🔊</button>
+            <div class="feedback correct" id="f11">Her name is Emily.</div>
+            <div class="controls">
+                <button class="check-btn" id="c11" onclick="showBlank(11, 'Emily')">Check Answer</button>
+                <button class="next-btn" id="n11" style="display:none;" onclick="nextQ(11)">Next ➔</button>
+            </div>
+        </div>
+
+        <div class="quiz-card" id="q12">
+            <span class="section-title">Step 3: Talking Time!</span><br>
+            <div class="sentence" id="t12">Do you like roller coasters?</div>
+            <button class="speaker-btn" onclick="speak('t12')">🔊</button>
+            <div class="feedback correct" id="f12">Let's talk!</div>
+            <div class="example-box" id="ex12" style="display:none;">
+                <strong>Example Answers:</strong><br>
+                😊 Yes, I do. Because they are exciting!<br>
+                😨 No, I don't. Because they are scary!
+            </div>
+            <div class="controls">
+                <button class="check-btn" id="c12" onclick="showFinal()">Check Answer</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="final-page" style="display:none;">
+        <h2>Perfect Score! 🎖️</h2>
+        <p>You are a Master of "Emily at the Fair"!</p>
+        <button class="check-btn" onclick="location.reload()">Try Again</button>
+    </div>
+
+</div>
+
+<script>
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira")));
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function speak(elementId) {
+        const text = document.getElementById(elementId).innerText;
+        const synth = window.speechSynthesis;
+        synth.cancel(); 
+        const uttr = new SpeechSynthesisUtterance(text);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        uttr.rate = 0.7;
+        uttr.pitch = 1.1;
+        synth.speak(uttr);
+    }
+
+    // Part 1 logic
+    function checkImg(qNum, selectedNum, correctNum) {
+        if(selectedNum === correctNum) {
+            document.getElementById('f' + qNum).style.display = 'block';
+            document.getElementById('f' + qNum).className = 'feedback correct';
+            document.getElementById('n' + qNum).style.display = 'inline-block';
+        } else {
+            alert("Try again! Look at the pictures carefully.");
+        }
+    }
+
+    // Part 2 & 3 logic
+    function showBlank(num, answerText) {
+        const blank = document.getElementById('b' + num);
+        if(blank) {
+            blank.innerText = answerText;
+            blank.style.color = "var(--success-green)";
+        }
+        document.getElementById('f' + num).style.display = 'block';
+        document.getElementById('c' + num).style.display = 'none';
+        document.getElementById('n' + num).style.display = 'inline-block';
+    }
+
+    function showFinal() {
+        document.getElementById('f12').style.display = 'block';
+        document.getElementById('ex12').style.display = 'block';
+        document.getElementById('c12').innerText = "Finish!";
+        document.getElementById('c12').onclick = function() {
+            document.getElementById('quiz-container').style.display = 'none';
+            document.getElementById('final-page').style.display = 'block';
+        };
+    }
+
+    function nextQ(current) {
+        document.getElementById('q' + current).classList.remove('active');
+        document.getElementById('q' + (current + 1)).classList.add('active');
+    }
+</script>
+</body>
+</html>
