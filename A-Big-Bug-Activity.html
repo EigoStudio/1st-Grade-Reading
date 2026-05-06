@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Big Bug - Activity Time!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #6ab04c;
+            --accent-pink: #ff78ae;
+            --bg-color: #fdf6e3;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0; padding: 10px;
+            display: flex; justify-content: center; min-height: 100vh;
+        }
+
+        .container {
+            width: 100%; max-width: 600px;
+            background: white; padding: 20px; border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center;
+        }
+
+        h1 { color: var(--primary-blue); font-size: 1.6rem; margin: 10px 0; }
+        .section-title { background: #eee; padding: 4px 12px; border-radius: 10px; display: inline-block; margin-bottom: 15px; font-size: 0.9rem; font-weight: bold; }
+
+        .quiz-card { display: none; animation: fadeIn 0.5s; }
+        .quiz-card.active { display: block; }
+
+        .sentence { font-size: 1.6rem; font-weight: bold; margin: 15px 0; line-height: 1.4; }
+        .blank { border-bottom: 3px solid var(--primary-blue); color: var(--accent-pink); padding: 0 10px; min-width: 60px; display: inline-block; }
+        
+        .main-img { width: auto; max-width: 90%; max-height: 250px; border-radius: 15px; margin-bottom: 10px; border: 2px solid #eee; }
+
+        .controls { margin-top: 20px; display: flex; justify-content: center; gap: 12px; align-items: center; }
+        button { padding: 10px 20px; font-family: inherit; font-weight: bold; border: none; border-radius: 50px; cursor: pointer; transition: 0.2s; }
+        
+        .speaker-btn { background: var(--accent-pink); color: white; font-size: 1.3rem; width: 55px; height: 55px; border-radius: 50%; box-shadow: 0 4px 0 #d64d8a; display: none; align-items: center; justify-content: center; }
+        .check-btn { background: var(--primary-blue); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #357abd; }
+        .next-btn { background: var(--success-green); color: white; font-size: 1.1rem; box-shadow: 0 4px 0 #538d3d; display: none; }
+        
+        button:active { transform: translateY(2px); box-shadow: none; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="container" id="quiz-container">
+    <h1>A Big Bug - Activity 🐞</h1>
+
+    <div class="quiz-card active" id="q1">
+        <span class="section-title">Fill in the Blank!</span><br>
+        <img src="images-bug/mom.jpg" class="main-img">
+        <div class="sentence" id="t1">Mom is <span class="blank" id="b1">?</span> the bed.</div>
+        <div class="controls">
+            <button class="speaker-btn" id="s1" onclick="speak('t1')">🔊</button>
+            <button class="check-btn" id="c1" onclick="showAnswer(1, 'on')">Check Answer</button>
+            <button class="next-btn" id="n1" onclick="nextQ(1)">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="quiz-card" id="q2">
+        <span class="section-title">Fill in the Blank!</span><br>
+        <img src="images-bug/see.jpg" class="main-img">
+        <div class="sentence" id="t2">I see a <span class="blank" id="b2">?</span> bug.</div>
+        <div class="controls">
+            <button class="speaker-btn" id="s2" onclick="speak('t2')">🔊</button>
+            <button class="check-btn" id="c2" onclick="showAnswer(2, 'big')">Check Answer</button>
+            <button class="next-btn" id="n2" onclick="nextQ(2)">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="quiz-card" id="q3">
+        <span class="section-title">Fill in the Blank!</span><br>
+        <img src="images-bug/bug.jpg" class="main-img">
+        <div class="sentence" id="t3">The bug is on the <span class="blank" id="b3">?</span>.</div>
+        <div class="controls">
+            <button class="speaker-btn" id="s3" onclick="speak('t3')">🔊</button>
+            <button class="check-btn" id="c3" onclick="showAnswer(3, 'rug')">Check Answer</button>
+            <button class="next-btn" id="n3" onclick="nextQ(3)">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="quiz-card" id="q4">
+        <span class="section-title">Fill in the Blank!</span><br>
+        <img src="images-bug/net.jpg" class="main-img">
+        <div class="sentence" id="t4">I get a <span class="blank" id="b4">?</span>.</div>
+        <div class="controls">
+            <button class="speaker-btn" id="s4" onclick="speak('t4')">🔊</button>
+            <button class="check-btn" id="c4" onclick="showAnswer(4, 'net')">Check Answer</button>
+            <button class="next-btn" id="n4" onclick="nextQ(4)">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="quiz-card" id="q5">
+        <span class="section-title">Fill in the Blank!</span><br>
+        <img src="images-bug/zap.jpg" class="main-img">
+        <div class="sentence" id="t5"><span class="blank" id="b5">?</span>! I got the bug.</div>
+        <div class="controls">
+            <button class="speaker-btn" id="s5" onclick="speak('t5')">🔊</button>
+            <button class="check-btn" id="c5" onclick="showAnswer(5, 'Zap')">Check Answer</button>
+            <button class="next-btn" id="n5" onclick="nextQ(5)">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="quiz-card" id="q6">
+        <span class="section-title">Fill in the Blank!</span><br>
+        <img src="images-bug/glad.jpg" class="main-img">
+        <div class="sentence" id="t6">Mom is <span class="blank" id="b6">?</span>.</div>
+        <div class="controls">
+            <button class="speaker-btn" id="s6" onclick="speak('t6')">🔊</button>
+            <button class="check-btn" id="c6" onclick="showAnswer(6, 'glad')">Check Answer</button>
+            <button class="next-btn" id="n6" onclick="nextQ(6)">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="quiz-card" id="q7">
+        <span class="section-title">Fill in the Blank!</span><br>
+        <img src="images-bug/sit.jpg" class="main-img">
+        <div class="sentence" id="t7">We sit and eat <span class="blank" id="b7">?</span>.</div>
+        <div class="controls">
+            <button class="speaker-btn" id="s7" onclick="speak('t7')">🔊</button>
+            <button class="check-btn" id="c7" onclick="showAnswer(7, 'nuts')">Check Answer</button>
+            <button class="next-btn" id="n7" onclick="finish()">Finish!</button>
+        </div>
+    </div>
+</div>
+
+<div id="final-page" style="display:none; text-align: center;">
+    <div class="container">
+        <h2>Great Job! 🌟</h2>
+        <p style="font-size: 1.2rem;">You finished the activity!</p>
+        <img src="images-bug/sit.jpg" style="max-height: 200px; border-radius: 15px; margin: 10px 0;">
+        <br>
+        <button class="check-btn" onclick="location.reload()">Try Again</button>
+    </div>
+</div>
+
+<script>
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira")));
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function speak(elementId) {
+        const text = document.getElementById(elementId).innerText;
+        const synth = window.speechSynthesis;
+        synth.cancel(); 
+        const uttr = new SpeechSynthesisUtterance(text);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        else uttr.lang = "en-US";
+        uttr.rate = 0.7;
+        uttr.pitch = 1.1;
+        synth.speak(uttr);
+    }
+
+    function showAnswer(num, answerText) {
+        const blank = document.getElementById('b' + num);
+        blank.innerText = answerText;
+        blank.style.color = "var(--success-green)";
+        
+        // 答えを表示するだけで、自動再生(speak)は行いません
+        document.getElementById('c' + num).style.display = 'none';
+        document.getElementById('s' + num).style.display = 'flex';
+        document.getElementById('n' + num).style.display = 'inline-block';
+    }
+
+    function nextQ(current) {
+        document.getElementById('q' + current).classList.remove('active');
+        document.getElementById('q' + (current + 1)).classList.add('active');
+    }
+
+    function finish() {
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('final-page').style.display = 'block';
+    }
+</script>
+</body>
+</html>
