@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Introduction - Interactive Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #2196f3;
+            --primary-pink: #ff4757;
+            --success-green: #6ab04c;
+            --bg-color: #e3f2fd;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+        }
+
+        body {
+            font-family: "Zen Maru Gothic", sans-serif;
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        h1 {
+            color: #1565c0;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background-color: #cbd5e1;
+            border-radius: 6px;
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--primary-blue);
+            transition: width 0.3s ease;
+        }
+
+        .page-card {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 35px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border: 2px solid #fff;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        .page-card.active {
+            display: block;
+        }
+
+        .instruction {
+            font-size: 1.2rem;
+            color: #546e7a;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .sentence {
+            font-size: 1.8rem;
+            font-weight: bold;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            color: var(--text-color);
+            min-height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .blank {
+            display: inline-block;
+            min-width: 120px;
+            border-bottom: 3px solid var(--primary-pink);
+            color: var(--primary-pink);
+            padding: 0 10px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .input-box {
+            font-family: inherit;
+            font-size: 1.3rem;
+            padding: 12px 20px;
+            border-radius: 15px;
+            border: 2px solid #cbd5e1;
+            width: 250px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--text-color);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-box:focus {
+            border-color: var(--primary-blue);
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 150px);
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        @media(min-width: 450px) {
+            .options-grid.grid-8 {
+                grid-template-columns: repeat(4, 130px);
+            }
+        }
+
+        .option-btn {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            padding: 12px 15px;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--text-color);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #cbd5e1;
+        }
+
+        .option-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #cbd5e1;
+        }
+
+        .option-btn.selected {
+            background-color: #ffe4e6;
+            border-color: var(--primary-pink);
+            color: var(--primary-pink);
+            box-shadow: 0 4px 0 #f43f5e;
+        }
+
+        .action-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            padding: 12px 30px;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.1s;
+            color: white;
+        }
+
+        .next-btn {
+            background: var(--success-green);
+            box-shadow: 0 5px 0 #538d3d;
+        }
+
+        .next-btn:active {
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .result-row {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            padding: 15px 20px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+            gap: 15px;
+        }
+
+        .speaker-btn {
+            background-color: var(--primary-blue);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 #1976d2;
+            transition: 0.1s;
+            flex-shrink: 0;
+        }
+
+        .speaker-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #1976d2;
+        }
+
+        .speaker-btn.playing {
+            background-color: var(--primary-pink);
+            box-shadow: 0 4px 0 #d63031;
+        }
+
+        .result-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .restart-btn {
+            background: var(--primary-blue);
+            box-shadow: 0 5px 0 #1976d2;
+            margin-top: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Your Introduction 🌟</h1>
+        <p style="font-weight: bold; color: #546e7a; margin: 5px 0 0 0;">ことばをえらんで、じこしょうかいを完成させよう！</p>
+    </header>
+
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <div class="page-card active" id="card-1">
+        <div class="instruction">なまえを えいごで タイプしてみよう！</div>
+        <div class="sentence">
+            My name is <span class="blank" id="blank-1">_____</span>.
+        </div>
+        <div style="margin-bottom: 25px;">
+            <input type="text" id="name-input" placeholder="Name" oninput="handleNameInput()" class="input-box">
+        </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-1" onclick="nextPage(1)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-2">
+        <div class="instruction">どこから来たか国をえらぼう！</div>
+        <div class="sentence">
+            I'm from <span class="blank" id="blank-2">_____</span>.
+        </div>
+        <div class="options-grid grid-8" id="grid-2">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-2" onclick="nextPage(2)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-3">
+        <div class="instruction">話せることばを【2つ】えらぼう！</div>
+        <div class="sentence">
+            I speak <span class="blank" id="blank-3-1">_____</span> and <span class="blank" id="blank-3-2">_____</span>.
+        </div>
+        <div class="options-grid grid-8" id="grid-3">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-3" onclick="nextPage(3)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-4">
+        <div class="instruction">話せないことばをえらぼう！</div>
+        <div class="sentence">
+            I cannot speak <span class="blank" id="blank-4">_____</span>.
+        </div>
+        <div class="options-grid grid-8" id="grid-4">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-4" onclick="nextPage(4)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-5">
+        <div class="instruction">🎨 すきな色をえらぼう！</div>
+        <div class="sentence">
+            My favorite color is <span class="blank" id="blank-5">_____</span>.
+        </div>
+        <div class="options-grid grid-8" id="grid-5">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-5" onclick="nextPage(5)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-6">
+        <div class="instruction">📝 すきな教科をえらぼう！</div>
+        <div class="sentence">
+            My favorite subject is <span class="blank" id="blank-6">_____</span>.
+        </div>
+        <div class="options-grid grid-8" id="grid-6">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-6" onclick="nextPage(6)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-7">
+        <div class="instruction">🦁 一番すきな【動物】をえらぼう！</div>
+        <div class="sentence">
+            I like <span class="blank" id="blank-7">_____</span> the best.
+        </div>
+        <div class="options-grid grid-8" id="grid-7">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-7" onclick="nextPage(7)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-8">
+        <div class="instruction">🍓 一番すきな【果物】をえらぼう！</div>
+        <div class="sentence">
+            I like <span class="blank" id="blank-8">_____</span> the best.
+        </div>
+        <div class="options-grid grid-8" id="grid-8">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-8" onclick="nextPage(8)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-9">
+        <div class="instruction">🥕 一番すきな【野菜】をえらぼう！</div>
+        <div class="sentence">
+            I like <span class="blank" id="blank-9">_____</span> the best.
+        </div>
+        <div class="options-grid grid-8" id="grid-9">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-9" onclick="nextPage(9)" disabled style="opacity: 0.5; cursor: not-allowed;">Next ➔</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-10">
+        <div class="instruction">🤸 やってみることがすきなことをえらぼう！</div>
+        <div class="sentence">
+            I like to <span class="blank" id="blank-10">_____</span>.
+        </div>
+        <div class="options-grid grid-8" id="grid-10">
+            </div>
+        <div class="action-nav">
+            <button class="nav-btn next-btn" id="next-10" onclick="showResults()" disabled style="opacity: 0.5; cursor: not-allowed;">Finish! 🎉</button>
+        </div>
+    </div>
+
+    <div class="page-card" id="card-result">
+        <h2 style="color: var(--primary-pink); margin-bottom: 10px;">Great Job! 🌟</h2>
+        <p style="font-weight: bold; color: #546e7a; margin-bottom: 25px;">あなただけの自己紹介文ができたよ！スピーカーを押してたくさん練習しよう！</p>
+        
+        <div id="results-list">
+            </div>
+
+        <button class="nav-btn restart-btn" onclick="location.reload()">もういちど 遊ぶ 🔄</button>
+    </div>
+</div>
+
+<script>
+    const optionData = {
+        2: ['Japan', 'America', 'Vietnam', 'Canada', 'France', 'China'],
+        3: ['Japanese', 'English', 'French', 'Chinese', 'Vietnamese', 'Spanish'],
+        4: ['Japanese', 'English', 'French', 'Chinese', 'Vietnamese', 'Spanish'],
+        5: ['red', 'yellow', 'pink', 'green', 'orange', 'purple', 'blue'],
+        6: ['English', 'math', 'science', 'music', 'art', 'P.E.'],
+        7: ['dogs', 'cats', 'rabbits', 'monkeys', 'bears', 'pigs', 'koalas', 'tigers'],
+        8: ['strawberries', 'oranges', 'apples', 'peaches', 'cherries', 'bananas', 'pineapples', 'grapes'],
+        9: ['cabbages', 'pumpkins', 'potatoes', 'carrots', 'tomatoes', 'cucumbers'],
+        10: ['play the piano', 'study', 'play sports', 'dance', 'sing', 'watch TV', 'go shopping']
+    };
+
+    const selections = {
+        name: '',
+        from: '',
+        speak: [],
+        cannot: '',
+        color: '',
+        subject: '',
+        animal: '',
+        fruit: '',
+        vegetable: '',
+        likeTo: ''
+    };
+
+    const totalSteps = 10;
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        Object.keys(optionData).forEach(page => {
+            const grid = document.getElementById('grid-' + page);
+            if (!grid) return;
+            
+            const shuffledOptions = shuffle([...optionData[page]]);
+            
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                
+                if (page == 3) {
+                    btn.onclick = (e) => selectMultipleOption(3, opt, 2, e.target);
+                } else if (page == 2) {
+                    btn.onclick = () => selectOption(2, 'from', opt);
+                } else if (page == 4) {
+                    btn.onclick = () => selectOption(4, 'cannot', opt);
+                } else if (page == 5) {
+                    btn.onclick = () => selectOption(5, 'color', opt);
+                } else if (page == 6) {
+                    btn.onclick = () => selectOption(6, 'subject', opt);
+                } else if (page == 7) {
+                    btn.onclick = () => selectOption(7, 'animal', opt);
+                } else if (page == 8) {
+                    btn.onclick = () => selectOption(8, 'fruit', opt);
+                } else if (page == 9) {
+                    btn.onclick = () => selectOption(9, 'vegetable', opt);
+                } else if (page == 10) {
+                    btn.onclick = () => selectOption(10, 'likeTo', opt);
+                }
+                
+                grid.appendChild(btn);
+            });
+        });
+    });
+
+    function updateProgressBar(step) {
+        const percentage = (step / totalSteps) * 100;
+        document.getElementById('progressFill').style.width = percentage + '%';
+    }
+
+    // 名前手入力のリアルタイム処理
+    function handleNameInput() {
+        const value = document.getElementById('name-input').value.trim();
+        selections.name = value;
+        document.getElementById('blank-1').innerText = value ? value : '_____';
+
+        const nextBtn = document.getElementById('next-1');
+        if (value.length > 0) {
+            nextBtn.disabled = false;
+            nextBtn.style.opacity = '1';
+            nextBtn.style.cursor = 'pointer';
+        } else {
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = '0.5';
+            nextBtn.style.cursor = 'not-allowed';
+        }
+    }
+
+    function selectOption(page, category, value) {
+        const card = document.getElementById('card-' + page);
+        const buttons = card.querySelectorAll('.option-btn');
+        buttons.forEach(btn => btn.classList.remove('selected'));
+        
+        event.target.classList.add('selected');
+        selections[category] = value;
+
+        document.getElementById('blank-' + page).innerText = value;
+
+        const nextBtn = document.getElementById('next-' + page);
+        nextBtn.disabled = false;
+        nextBtn.style.opacity = '1';
+        nextBtn.style.cursor = 'pointer';
+    }
+
+    function selectMultipleOption(page, value, maxSelections, btnElement) {
+        if (selections.speak.includes(value)) {
+            selections.speak = selections.speak.filter(item => item !== value);
+            btnElement.classList.remove('selected');
+        } else {
+            if (selections.speak.length < maxSelections) {
+                selections.speak.push(value);
+                btnElement.classList.add('selected');
+            }
+        }
+
+        document.getElementById('blank-3-1').innerText = selections.speak[0] ? selections.speak[0] : '_____';
+        document.getElementById('blank-3-2').innerText = selections.speak[1] ? selections.speak[1] : '_____';
+
+        const nextBtn = document.getElementById('next-' + page);
+        if (selections.speak.length === maxSelections) {
+            nextBtn.disabled = false;
+            nextBtn.style.opacity = '1';
+            nextBtn.style.cursor = 'pointer';
+        } else {
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = '0.5';
+            nextBtn.style.cursor = 'not-allowed';
+        }
+    }
+
+    function nextPage(currentPage) {
+        document.getElementById('card-' + currentPage).classList.remove('active');
+        document.getElementById('card-' + (currentPage + 1)).classList.add('active');
+        updateProgressBar(currentPage);
+    }
+
+    function showResults() {
+        updateProgressBar(10);
+        document.getElementById('card-10').classList.remove('active');
+        document.getElementById('card-result').classList.add('active');
+
+        const sentences = [
+            `My name is ${selections.name}.`,
+            `I'm from ${selections.from}.`,
+            `I speak ${selections.speak[0]} and ${selections.speak[1]}.`,
+            `I cannot speak ${selections.cannot}.`,
+            `My favorite color is ${selections.color}.`,
+            `My favorite subject is ${selections.subject}.`,
+            `I like ${selections.animal} the best.`,
+            `I like ${selections.fruit} the best.`,
+            `I like ${selections.vegetable} the best.`,
+            `I like to ${selections.likeTo} because it's fun. I like to have a lot of fun!`
+        ];
+
+        const resultsList = document.getElementById('results-list');
+        resultsList.innerHTML = '';
+
+        sentences.forEach((sentence, index) => {
+            const row = document.createElement('div');
+            row.className = 'result-row';
+            
+            row.innerHTML = `
+                <button class="speaker-btn" id="btn-s${index}" onclick="speakText('s${index}', \`${sentence.replace(/'/g, "\\'")}\`)">🔊</button>
+                <div class="result-text" id="s${index}">${sentence}</div>
+            `;
+            resultsList.appendChild(row);
+        });
+    }
+
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && v.name.includes("Google US English")) ||
+            voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && v.name.includes("Samantha")) ||
+            voices.find(v => (v.lang === 'en-US' || v.lang === 'en_US') && v.name.includes("Zira")) ||
+            voices.find(v => v.lang.startsWith('en'));
+    }
+
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function speakText(id, text) {
+        window.speechSynthesis.cancel();
+        
+        const uttr = new SpeechSynthesisUtterance(text);
+        if (preferredVoice) {
+            uttr.voice = preferredVoice;
+        }
+        uttr.lang = 'en-US';
+        uttr.rate = 0.6;
+        
+        const btn = document.getElementById('btn-' + id);
+        btn.classList.add('playing');
+        
+        uttr.onend = () => btn.classList.remove('playing');
+        uttr.onerror = () => btn.classList.remove('playing');
+
+        window.speechSynthesis.speak(uttr);
+    }
+</script>
+</body>
+</html>
