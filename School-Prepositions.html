@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>preposition quiz! 🎒</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #6ab04c;
+            --accent-pink: #ff78ae;
+            --danger-red: #ff4d4d;
+            --header-gray: #455a64;
+            --bg-color: #f0f4f8;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: white;
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+        }
+
+        .main-image-container {
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto 15px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid #cbd5e1;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+        }
+
+        .main-image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .progress-bar {
+            background: #eee;
+            padding: 4px 12px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .question-section {
+            background: #f8fafc;
+            border: 3px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            min-height: 80px;
+        }
+
+        .question-text {
+            font-size: 1.7rem;
+            font-weight: bold;
+            color: #334155;
+            text-align: left;
+        }
+
+        .filled-word {
+            color: var(--primary-blue);
+            border-bottom: 3px solid var(--primary-blue);
+            padding: 0 8px;
+            transition: all 0.2s;
+        }
+        .filled-word.correct-word {
+            color: var(--success-green);
+            border-bottom-color: var(--success-green);
+        }
+        .filled-word.wrong-word {
+            color: var(--danger-red);
+            border-bottom-color: var(--danger-red);
+        }
+
+        .speaker-btn {
+            background: #e1f5fe;
+            border: 2px solid #03a9f4;
+            color: #03a9f4;
+            font-size: 1.6rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #0288d1;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            transition: transform 0.1s;
+        }
+
+        .speaker-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #0288d1;
+        }
+
+        .choices-area {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 800px;
+            margin: 15px auto;
+        }
+
+        .choices-area.two-columns {
+            grid-template-columns: repeat(2, 1fr);
+            max-width: 500px;
+        }
+
+        .choice-btn {
+            background: white;
+            border: 3px solid var(--header-gray);
+            border-radius: 15px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            padding: 10px 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--header-gray);
+            font-family: inherit;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60px;
+            white-space: normal;
+        }
+
+        .choice-btn:hover {
+            background-color: #f1f5f9;
+        }
+
+        .choice-btn.correct {
+            border-color: var(--success-green);
+            background: #f0fdf4;
+            color: var(--success-green);
+            pointer-events: none;
+        }
+
+        .choice-btn.wrong {
+            border-color: var(--danger-red);
+            background: #fef2f2;
+            color: var(--danger-red);
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake { 
+            0%, 100% { transform: translateX(0); } 
+            25% { transform: translateX(-5px); } 
+            75% { transform: translateX(5px); } 
+        }
+
+        .feedback {
+            font-size: 1.5rem;
+            font-weight: bold;
+            height: 35px;
+            margin-bottom: 15px;
+        }
+        .feedback.correct { color: var(--success-green); }
+        .feedback.wrong { color: var(--danger-red); }
+
+        .nav-btn {
+            font-family: inherit;
+            padding: 12px 35px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            background: var(--primary-blue);
+            box-shadow: 0 4px 0 #357abd;
+            display: none;
+            margin: 0 auto;
+            transition: transform 0.1s;
+        }
+
+        .nav-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #357abd;
+        }
+
+        .action-btn { 
+            background-color: var(--header-gray); 
+            color: white; 
+            border: none; 
+            padding: 15px 40px; 
+            border-radius: 40px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin: 15px auto 0 auto; 
+            width: 100%;
+            max-width: 400px;
+            font-family: inherit;
+            box-shadow: 0 4px 0 #263238;
+            display: block;
+            transition: transform 0.1s;
+        }
+        .action-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #263238;
+        }
+
+        #quiz-screen, #result-screen { display: none; }
+        #quiz-screen.active, #result-screen.active { display: block; }
+        
+        .score-num { font-size: 4rem; color: var(--primary-blue); font-weight: 700; }
+        .mistake-list { text-align: left; background: #fafafa; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid #cfd8dc; }
+        .mistake-item { font-size: 1.2rem; padding: 8px 0; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>preposition quiz! 🎒</h1>
+
+    <div class="main-image-container">
+        <img src="images-school/classroom.jpg" alt="Classroom map">
+    </div>
+
+    <div id="quiz-screen" class="active">
+        <div class="progress-bar">question <span id="current-q">1</span> / 10</div>
+
+        <div class="question-section">
+            <div class="question-text" id="question-text-display">Question text here</div>
+            <button class="speaker-btn" id="speaker-icon" onclick="playQuestionSound()">🔊</button>
+        </div>
+
+        <div class="choices-area" id="choices-container"></div>
+        <div class="feedback" id="feedback-message"></div>
+        <button class="nav-btn" id="next-btn" onclick="nextQuestion()">next ➔</button>
+    </div>
+
+    <div id="result-screen">
+        <h2>great job! 🎖️</h2>
+        <div style="font-size: 1.3rem; margin: 15px 0;">
+            正解! ：<span class="score-num" id="final-score">0</span> / 10
+        </div>
+        
+        <div id="mistake-container" style="display:none;">
+            <h3 style="color: var(--header-gray); margin-top:20px;">もういちど 確認しよう！ (review questions)</h3>
+            <div class="mistake-list" id="mistake-list"></div>
+        </div>
+
+        <button class="action-btn" onclick="sendReportEmail()">Tamaki先生に報告する</button>
+        <button class="action-btn" style="background-color: #90a4ae; box-shadow: 0 4px 0 #546e7a;" onclick="restartGame()">もう一度やる</button>
+    </div>
+</div>
+
+<script>
+    // 複数形（pencils/stickers）のbe動詞を Are に修正
+    const questionPool = [
+        { q: "Is the marker under the chair?", a: "No, it isn't.", c: ["Yes, it is."] },
+
+        { q: "What's under the desk?", a: "ruler", c: ["book", "computer"] },
+
+        { q: "The computer is on the ___ .", a: "desk", c: ["chair", "table"] },
+
+        { q: "Is the book under the table?", a: "Yes, it is.", c: ["No, it isn't."] },
+
+        { q: "What's on the chair?", a: "eraser and marker", c: ["pencils and glue", "notebooks and stickers"] },
+
+        { q: "The ruler is ___ the desk.", a: "under", c: ["on", "in"] },
+
+        { q: "Is the dictionary under the desk?", a: "No, it isn't.", c: ["Yes, it is."] },
+
+        { q: "What's on the blackboard?", a: "homework and paper", c: ["stickers and glue", "dictionary and ruler"] },
+
+        { q: "The homework is ___ the blackboard.", a: "on", c: ["under", "in"] },
+
+        { q: "Is the student on the chair?", a: "Yes, she is.", c: ["No, she isn't."] },
+
+        { q: "The stickers are on the ___ .", a: "table", c: ["chair", "desk"] },
+
+        { q: "What's on the desk?", a: "computer and dictionary", c: ["homework and paper", "ruler and book"] },
+
+        { q: "The glue is ___ the table.", a: "on", c: ["under", "in"] },
+
+        { q: "Are the pencils under the table?", a: "No, they aren't.", c: ["Yes, they are."] },
+
+        { q: "The paper is ___ the blackboard.", a: "on", c: ["under", "in"] },
+
+        { q: "What's under the table?", a: "book", c: ["ruler", "eraser"] },
+
+        { q: "Is the computer on the desk?", a: "Yes, it is.", c: ["No, it isn't."] },
+
+        { q: "The dictionary is ___ the desk.", a: "on", c: ["under", "in"] },
+
+        { q: "The eraser is ___ the chair.", a: "on", c: ["under", "in"] },
+
+        { q: "Is the ruler on the desk?", a: "No, it isn't.", c: ["Yes, it is."] }
+    ];
+
+    let quizQueue = [];
+    let currentIndex = 0;
+    let firstTryCorrectCount = 0;
+    let isFirstTry = true;
+    let mistakes = [];
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira")));
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function initQuiz() {
+        const shuffledPool = [...questionPool].sort(() => 0.5 - Math.random());
+        quizQueue = shuffledPool.slice(0, 10).map(item => {
+            const choices = [item.a, ...item.c].sort(() => 0.5 - Math.random());
+            return { question: item.q, answer: item.a, choices: choices };
+        });
+        
+        currentIndex = 0;
+        firstTryCorrectCount = 0;
+        mistakes = [];
+    }
+
+    function playQuestionSound() {
+        const currentQ = quizQueue[currentIndex].question;
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        
+        const cleanSpeech = currentQ.replace(/___/g, "blank");
+        const uttr = new SpeechSynthesisUtterance(cleanSpeech);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        uttr.rate = 0.7;
+        uttr.pitch = 1.1;
+        synth.speak(uttr);
+    }
+
+    function loadQuestion() {
+        document.getElementById("next-btn").style.display = "none";
+        document.getElementById("feedback-message").className = "feedback";
+        document.getElementById("feedback-message").innerText = "";
+        document.getElementById("current-q").innerText = currentIndex + 1;
+        isFirstTry = true;
+
+        renderQuestionText("___");
+
+        const currentData = quizQueue[currentIndex];
+        const container = document.getElementById("choices-container");
+        container.innerHTML = "";
+
+        if (currentData.choices.length === 2) {
+            container.className = "choices-area two-columns";
+        } else {
+            container.className = "choices-area";
+        }
+
+        currentData.choices.forEach(choice => {
+            const btn = document.createElement("button");
+            btn.className = "choice-btn";
+            btn.innerText = choice;
+            btn.onclick = () => checkAnswer(choice, btn);
+            container.appendChild(btn);
+        });
+    }
+
+    function renderQuestionText(blankValue, statusClass = "") {
+        const rawQuestion = quizQueue[currentIndex].question;
+        const displayContainer = document.getElementById("question-text-display");
+        
+        if (rawQuestion.includes("___")) {
+            const spanHtml = `<span class="filled-word ${statusClass}">${blankValue}</span>`;
+            displayContainer.innerHTML = rawQuestion.replace(/___/g, spanHtml);
+        } else {
+            displayContainer.innerText = rawQuestion;
+        }
+    }
+
+    function checkAnswer(selected, btnElement) {
+        if (document.getElementById("next-btn").style.display === "block") return;
+
+        const correctAnswer = quizQueue[currentIndex].answer;
+        const feedback = document.getElementById("feedback-message");
+
+        if (selected === correctAnswer) {
+            if (isFirstTry) { 
+                firstTryCorrectCount++; 
+                feedback.innerText = "Excellent! ✨";
+            } else {
+                feedback.innerText = "Good job! 👍";
+            }
+            
+            renderQuestionText(selected, "correct-word");
+            btnElement.classList.add("correct");
+            feedback.className = "feedback correct";
+            document.getElementById("next-btn").style.display = "block";
+        } else {
+            if (isFirstTry) {
+                mistakes.push({ q: quizQueue[currentIndex].question, a: correctAnswer });
+                isFirstTry = false;
+            }
+            
+            renderQuestionText(selected, "wrong-word");
+            btnElement.classList.add("wrong");
+            feedback.innerText = "Try again! ❌";
+            feedback.className = "feedback wrong";
+            
+            setTimeout(() => {
+                btnElement.classList.remove("wrong");
+            }, 1000);
+        }
+    }
+
+    function nextQuestion() {
+        window.speechSynthesis.cancel();
+        currentIndex++;
+        
+        if (currentIndex < quizQueue.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').classList.remove('active');
+        document.getElementById('result-screen').classList.add('active');
+        document.getElementById('final-score').textContent = firstTryCorrectCount;
+        
+        const mistakeContainer = document.getElementById('mistake-container');
+        if (mistakes.length > 0) {
+            mistakeContainer.style.display = 'block';
+            document.getElementById('mistake-list').innerHTML = mistakes.map(m => `
+                <div class="mistake-item">❓ <strong>${m.q}</strong><br>➔ 正解: ${m.a}</div>
+            `).join('');
+        } else {
+            mistakeContainer.style.display = 'none';
+        }
+    }
+
+    function sendReportEmail() {
+        const teacherEmail = "tamaki@eigostudio-stepforward.com";
+        const subject = encodeURIComponent("preposition quiz 結果報告"); // タイトル修正に連動
+        
+        const cleanMistakes = mistakes.map(m => `・${m.q} (正解: ${m.a})`).join("\n");
+        let mistakeText = mistakes.length > 0 ? "\n\n■もういちど確認する問題リスト:\n" + cleanMistakes : "\n\nすべて一発正解でした！すばらしい！Perfect!";
+        
+        const body = encodeURIComponent(`Tamaki先生へ\n\n「preposition quiz」のトレーニングが終わりました！\n\n【結果】: 10問中 ${firstTryCorrectCount} 問を正解！${mistakeText}`);
+        
+        window.location.href = `mailto:${teacherEmail}?subject=${subject}&body=${body}`;
+    }
+
+    function restartGame() {
+        document.getElementById('quiz-screen').classList.add('active');
+        document.getElementById('result-screen').classList.remove('active');
+        initQuiz();
+        loadQuestion();
+    }
+
+    initQuiz();
+    loadQuestion();
+</script>
+</body>
+</html>

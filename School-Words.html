@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>school words quiz! 🎒</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #6ab04c;
+            --accent-pink: #ff78ae;
+            --danger-red: #ff4d4d;
+            --header-gray: #455a64;
+            --bg-color: #f0f4f8;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* タブメニューのスタイル */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            background: #e2e8f0;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: var(--primary-blue);
+            color: white;
+            box-shadow: 0 4px 0 #357abd;
+        }
+
+        .progress-bar {
+            background: #eee;
+            padding: 5px 15px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* 問題提示エリア */
+        .question-section {
+            background: #f8fafc;
+            border: 3px dashed #cbd5e1;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            min-height: 160px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .word-display {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: var(--primary-blue);
+            letter-spacing: 1px;
+        }
+
+        .speaker-btn {
+            background: #e1f5fe;
+            border: 2px solid #03a9f4;
+            color: #03a9f4;
+            font-size: 2rem;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #0288d1;
+            transition: transform 0.1s, background-color 0.2s;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .speaker-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #0288d1;
+        }
+
+        .instruction-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #64748b;
+        }
+
+        /* 3択の画像選択肢レイアウト */
+        .choices-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .choice-card {
+            background: #fafafa;
+            border: 4px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .choice-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* 正解・不正解のスタイル */
+        .choice-card.correct {
+            border-color: var(--success-green);
+            background: #f0fdf4;
+            pointer-events: none;
+        }
+
+        .choice-card.wrong {
+            border-color: var(--danger-red);
+            background: #fef2f2;
+            opacity: 0.6;
+            animation: shake 0.3s;
+        }
+
+        @keyframes shake { 
+            0%, 100% { transform: translateX(0); } 
+            25% { transform: translateX(-5px); } 
+            75% { transform: translateX(5px); } 
+        }
+
+        /* フィードバックメッセージ */
+        .feedback {
+            font-size: 1.6rem;
+            font-weight: bold;
+            height: 40px;
+            margin-bottom: 20px;
+        }
+        .feedback.correct { color: var(--success-green); }
+        .feedback.wrong { color: var(--danger-red); }
+
+        /* ナビゲーション・アクションボタン */
+        .nav-btn {
+            font-family: inherit;
+            padding: 12px 35px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 50px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            background: var(--primary-blue);
+            box-shadow: 0 4px 0 #357abd;
+            display: none;
+            margin: 0 auto;
+        }
+
+        .nav-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #357abd;
+        }
+
+        .action-btn { 
+            background-color: var(--header-gray); 
+            color: white; 
+            border: none; 
+            padding: 15px 40px; 
+            border-radius: 40px; 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            cursor: pointer; 
+            margin-top: 15px; 
+            width: 100%;
+            font-family: inherit;
+            box-shadow: 0 4px 0 #263238;
+        }
+        .action-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #263238;
+        }
+
+        /* 終了画面 */
+        #quiz-screen, #result-screen { display: none; }
+        #quiz-screen.active, #result-screen.active { display: block; }
+        
+        .score-num { font-size: 4rem; color: var(--primary-blue); font-weight: 700; }
+        .mistake-list { text-align: left; background: #fafafa; padding: 15px; border-radius: 10px; margin-top: 15px; border: 1px solid #cfd8dc; }
+        .mistake-item { font-size: 1.2rem; padding: 8px 0; border-bottom: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>school words quiz! 🎒</h1>
+
+    <div class="tabs" id="mode-tabs">
+        <button class="tab-btn active" id="tab-listen" onclick="switchMode('listen')">👂 listen & choose</button>
+        <button class="tab-btn" id="tab-read" onclick="switchMode('read')">📖 read & choose</button>
+    </div>
+
+    <div id="quiz-screen" class="active">
+        <div class="progress-bar">question <span id="current-q">1</span> / 17</div>
+
+        <div class="question-section">
+            <div class="word-display" id="word-text-display" style="display: none;">word</div>
+            <button class="speaker-btn" id="speaker-icon" onclick="playWordSound()">🔊</button>
+            <div class="instruction-text" id="instruction-message">listen and touch the picture!</div>
+        </div>
+
+        <div class="choices-grid" id="choices-container"></div>
+        <div class="feedback" id="feedback-message"></div>
+        <button class="nav-btn" id="next-btn" onclick="nextQuestion()">next ➔</button>
+    </div>
+
+    <div id="result-screen">
+        <h2>great job! 🎖️</h2>
+        <div style="font-size: 1.3rem; margin: 15px 0;">
+            正解! ：<span class="score-num" id="final-score">0</span> / 17
+        </div>
+        
+        <div id="mistake-container" style="display:none;">
+            <h3 style="color: var(--header-gray); margin-top:20px;">もういちど 確認しよう！ (review words)</h3>
+            <div class="mistake-list" id="mistake-list"></div>
+        </div>
+
+        <button class="action-btn" onclick="sendReportEmail()">Tamaki先生に報告する</button>
+        <button class="action-btn" style="background-color: #90a4ae; box-shadow: 0 4px 0 #546e7a;" onclick="restartGame()">もう一度やる</button>
+    </div>
+</div>
+
+<script>
+    const wordList = [
+        "eraser", "desk", "notebook", "dictionary", "computer", 
+        "marker", "teacher", "chair", "homework", "paper", 
+        "glue", "student", "table", "pencil", "book", 
+        "ruler", "stickers"
+    ];
+
+    let quizQueue = [];
+    let currentIndex = 0;
+    let firstTryCorrectCount = 0;
+    let isFirstTry = true;
+    let mistakes = [];
+    let currentMode = 'listen'; // 'listen' or 'read'
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira")));
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function switchMode(mode) {
+        window.speechSynthesis.cancel();
+        currentMode = mode;
+        document.getElementById('tab-listen').classList.toggle('active', mode === 'listen');
+        document.getElementById('tab-read').classList.toggle('active', mode === 'read');
+        restartGame();
+    }
+
+    function initQuiz() {
+        quizQueue = wordList.map(word => {
+            const decoys = wordList.filter(w => w !== word).sort(() => 0.5 - Math.random());
+            const choices = [word, decoys[0], decoys[1]].sort(() => 0.5 - Math.random());
+            return { answer: word, choices: choices };
+        });
+        quizQueue.sort(() => 0.5 - Math.random());
+        
+        currentIndex = 0;
+        firstTryCorrectCount = 0;
+        mistakes = [];
+    }
+
+    function playWordSound() {
+        const currentWord = quizQueue[currentIndex].answer;
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        
+        const uttr = new SpeechSynthesisUtterance(currentWord);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        uttr.rate = 0.7;
+        uttr.pitch = 1.1;
+        synth.speak(uttr);
+    }
+
+    function loadQuestion() {
+        document.getElementById("next-btn").style.display = "none";
+        document.getElementById("feedback-message").className = "feedback";
+        document.getElementById("feedback-message").innerText = "";
+        document.getElementById("current-q").innerText = currentIndex + 1;
+        isFirstTry = true;
+
+        const currentData = quizQueue[currentIndex];
+        const wordText = document.getElementById("word-text-display");
+        const speakerBtn = document.getElementById("speaker-icon");
+        const instruction = document.getElementById("instruction-message");
+
+        if (currentMode === 'read') {
+            wordText.style.display = "block";
+            wordText.innerText = currentData.answer; // 小文字のまま表示
+            speakerBtn.style.display = "none";
+            instruction.innerText = "read and touch the picture!";
+        } else {
+            wordText.style.display = "none";
+            speakerBtn.style.display = "inline-flex";
+            instruction.innerText = "listen and touch the picture!";
+        }
+
+        const container = document.getElementById("choices-container");
+        container.innerHTML = "";
+
+        currentData.choices.forEach(word => {
+            const card = document.createElement("div");
+            card.className = "choice-card";
+            card.onclick = () => checkAnswer(word, card);
+
+            const img = document.createElement("img");
+            img.src = `images-school/${word}.jpg`;
+            img.alt = word;
+
+            card.appendChild(img);
+            container.appendChild(card);
+        });
+    }
+
+    function checkAnswer(selectedWord, selectedCard) {
+        if (document.getElementById("next-btn").style.display === "block") return;
+
+        const correctAnswer = quizQueue[currentIndex].answer;
+        const feedback = document.getElementById("feedback-message");
+
+        if (selectedWord === correctAnswer) {
+            if (isFirstTry) { 
+                firstTryCorrectCount++; 
+                feedback.innerText = "Excellent! ✨";
+            } else {
+                feedback.innerText = "Good job! 👍";
+            }
+            selectedCard.classList.add("correct");
+            feedback.className = "feedback correct";
+            document.getElementById("next-btn").style.display = "block";
+        } else {
+            if (isFirstTry) {
+                mistakes.push(correctAnswer);
+                isFirstTry = false;
+            }
+            selectedCard.classList.add("wrong");
+            feedback.innerText = "Try again! ❌";
+            feedback.className = "feedback wrong";
+        }
+    }
+
+    function nextQuestion() {
+        window.speechSynthesis.cancel();
+        currentIndex++;
+        
+        if (currentIndex < quizQueue.length) {
+            loadQuestion();
+        } else {
+            showResult();
+        }
+    }
+
+    function showResult() {
+        document.getElementById('quiz-screen').classList.remove('active');
+        document.getElementById('mode-tabs').style.display = 'none';
+        document.getElementById('result-screen').classList.add('active');
+        document.getElementById('final-score').textContent = firstTryCorrectCount;
+        
+        const mistakeContainer = document.getElementById('mistake-container');
+        if (mistakes.length > 0) {
+            mistakeContainer.style.display = 'block';
+            document.getElementById('mistake-list').innerHTML = mistakes.map(m => `
+                <div class="mistake-item">❌ <strong>${m}</strong></div>
+            `).join('');
+        } else {
+            mistakeContainer.style.display = 'none';
+        }
+    }
+
+    function sendReportEmail() {
+        const teacherEmail = "tamaki@eigostudio-stepforward.com";
+        const modeName = currentMode === 'listen' ? "listen & choose (音声モード)" : "read & choose (文字モード)";
+        const subject = encodeURIComponent(`school words quiz 結果報告 (${currentMode})`);
+        
+        const cleanMistakes = mistakes.map(m => `・${m}`).join("\n");
+        let mistakeText = mistakes.length > 0 ? "\n\n■もういちど確認する単語リスト:\n" + cleanMistakes : "\n\nすべて一発正解でした！すばらしい！Perfect!";
+        
+        const body = encodeURIComponent(`Tamaki先生へ\n\n「school words quiz」のトレーニングが終わりました！\n\n【挑戦したモード】: ${modeName}\n【結果】: ${quizQueue.length}問中 ${firstTryCorrectCount} 問を正解！${mistakeText}`);
+        
+        window.location.href = `mailto:${teacherEmail}?subject=${subject}&body=${body}`;
+    }
+
+    function restartGame() {
+        document.getElementById('quiz-screen').classList.add('active');
+        document.getElementById('result-screen').classList.remove('active');
+        document.getElementById('mode-tabs').style.display = 'flex';
+        initQuiz();
+        loadQuestion();
+    }
+
+    initQuiz();
+    loadQuestion();
+</script>
+</body>
+</html>
