@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lily's Sticker Hunt! - Story Time!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #6ab04c;
+            --accent-pink: #ff78ae;
+            --bg-color: #fdf6e3;
+            --text-color: #333;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { color: var(--primary-blue); font-size: 2.2rem; margin-bottom: 5px; }
+        .subtitle { color: #888; font-size: 1rem; margin-bottom: 25px; }
+        .story-page { display: none; animation: fadeIn 0.5s; }
+        .story-page.active { display: block; }
+        .page-indicator {
+            background: #eee; padding: 5px 15px; border-radius: 10px;
+            display: inline-block; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;
+        }
+        .image-container {
+            width: 100%; max-width: 550px; margin: 0 auto 20px auto;
+            border-radius: 20px; overflow: hidden; border: 4px solid #f0f4f8;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05); aspect-ratio: 4 / 3; background: #fafafa;
+        }
+        .image-container img { width: 100%; height: 100%; object-fit: contain; }
+        .story-text-box {
+            font-size: 1.6rem; font-weight: bold; line-height: 1.6;
+            margin: 20px auto; max-width: 600px; min-height: 110px;
+            display: flex; flex-direction: column; gap: 12px; text-align: left; padding: 0 20px;
+        }
+        .story-line { display: block; }
+        .controls { margin-top: 25px; display: flex; justify-content: center; align-items: center; }
+        .btn-row { display: flex; justify-content: center; align-items: center; gap: 15px; }
+        button { font-family: inherit; font-weight: bold; border: none; cursor: pointer; transition: transform 0.1s, background-color 0.2s; }
+        button:active { transform: translateY(2px); box-shadow: none !important; }
+        .speaker-btn {
+            background: var(--accent-pink); color: white; font-size: 1.1rem;
+            padding: 12px 18px; border-radius: 50px; box-shadow: 0 4px 0 #d64d8a;
+            display: flex; justify-content: center; align-items: center; gap: 6px;
+        }
+        .speaker-btn:hover { background: #ff5c9d; }
+        .nav-btn { padding: 12px 28px; font-size: 1.2rem; border-radius: 50px; color: white; min-width: 110px; }
+        .prev-btn { background: #94a3b8; box-shadow: 0 4px 0 #64748b; }
+        .prev-btn:hover { background: #64748b; }
+        .next-btn { background: var(--primary-blue); box-shadow: 0 4px 0 #357abd; }
+        .next-btn:hover { background: #2563eb; }
+        .finish-btn { background: var(--success-green); box-shadow: 0 4px 0 #538d3d; }
+        .finish-btn:hover { background: #4ea236; }
+        .nav-spacer { width: 110px; height: 1px; visibility: hidden; }
+        #ending-page { display: none; animation: fadeIn 0.5s; padding: 40px 20px; }
+        #ending-page h2 { color: var(--success-green); font-size: 2.5rem; margin-bottom: 15px; }
+        #ending-page p { font-size: 1.4rem; margin-bottom: 30px; color: #555; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Lily's Sticker Hunt! 🎒</h1>
+    <div class="subtitle">Story Book Edition</div>
+
+    <div id="story-container">
+        <div class="story-page active" id="p1">
+            <span class="page-indicator">Page 1</span>
+            <div class="image-container"><img src="images-school/Scene1.jpg" alt="Page 1"></div>
+            <div class="story-text-box">
+                <span class="story-line" id="p1-l1">Lily is a student. She sits at her desk.</span>
+                <span class="story-line" id="p1-l2">She loves stickers! She has many cute stickers.</span>
+                <span class="story-line" id="p1-l3">But look! Lily is sad.</span>
+                <span class="story-line" id="p1-l4">"Where is my favorite bear sticker?" she asks.</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <div class="nav-spacer"></div>
+                    <button class="speaker-btn" onclick="speakLines(['p1-l1', 'p1-l2'])">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p1-l3', 'p1-l4'])">🔊 Part 2</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(1)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p2">
+            <span class="page-indicator">Page 2</span>
+            <div class="image-container"><img src="images-school/Scene2.jpg" alt="Page 2"></div>
+            <div class="story-text-box">
+                <span class="story-line" id="p2-l1">Lily stands up and looks around.</span>
+                <span class="story-line" id="p2-l2">She looks at her chair.</span>
+                <span class="story-line" id="p2-l3">There is a pink eraser and a blue marker on the chair.</span>
+                <span class="story-line" id="p2-l4">But the bear sticker is not there!</span>
+                <span class="story-line" id="p2-l5">"It is not on my chair," Lily says.</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(2)">⬅ Back</button>
+                    <button class="speaker-btn" onclick="speakLines(['p2-l1', 'p2-l2', 'p2-l3'])">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p2-l4', 'p2-l5'])">🔊 Part 2</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(2)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p3">
+            <span class="page-indicator">Page 3</span>
+            <div class="image-container"><img src="images-school/Scene3.jpg" alt="Page 3"></div>
+            <div class="story-text-box">
+                <span class="story-line" id="p3-l1">Her friend, Ken, wants to help.</span>
+                <span class="story-line" id="p3-l2">Ken looks under the big table.</span>
+                <span class="story-line" id="p3-l3">There are some colorful books under the table.</span>
+                <span class="story-line" id="p3-l4">Ken lifts a yellow book.</span>
+                <span class="story-line" id="p3-l5">"Is it under this book, Lily?" Ken asks.</span>
+                <span class="story-line" id="p3-l6">"No, it isn't," Lily says.</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(3)">⬅ Back</button>
+                    <button class="speaker-btn" onclick="speakLines(['p3-l1', 'p3-l2', 'p3-l3', 'p3-l4'])">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p3-l5', 'p3-l6'])">🔊 Part 2</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(3)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p4">
+            <span class="page-indicator">Page 4</span>
+            <div class="image-container"><img src="images-school/Scene4.jpg" alt="Page 4"></div>
+            <div class="story-text-box">
+                <span class="story-line" id="p4-l1">Ms. Green comes over with a big smile.</span>
+                <span class="story-line" id="p4-l2">"Let's check the box, Lily," Ms. Green says.</span>
+                <span class="story-line" id="p4-l3">Lily opens the purple box. She looks inside.</span>
+                <span class="story-line" id="p4-l4">There is an orange notebook and a green glue in the box.</span>
+                <span class="story-line" id="p4-l5">"It is not in the box," Lily sighs.</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(4)">⬅ Back</button>
+                    <button class="speaker-btn" onclick="speakLines(['p4-l1', 'p4-l2', 'p4-l3'])">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p4-l4', 'p4-l5'])">🔊 Part 2</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(4)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p5">
+            <span class="page-indicator">Page 5</span>
+            <div class="image-container"><img src="images-school/Scene5.jpg" alt="Page 5"></div>
+            <div class="story-text-box">
+                <span class="story-line" id="p5-l1">Everyone is looking for the bear sticker.</span>
+                <span class="story-line" id="p5-l2">Lily looks at Ms. Green's desk.</span>
+                <span class="story-line" id="p5-l3">There is a computer and a thick red dictionary on the desk.</span>
+                <span class="story-line" id="p5-l4">"Look!" Ken cries. "There is a wooden ruler under the desk!"</span>
+                <span class="story-line" id="p5-l5">"But no sticker."</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(5)">⬅ Back</button>
+                    <button class="speaker-btn" onclick="speakLines(['p5-l1', 'p5-l2', 'p5-l3'])">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p5-l4', 'p5-l5'])">🔊 Part 2</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(5)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p6">
+            <span class="page-indicator">Page 6</span>
+            <div class="image-container"><img src="images-school/Scene6.jpg" alt="Page 6"></div>
+            <div class="story-text-box">
+                <span class="story-line" id="p6-l1">Lily walks back to her seat. She opens her pink school bag.</span>
+                <span class="story-line" id="p6-l2">"Oh!" Lily smiles big. The bear sticker is in her school bag!</span>
+                <span class="story-line" id="p6-l3">"Thank you, Ms. Green! Thank you, Ken!"</span>
+                <span class="story-line" id="p6-l4">Lily is very happy now!</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(6)">⬅ Back</button>
+                    <button class="speaker-btn" onclick="speakLines(['p6-l1', 'p6-l2'])">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p6-l3', 'p6-l4'])">🔊 Part 2</button>
+                    <button class="nav-btn finish-btn" onclick="showEnding()">Finish ➔</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ending-page">
+        <h2>Great Job! 🎖️</h2>
+        <p>You read all of "Lily's Sticker Hunt!"!</p>
+        <button class="nav-btn next-btn" onclick="location.reload()">Read Again</button>
+    </div>
+</div>
+
+<script>
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira")));
+    }
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    function speakLines(lineIds) {
+        const textParts = lineIds.map(id => {
+            const el = document.getElementById(id);
+            return el ? el.innerText : "";
+        });
+        const combinedText = textParts.join(" "); 
+        const synth = window.speechSynthesis;
+        synth.cancel();
+        
+        const uttr = new SpeechSynthesisUtterance(combinedText);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        uttr.rate = 0.7;  
+        uttr.pitch = 1.1; 
+        synth.speak(uttr);
+    }
+
+    function nextPage(current) {
+        window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current + 1)).classList.add('active');
+    }
+
+    function prevPage(current) {
+        window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current - 1)).classList.add('active');
+    }
+
+    function showEnding() {
+        window.speechSynthesis.cancel();
+        document.getElementById('story-container').style.display = 'none';
+        document.getElementById('ending-page').style.display = 'block';
+    }
+</script>
+</body>
+</html>
