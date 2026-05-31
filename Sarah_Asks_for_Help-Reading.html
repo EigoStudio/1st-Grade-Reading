@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sarah Asks for Help - Story Time!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #6ab04c;
+            --accent-pink: #ff78ae;
+            --bg-color: #fdf6e3;
+            --text-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 750px;
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-blue);
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1rem;
+            margin-bottom: 25px;
+        }
+
+        /* ページの切り替え管理 */
+        .story-page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .story-page.active {
+            display: block;
+        }
+
+        .page-indicator {
+            background: #eee;
+            padding: 5px 15px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* 画像エリア */
+        .image-container {
+            width: 100%;
+            max-width: 550px;
+            margin: 0 auto 20px auto;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid #f0f4f8;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+            aspect-ratio: 4 / 3;
+            background: #fafafa;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* テキストエリア：左寄せ＋しっかり行替え */
+        .story-text-box {
+            font-size: 1.6rem;
+            font-weight: bold;
+            line-height: 1.6;
+            margin: 20px auto;
+            max-width: 600px;
+            min-height: 110px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            padding: 0 20px;
+        }
+
+        .story-line {
+            display: block;
+        }
+
+        /* ボタン類のコントロール：矢印の間にスピーカーを綺麗に並べる */
+        .controls {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        button {
+            font-family: inherit;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        button:active {
+            transform: translateY(2px);
+            box-shadow: none !important;
+        }
+
+        /* スピーカーボタンのデザイン：分割・単体どちらも馴染むカプセル/丸型 */
+        .speaker-btn {
+            background: var(--accent-pink);
+            color: white;
+            font-size: 1.2rem;
+            padding: 12px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 0 #d64d8a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+        .speaker-btn:hover {
+            background: #ff5c9d;
+        }
+
+        /* 1つだけのページは丸いスピーカー型にする */
+        .speaker-btn.single {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            font-size: 1.6rem;
+            padding: 0;
+            box-shadow: 0 5px 0 #d64d8a;
+        }
+
+        .nav-btn {
+            padding: 12px 28px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            color: white;
+            min-width: 110px;
+        }
+
+        .prev-btn {
+            background: #94a3b8;
+            box-shadow: 0 4px 0 #64748b;
+        }
+        .prev-btn:hover {
+            background: #64748b;
+        }
+
+        .next-btn {
+            background: var(--primary-blue);
+            box-shadow: 0 4px 0 #357abd;
+        }
+        .next-btn:hover {
+            background: #2563eb;
+        }
+
+        .finish-btn {
+            background: var(--success-green);
+            box-shadow: 0 4px 0 #538d3d;
+        }
+        .finish-btn:hover {
+            background: #4ea236;
+        }
+
+        /* 1ページ目の左右バランス用スペーサー */
+        .nav-spacer {
+            width: 110px;
+            height: 1px;
+            visibility: hidden;
+        }
+
+        /* 最終リザルト画面 */
+        #ending-page {
+            display: none;
+            animation: fadeIn 0.5s;
+            padding: 40px 20px;
+        }
+
+        #ending-page h2 {
+            color: var(--success-green);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        #ending-page p {
+            font-size: 1.4rem;
+            margin-bottom: 30px;
+            color: #555;
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(5px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Sarah Asks for Help 🎒</h1>
+    <div class="subtitle">Story Book Edition</div>
+
+    <div id="story-container">
+        
+        <div class="story-page active" id="p1">
+            <span class="page-indicator">Page 1</span>
+            <div class="image-container">
+                <img src="images-Sarah/1-classroom.jpg" alt="Sarah in the classroom">
+            </div>
+            <div class="story-text-box">
+                <span class="story-line" id="p1-l1">Look! This is Sarah.</span>
+                <span class="story-line" id="p1-l2">She sits at her desk.</span>
+                <span class="story-line" id="p1-l3">She is wearing a blue T-shirt today.</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <div class="nav-spacer"></div>
+                    <button class="speaker-btn single" onclick="speakLines(['p1-l1', 'p1-l2', 'p1-l3'])" title="Listen">🔊</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(1)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p2">
+            <span class="page-indicator">Page 2</span>
+            <div class="image-container">
+                <img src="images-Sarah/2-teacher.jpg" alt="Teacher talking">
+            </div>
+            <div class="story-text-box">
+                <span class="story-line" id="p2-l1">Listen! The teacher is talking.</span>
+                <span class="story-line" id="p2-l2">"Please do page five," the teacher says.</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(2)">⬅ Back</button>
+                    <button class="speaker-btn single" onclick="speakLines(['p2-l1', 'p2-l2'])" title="Listen">🔊</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(2)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p3">
+            <span class="page-indicator">Page 3</span>
+            <div class="image-container">
+                <img src="images-Sarah/3-stuck.jpg" alt="Sarah is stuck">
+            </div>
+            <div class="story-text-box">
+                <span class="story-line" id="p3-l1">Everyone is working.</span>
+                <span class="story-line" id="p3-l2">Sarah looks at her paper.</span>
+                <span class="story-line" id="p3-l3">She is reading the words.</span>
+                <span class="story-line" id="p3-l4">But wait! She does not understand.</span>
+                <span class="story-line" id="p3-l5">The work is very hard.</span>
+                <span class="story-line" id="p3-l6">"I am stuck," Sarah says.</span>
+                <span class="story-line" id="p3-l7">She stays very quiet.</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(3)">⬅ Back</button>
+                    <button class="speaker-btn" onclick="speakLines(['p3-l1', 'p3-l2', 'p3-l3', 'p3-l4', 'p3-l5'])" title="Listen Part 1">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p3-l6', 'p3-l7'])" title="Listen Part 2">🔊 Part 2</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(3)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p4">
+            <span class="page-indicator">Page 4</span>
+            <div class="image-container">
+                <img src="images-Sarah/3-stuck.jpg" alt="Sarah looks at her friends">
+            </div>
+            <div class="story-text-box">
+                <span class="story-line" id="p4-l1">"I am stuck..."</span>
+                <span class="story-line" id="p4-l2">The minutes are passing.</span>
+                <span class="story-line" id="p4-l3">Sarah looks at her friends.</span>
+                <span class="story-line" id="p4-l4">They are writing quickly.</span>
+                <span class="story-line" id="p4-l5">She wants to finish her work too.</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(4)">⬅ Back</button>
+                    <button class="speaker-btn" onclick="speakLines(['p4-l1', 'p4-l2', 'p4-l3', 'p4-l4', 'p4-l5'])" title="Listen">🔊 Listen</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(4)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p5">
+            <span class="page-indicator">Page 5</span>
+            <div class="image-container">
+                <img src="images-Sarah/4-raising-hand.jpg" alt="Sarah raising her hand">
+            </div>
+            <div class="story-text-box">
+                <span class="story-line" id="p5-l1">Sarah takes a deep breath.</span>
+                <span class="story-line" id="p5-l2">She lifts her arm.</span>
+                <span class="story-line" id="p5-l3">Look!</span>
+                <span class="story-line" id="p5-l4">She raises her hand high in the air!</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(5)">⬅ Back</button>
+                    <button class="speaker-btn single" onclick="speakLines(['p5-l1', 'p5-l2', 'p5-l3', 'p5-l4'])" title="Listen">🔊</button>
+                    <button class="nav-btn next-btn" onclick="nextPage(5)">Next ➔</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="story-page" id="p6">
+            <span class="page-indicator">Page 6</span>
+            <div class="image-container">
+                <img src="images-Sarah/7-happy-end.jpg" alt="The teacher helps Sarah">
+            </div>
+            <div class="story-text-box">
+                <span class="story-line" id="p6-l1">The teacher smiles and walks over.</span>
+                <span class="story-line" id="p6-l2">"Yes, Sarah?" the teacher asks.</span>
+                <span class="story-line" id="p6-l3">"I am stuck," Sarah says.</span>
+                <span class="story-line" id="p6-l4">"Can you help me, please?"</span>
+                <span class="story-line" id="p6-l5">"Yes, of course!" the teacher says.</span>
+                <span class="story-line" id="p6-l6">Sarah is smiling now.</span>
+                <span class="story-line" id="p6-l7">She is happy.</span>
+                <span class="story-line" id="p6-l8">She can do it!</span>
+            </div>
+            <div class="controls">
+                <div class="btn-row">
+                    <button class="nav-btn prev-btn" onclick="prevPage(6)">⬅ Back</button>
+                    <button class="speaker-btn" onclick="speakLines(['p6-l1', 'p6-l2', 'p6-l3', 'p6-l4', 'p6-l5'])" title="Listen Part 1">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p6-l6', 'p6-l7', 'p6-l8'])" title="Listen Part 2">🔊 Part 2</button>
+                    <button class="nav-btn finish-btn" onclick="showEnding()">Finish ➔</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="ending-page">
+        <h2>Great Job! 🎖️</h2>
+        <p>You read all of "Sarah Asks for Help"!</p>
+        <button class="nav-btn next-btn" onclick="location.reload()">Read Again</button>
+    </div>
+
+</div>
+
+<script>
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira")));
+    }
+    
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+
+    // 指定された複数の一行（ID）を結合して読み上げる関数
+    function speakLines(lineIds) {
+        const textParts = lineIds.map(id => document.getElementById(id).innerText);
+        const combinedText = textParts.join(" "); 
+        
+        const synth = window.speechSynthesis;
+        synth.cancel(); // 前の音声をクリア
+        
+        const uttr = new SpeechSynthesisUtterance(combinedText);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        
+        uttr.rate = 0.7;  // Emily基準のスピード
+        uttr.pitch = 1.1; // 少し高めの聞き取りやすいトーン
+        synth.speak(uttr);
+    }
+
+    // ページナビゲーション
+    function nextPage(current) {
+        window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current + 1)).classList.add('active');
+    }
+
+    function prevPage(current) {
+        window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current - 1)).classList.add('active');
+    }
+
+    // 終了画面
+    function showEnding() {
+        window.speechSynthesis.cancel();
+        document.getElementById('story-container').style.display = 'none';
+        document.getElementById('ending-page').style.display = 'block';
+    }
+</script>
+</body>
+</html>
