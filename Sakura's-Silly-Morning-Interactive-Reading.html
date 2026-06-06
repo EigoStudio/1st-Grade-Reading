@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakura's Silly Morning - Story Book</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #2ecc71;
+            --accent-orange: #ff7f50;
+            --accent-pink: #ff78ae;
+            --bg-color: #fffde7;
+            --text-color: #2c3e50;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            text-align: center;
+            border: 6px dashed #ffd54f;
+            position: relative;
+        }
+        h1 { color: #e67e22; font-size: 2.5rem; margin-bottom: 5px; font-weight: 700; }
+        .subtitle { color: #7f8c8d; font-size: 1.1rem; margin-bottom: 25px; font-weight: bold; }
+        .story-page { display: none; animation: fadeIn 0.5s ease-out; }
+        .story-page.active { display: block; }
+        .page-indicator {
+            background: #fff3e0; color: #e65100; padding: 6px 18px; border-radius: 12px;
+            display: inline-block; margin-bottom: 20px; font-weight: bold; font-size: 1.2rem;
+            border: 2px solid #ffe0b2;
+        }
+        .image-container {
+            width: 100%; max-width: 600px; margin: 0 auto 20px auto;
+            border-radius: 20px; overflow: hidden; border: 4px solid #f1f2f6;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08); aspect-ratio: 4 / 3; background: #fafafa;
+        }
+        .image-container img { width: 100%; height: 100%; object-fit: contain; }
+        
+        .question-balloon {
+            background: #e1f5fe; border: 3px solid #81d4fa; border-radius: 15px;
+            padding: 15px; font-size: 1.5rem; font-weight: bold; color: #0288d1;
+            margin: 15px auto; max-width: 600px; line-height: 1.4;
+        }
+        .check-btn {
+            background: var(--accent-orange); color: white; font-family: inherit;
+            font-size: 1.3rem; font-weight: bold; padding: 12px 30px; border: none;
+            border-radius: 50px; cursor: pointer; margin: 10px 0 20px 0;
+            box-shadow: 0 5px 0 #d35400; transition: all 0.1s;
+        }
+        .check-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #d35400; }
+
+        .story-content-box {
+            display: none; opacity: 0; transition: opacity 0.4s ease-in-out;
+            background: #f9f9f9; border-radius: 20px; padding: 20px;
+            border: 3px dashed #b2dfdb; margin-bottom: 20px;
+        }
+        .story-content-box.show { display: block; opacity: 1; }
+
+        .story-text-box {
+            font-size: 1.7rem; font-weight: bold; line-height: 1.6;
+            margin: 10px auto; max-width: 650px;
+            display: flex; flex-direction: column; gap: 14px; text-align: left;
+        }
+        .story-line { display: block; color: #2c3e50; }
+        
+        .print-only-content { display: none; }
+
+        .controls { margin-top: 25px; display: flex; justify-content: center; align-items: center; }
+        .btn-row { display: flex; justify-content: center; align-items: center; gap: 15px; width: 100%; max-width: 650px; }
+        
+        button { font-family: inherit; font-weight: bold; border: none; cursor: pointer; transition: transform 0.1s, background-color 0.2s; }
+        button:active { transform: translateY(2px); box-shadow: none !important; }
+        
+        .speaker-btn {
+            background: var(--accent-pink); color: white; font-size: 1.1rem;
+            padding: 10px 16px; border-radius: 50px; box-shadow: 0 4px 0 #d64d8a;
+            display: flex; justify-content: center; align-items: center; gap: 6px;
+        }
+        .speaker-btn:hover { background: #ff5c9d; }
+        
+        .nav-btn { padding: 12px 28px; font-size: 1.2rem; border-radius: 50px; color: white; min-width: 120px; }
+        .prev-btn { background: #95a5a6; box-shadow: 0 4px 0 #7f8c8d; }
+        .prev-btn:hover { background: #7f8c8d; }
+        .next-btn { background: var(--primary-blue); box-shadow: 0 4px 0 #2980b9; }
+        .next-btn:hover { background: #2980b9; }
+        .finish-btn { background: var(--success-green); box-shadow: 0 4px 0 #27ae60; }
+        .finish-btn:hover { background: #27ae60; }
+        .nav-spacer { width: 120px; height: 1px; visibility: hidden; }
+        
+        #ending-page { display: none; animation: fadeIn 0.5s ease-out; padding: 40px 20px; }
+        #ending-page h2 { color: var(--success-green); font-size: 2.8rem; margin-bottom: 15px; }
+        #ending-page p { font-size: 1.5rem; margin-bottom: 30px; color: #34495e; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 🖨️ プリントアウト用のテキストスタイル */
+        @media print {
+            body { background: white; color: black; padding: 0; font-family: serif; }
+            .container { border: none; box-shadow: none; padding: 0; max-width: 100%; }
+            h1 { font-size: 2rem; color: black; border-bottom: 2px solid black; padding-bottom: 10px; }
+            .subtitle, .page-indicator, .image-container, .question-balloon, .check-btn, .controls, #ending-page, #story-container { display: none !important; }
+            
+            .print-only-content { display: block !important; text-align: left; margin-top: 20px; }
+            .print-page-block { page-break-inside: avoid; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px dashed #ccc; }
+            .print-page-num { font-weight: bold; font-size: 1.2rem; margin-bottom: 5px; display: block; }
+            .print-eng { font-size: 1.3rem; font-weight: bold; display: block; margin-bottom: 5px; line-height: 1.4; }
+            .print-jp { font-size: 1rem; color: #555; display: block; margin-bottom: 15px; font-style: italic; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="story-container">
+        <h1>Sakura's Silly Morning ⏰</h1>
+        <div class="subtitle">Interactive Reading Activity</div>
+        
+        <!-- PAGE 1: WHAT'S FUNNY -->
+        <div class="story-page active" id="p1">
+            <span class="page-indicator">Page 1</span>
+            <div class="image-container"><img src="images-Sakura/what's-funny.jpg" alt="Mom at the door"></div>
+            <div class="question-balloon">What is mom saying? Let's think!</div>
+            <button class="check-btn" onclick="revealStory(1)">Let's Check! (みてみよう！)</button>
+            <div class="story-content-box" id="story-box-1">
+                <div class="story-text-box">
+                    <span class="story-line" id="p1-l1">Sakura is going out.</span>
+                    <span class="story-line" id="p1-l2">Look at Mom. She looks very surprised!</span>
+                    <span class="story-line" id="p1-l3">"Wait, Sakura! You're not ready!" says Mom.</span>
+                </div>
+                <div style="display:flex; justify-content:center; margin-top:10px;">
+                    <button class="speaker-btn" onclick="speakLines(['p1-l1', 'p1-l2', 'p1-l3'])">🔊 Read All</button>
+                </div>
+            </div>
+            <div class="controls"><div class="btn-row"><div class="nav-spacer"></div><button class="nav-btn next-btn" onclick="nextPage(1)">Next ➔</button></div></div>
+        </div>
+
+        <!-- PAGE 2: EMPTY BACKPACK -->
+        <div class="story-page" id="p2">
+            <span class="page-indicator">Page 2</span>
+            <div class="image-container"><img src="images-Sakura/empty-backpack.jpg" alt="Empty backpack"></div>
+            <div class="question-balloon">Look at the desk! What's wrong with her backpack?</div>
+            <button class="check-btn" onclick="revealStory(2)">Let's Check! (みてみよう！)</button>
+            <div class="story-content-box" id="story-box-2">
+                <div class="story-text-box">
+                    <span class="story-line" id="p2-l1">Oh no! Her red backpack is empty!</span>
+                    <span class="story-line" id="p2-l2">Her pencils, eraser, notebooks, and books are on the desk.</span>
+                    <span class="story-line" id="p2-l3">"My homework is still here!" says Sakura.</span>
+                </div>
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+                    <button class="speaker-btn" onclick="speakLines(['p2-l1', 'p2-l2'])">🔊 Part 1</button>
+                    <button class="speaker-btn" onclick="speakLines(['p2-l3'])">🔊 Part 2</button>
+                </div>
+            </div>
+            <div class="controls"><div class="btn-row"><button class="nav-btn prev-btn" onclick="prevPage(2)">⬅ Back</button><button class="nav-btn next-btn" onclick="nextPage(2)">Next ➔</button></div></div>
+        </div>
+
+        <!-- PAGE 3: BRUSHING TEETH -->
+        <div class="story-page" id="p3">
+            <span class="page-indicator">Page 3</span>
+            <div class="image-container"><img src="images-Sakura/brushing-teeth.jpg" alt="Brushing teeth"></div>
+            <div class="question-balloon">Where is Sakura now? What is she doing?</div>
+            <button class="check-btn" onclick="revealStory(3)">Let's Check! (みてみよう！)</button>
+            <div class="story-content-box" id="story-box-3">
+                <div class="story-text-box">
+                    <span class="story-line" id="p3-l1">Sakura is in the bathroom now.</span>
+                    <span class="story-line" id="p3-l2">She is brushing her teeth.</span>
+                    <span class="story-line" id="p3-l3">But wait! Did she eat her breakfast?</span>
+                </div>
+                <div style="display:flex; justify-content:center; margin-top:10px;">
+                    <button class="speaker-btn" onclick="speakLines(['p3-l1', 'p3-l2', 'p3-l3'])">🔊 Read All</button>
+                </div>
+            </div>
+            <div class="controls"><div class="btn-row"><button class="nav-btn prev-btn" onclick="prevPage(3)">⬅ Back</button><button class="nav-btn next-btn" onclick="nextPage(3)">Next ➔</button></div></div>
+        </div>
+
+        <!-- PAGE 4: UNTOUCHED BREAKFAST -->
+        <div class="story-page" id="p4">
+            <span class="page-indicator">Page 4</span>
+            <div class="image-container"><img src="images-Sakura/untouched-breakfast.jpg" alt="Breakfast table"></div>
+            <div class="question-balloon">Look at the table! What can you see?</div>
+            <button class="check-btn" onclick="revealStory(4)">Let's Check! (みてみよう！)</button>
+            <div class="story-content-box" id="story-box-4">
+                <div class="story-text-box">
+                    <span class="story-line" id="p4-l1">Look! Yummy salmon, rice, miso soup, and green tea are on the table.</span>
+                    <span class="story-line" id="p4-l2">"Eat your breakfast, Sakura!" says Mom.</span>
+                    <span class="story-line" id="p4-l3">"I love salmon! Itadakimasu!" says Sakura.</span>
+                </div>
+                <div style="display:flex; justify-content:center; margin-top:10px;">
+                    <button class="speaker-btn" onclick="speakLines(['p4-l1', 'p4-l2', 'p4-l3'])">🔊 Read All</button>
+                </div>
+            </div>
+            <div class="controls"><div class="btn-row"><button class="nav-btn prev-btn" onclick="prevPage(4)">⬅ Back</button><button class="nav-btn next-btn" onclick="nextPage(4)">Next ➔</button></div></div>
+        </div>
+
+        <!-- PAGE 5: STILL IN PJS -->
+        <div class="story-page" id="p5">
+            <span class="page-indicator">Page 5</span>
+            <div class="image-container"><img src="images-Sakura/still-in-PJs.jpg" alt="Pajamas"></div>
+            <div class="question-balloon">Oh! What is Sakura wearing?</div>
+            <button class="check-btn" onclick="revealStory(5)">Let's Check! (みてみよう！)</button>
+            <div class="story-content-box" id="story-box-5">
+                <div class="story-text-box">
+                    <span class="story-line" id="p5-l1">Wow! Sakura is still in her pink PJs!</span>
+                    <span class="story-line" id="p5-l2">"Get dressed, Sakura!" says Mom.</span>
+                    <span class="story-line" id="p5-l3">"My favorite T-shirt!" says Sakura.</span>
+                </div>
+                <div style="display:flex; justify-content:center; margin-top:10px;">
+                    <button class="speaker-btn" onclick="speakLines(['p5-l1', 'p5-l2', 'p5-l3'])">🔊 Read All</button>
+                </div>
+            </div>
+            <div class="controls"><div class="btn-row"><button class="nav-btn prev-btn" onclick="prevPage(5)">⬅ Back</button><button class="nav-btn next-btn" onclick="nextPage(5)">Next ➔</button></div></div>
+        </div>
+
+        <!-- PAGE 6: MESSY HAIR -->
+        <div class="story-page" id="p6">
+            <span class="page-indicator">Page 6</span>
+            <div class="image-container"><img src="images-Sakura/messy-hair.jpg" alt="Messy hair"></div>
+            <div class="question-balloon">She changed her clothes! But wait... look at her hair!</div>
+            <button class="check-btn" onclick="revealStory(6)">Let's Check! (みてみよう！)</button>
+            <div class="story-content-box" id="story-box-6">
+                <div class="story-text-box">
+                    <span class="story-line" id="p6-l1">She is wearing her yellow T-shirt and blue skirt.</span>
+                    <span class="story-line" id="p6-l2">But look at her hair! It looks so messy!</span>
+                    <span class="story-line" id="p6-l3">Mom is holding a pink bow. "Let's fix your hair!" says Mom.</span>
+                </div>
+                <div style="display:flex; justify-content:center; margin-top:10px;">
+                    <button class="speaker-btn" onclick="speakLines(['p6-l1', 'p6-l2', 'p6-l3'])">🔊 Read All</button>
+                </div>
+            </div>
+            <div class="controls"><div class="btn-row"><button class="nav-btn prev-btn" onclick="prevPage(6)">⬅ Back</button><button class="nav-btn finish-btn" onclick="showEnding()">Finish ➔</button></div></div>
+        </div>
+    </div>
+
+    <div id="ending-page">
+        <h2>Super Good Job! 🌟</h2>
+        <p>You found all the funny things with Sakura!<br>Now she is perfectly ready for school!</p>
+        <div style="font-size: 5rem; margin-bottom: 30px;">🎒🏫👧</div>
+        <button class="nav-btn next-btn" onclick="location.reload()">Start Again</button>
+    </div>
+
+    <!-- 🖨️ 印刷専用エリア（Get dressedに対応） -->
+    <div class="print-only-content">
+        <h1>Sakura's Silly Morning サクラちゃんのヘンテコな朝</h1>
+        <p style="margin-bottom: 25px;">[Print Out Text Edition for Reference]</p>
+        
+        <div class="print-page-block">
+            <span class="print-page-num">Page 1: Overview</span>
+            <span class="print-eng">Sakura is going out. Look at Mom. She looks very surprised! "Wait, Sakura! You're not ready!" says Mom.</span>
+            <span class="print-jp">サクラちゃんが出かけようとしています。お母さんを見て。彼女はとってもびっくりした顔をしています！「待ってサクラ！まだ支度ができてないわよ！」とお母さんは言っています。</span>
+        </div>
+
+        <div class="print-page-block">
+            <span class="print-page-num">Page 2: Backpack</span>
+            <span class="print-eng">Oh no! Her red backpack is empty! Her pencils, eraser, notebooks, and books are on the desk. "My homework is still here!" says Sakura.</span>
+            <span class="print-jp">大変！彼女の赤いランドセルは空っぽです！彼女のえんぴつ、消しゴム、ノート、そして本が机の上にあります。「宿題がまだここにある！」とサクラちゃんは言っています。</span>
+        </div>
+
+        <div class="print-page-block">
+            <span class="print-page-num">Page 3: Bathroom</span>
+            <span class="print-eng">Sakura is in the bathroom now. She is brushing her teeth. But wait! Did she eat her breakfast?</span>
+            <span class="print-jp">サクラちゃんは今、洗面所にいます。彼女は歯を磨いています。でも待って！彼女は朝ごはんを食べたのかな？</span>
+        </div>
+
+        <div class="print-page-block">
+            <span class="print-page-num">Page 4: Breakfast</span>
+            <span class="print-eng">Look! Yummy salmon, rice, miso soup, and green tea are on the table. "Eat your breakfast, Sakura!" says Mom. "I love salmon! Itadakimasu!" says Sakura.</span>
+            <span class="print-jp">見て！おいしいシャケ、ご飯、お味噌汁、そして緑茶がテーブルの上にあります。「朝ごはんを食べなさい、サクラ！」と言っています。「シャケ大好き！いただきます！」とサクラちゃんは言っています。</span>
+        </div>
+
+        <div class="print-page-block">
+            <span class="print-page-num">Page 5: Clothes</span>
+            <span class="print-eng">Wow! Sakura is still in her pink PJs! "Get dressed, Sakura!" says Mom. "My favorite T-shirt!" says Sakura.</span>
+            <span class="print-jp">わあ！サクラちゃんはまだピンクのパジャマ姿です！「お洋服を着なさい（支度しなさい）、サクラ！」と言っています。「私のお気に入りのTシャツ！」とサクラちゃんは言っています。</span>
+        </div>
+
+        <div class="print-page-block">
+            <span class="print-page-num">Page 6: Hair</span>
+            <span class="print-eng">She is wearing her yellow T-shirt and blue skirt. But look at her hair! It looks so messy! Mom is holding a pink bow. "Let's fix your hair!" says Mom.</span>
+            <span class="print-jp">彼女は黄色のTシャツと青いスカートを着ています。でも髪の毛を見て！ボサボサです！お母さんはピンクのリボンの飾りを持っています。「髪の毛をきれいに整えようね！」と言っています。</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    let preferredVoice = null;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira"))) ||
+            voices.find(v => v.lang.startsWith("en"));
+    }
+    
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+    }
+
+    function speakLines(lineIds) {
+        const textParts = lineIds.map(id => {
+            const el = document.getElementById(id);
+            return el ? el.innerText : "";
+        });
+        const combinedText = textParts.join(" "); 
+        const synth = window.speechSynthesis;
+        if (!synth) return;
+        synth.cancel();
+        
+        const uttr = new SpeechSynthesisUtterance(combinedText);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        uttr.rate = 0.72;  
+        uttr.pitch = 1.15; 
+        synth.speak(uttr);
+    }
+
+    function revealStory(pageNum) {
+        const box = document.getElementById('story-box-' + pageNum);
+        if (box) {
+            box.classList.add('show');
+            box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    function nextPage(current) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current + 1)).classList.add('active');
+    }
+
+    function prevPage(current) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current - 1)).classList.add('active');
+    }
+
+    function showEnding() {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('story-container').style.display = 'none';
+        document.getElementById('ending-page').style.display = 'block';
+    }
+</script>
+</body>
+</html>
