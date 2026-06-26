@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>I Love Pink! - Fun English Activity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #ff78ae;
+            --accent-purple: #9b59b6;
+            --bg-color: #fff0f5;
+            --text-color: #2c3e50;
+            --marker-h: rgba(255, 255, 0, 0.6); 
+            --marker-v: rgba(255, 105, 180, 0.5);
+            --cell-size: 65px;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            touch-action: pan-y;
+        }
+
+        #game-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            padding: 30px;
+            width: 100%;
+            max-width: 950px;
+            text-align: center;
+            border: 6px dashed var(--primary-pink);
+            position: relative;
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #ff4081;
+            font-size: 2.8rem;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .instruction {
+            color: #7f8c8d;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 0 0 15px 0;
+        }
+
+        .page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        .speaker-btn {
+            background: var(--accent-purple);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #763e8f;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.1s;
+        }
+        .speaker-btn:hover { background: #af69cc; }
+        .speaker-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        .nav-btn {
+            background-color: var(--primary-pink);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #c74d7e;
+            margin-top: 20px;
+            transition: 0.1s;
+        }
+        .nav-btn:hover { background: #ff5c9d; }
+        .nav-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        /* Page 1: Lyric */
+        .lyric-box {
+            font-size: 1.8rem;
+            line-height: 1.6;
+            margin: 20px 0;
+            background: #fff5f8;
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #ffb6c1;
+        }
+
+        /* Page 2: Drag & Drop Sorting */
+        .item-pool {
+            display: flex;
+            gap: 15px;
+            flex-wrap: nowrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            min-height: 120px;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            overflow-x: auto;
+        }
+        .drag-item {
+            font-size: 3.5rem;
+            padding: 10px;
+            background: white;
+            border: 3px solid #eee;
+            border-radius: 15px;
+            cursor: grab;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.08);
+            display: inline-block;
+            transition: transform 0.2s;
+            touch-action: none;
+            flex-shrink: 0;
+        }
+        .basket-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            width: 100%;
+        }
+        .basket {
+            border: 4px dashed #ccc;
+            border-radius: 20px;
+            width: 46%;
+            padding: 20px;
+            min-height: 160px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-content: flex-start;
+            justify-content: center;
+            gap: 10px;
+        }
+        .basket.pink-basket { border-color: var(--primary-pink); background: #fff0f5; }
+        .basket.other-basket { border-color: #7f8c8d; background: #f5f5f5; }
+        .basket-title { font-weight: bold; font-size: 1.3rem; margin-bottom: 10px; width: 100%; text-align: center; }
+        .feedback-toast { font-size: 1.5rem; font-weight: bold; color: #e67e22; height: 35px; margin-top: 5px; }
+
+        /* Page 3: Word Search */
+        .wordsearch-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin: 15px 0;
+            width: 100%;
+        }
+        #board { 
+            display: grid; 
+            grid-template-columns: repeat(6, var(--cell-size)); 
+            gap: 0; 
+            background-color: #fff; 
+            touch-action: none; 
+            user-select: none; 
+            isolation: isolate; 
+            border: 3px solid #ebd3dd;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .cell { 
+            width: var(--cell-size); 
+            height: var(--cell-size); 
+            line-height: var(--cell-size); 
+            font-size: 38px; 
+            text-align: center; 
+            font-weight: 700; 
+            cursor: pointer; 
+            position: relative; 
+            pointer-events: auto; 
+        }
+        .cell::after, .cell::before { content: ""; position: absolute; z-index: -1; mix-blend-mode: multiply; display: none; }
+        .cell.h::after { display: block; left: 0; right: 0; top: 15%; bottom: 15%; background-color: var(--marker-h); }
+        .cell.v::before { display: block; left: 15%; right: 15%; top: 0; bottom: 0; background-color: var(--marker-v); }
+        .cell.h-start::after { border-top-left-radius: 30px; border-bottom-left-radius: 30px; }
+        .cell.h-end::after { border-top-right-radius: 30px; border-bottom-right-radius: 30px; }
+        .cell.v-start::before { border-top-left-radius: 30px; border-top-right-radius: 30px; }
+        .cell.v-end::before { border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        
+        .word-list-side { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            justify-content: center;
+            align-items: flex-start;
+            min-width: 160px;
+        }
+        .word-tag { 
+            padding: 10px 22px; 
+            background: #eee; 
+            border-radius: 20px; 
+            font-weight: bold; 
+            font-size: 1.4rem; 
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 3px 0 #ccc;
+        }
+        .word-tag.found { background: #2ecc71; color: white; text-decoration: line-through; box-shadow: 0 3px 0 #27ae60; }
+
+        /* Page 4: Survey */
+        .survey-box { font-size: 2.2rem; margin: 25px 0; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .btn-group { display: flex; gap: 30px; }
+        .ans-btn { padding: 18px 50px; font-size: 1.8rem; border: none; border-radius: 50px; cursor: pointer; color: white; font-weight: bold; box-shadow: 0 6px 0 rgba(0,0,0,0.1); }
+        .btn-yes { background-color: #2ecc71; }
+        .btn-no { background-color: #e74c3c; }
+
+        /* Page 5: Report Card */
+        .input-group { margin: 20px 0; }
+        .input-name { font-family: inherit; font-size: 1.5rem; padding: 10px 20px; border-radius: 25px; border: 3px solid var(--primary-pink); text-align: center; width: 250px; }
+        .gender-select { font-family: inherit; font-size: 1.3rem; padding: 10px; border-radius: 15px; border: 2px solid #ccc; margin-left: 15px; }
+        .report-display { background: #fdf6f0; border: 3px double #e67e22; padding: 25px; border-radius: 15px; font-size: 1.8rem; line-height: 1.6; margin-top: 20px; min-height: 120px; width: 85%; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <h1>🌸 I Love Pink! 🌸</h1>
+
+    <div id="game-container">
+        
+        <div id="page1" class="page active">
+            <h2>Read the lyrics! <button class="speaker-btn" onclick="speakLyric()">🔊 Listen</button></h2>
+            <div class="lyric-box">
+                I like pink!<br>
+                Pink is my favorite color!<br>
+                Do you like pink? Yes, I do!<br>
+                I blink and wink when I see pink! 😉✨
+            </div>
+            <button class="nav-btn" onclick="nextPage(2)">Next ➔</button>
+        </div>
+
+        <div id="page2" class="page">
+            <h2>Find Pink Items! <button class="speaker-btn" onclick="speak('Find pink items and put them in the pink basket!')">🔊 Listen</button></h2>
+            <div class="instruction">Drag the items into the correct baskets!</div>
+            <div class="item-pool" id="item-pool"></div>
+            <div class="feedback-toast" id="basket-toast"></div>
+            <div class="basket-container">
+                <div class="basket pink-basket" ondragover="allowDrop(event)" ondrop="dropItem(event, 'pink')">
+                    <div class="basket-title">💗 Pink Items</div>
+                </div>
+                <div class="basket other-basket" ondragover="allowDrop(event)" ondrop="dropItem(event, 'other')">
+                    <div class="basket-title">🍏 Other Colors</div>
+                </div>
+            </div>
+            <button class="nav-btn" onclick="nextPage(3)" style="visibility: hidden;" id="next2">Next ➔</button>
+        </div>
+
+        <div id="page3" class="page">
+            <h2>Word Search! <button class="speaker-btn" onclick="speak('Find five words in the grid!')">🔊 Listen</button></h2>
+            <div class="instruction">Find and highlight the words!</div>
+            <div class="wordsearch-layout">
+                <div id="board"></div>
+                <div class="word-list-side" id="ws-list"></div>
+            </div>
+            <button class="nav-btn" onclick="nextPage(4)" style="visibility: hidden;" id="next3">Next ➔</button>
+        </div>
+
+        <div id="page4" class="page">
+            <h2>Answer the questions!</h2>
+            <div class="survey-box">
+                <span id="survey-item-emoji" style="font-size: 5rem;">🦩</span>
+                <span id="survey-question">Do you like flamingos?</span>
+                <button class="speaker-btn" id="survey-speaker" onclick="speakQuestion()">🔊 Listen</button>
+            </div>
+            <div class="btn-group">
+                <button class="ans-btn btn-yes" onclick="answerSurvey(true)">Yes, I do! 👍</button>
+                <button class="ans-btn btn-no" onclick="answerSurvey(false)">No, I don't. 👎</button>
+            </div>
+        </div>
+
+        <div id="page5" class="page">
+            <h2>Your Profile Activity Card 📝</h2>
+            <div class="instruction">Type your name and choose She, He, or I!</div>
+            <div class="input-group">
+                <input type="text" id="student-name" class="input-name" placeholder="Enter Name Here" oninput="generateReport()">
+                <select id="pronoun-select" class="gender-select" onchange="generateReport()">
+                    <option value="she">She</option>
+                    <option value="he">He</option>
+                    <option value="I">I</option>
+                </select>
+            </div>
+            <div class="report-display" id="report-text">Please enter your name above.</div>
+            <button class="speaker-btn" style="margin-top: 10px;" onclick="speakReport()">🔊 Listen to Profile</button>
+            <button class="nav-btn" onclick="nextPage(1)" style="background-color: #2ecc71; box-shadow: 0 4px 0 #27ae60;">Play Again 🔄</button>
+        </div>
+
+    </div>
+
+    <script>
+        // 音声読み上げ設定
+        let preferredVoice = null;
+        function loadVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length === 0) return;
+            preferredVoice = 
+                voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+                voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+                voices.find(v => v.lang.startsWith("en-US")) ||
+                voices.find(v => v.lang.startsWith("en"));
+        }
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices();
+        }
+
+        function speak(text, callback) {
+            const synth = window.speechSynthesis;
+            if (!synth) return;
+            synth.cancel();
+            const uttr = new SpeechSynthesisUtterance(text);
+            if (preferredVoice) uttr.voice = preferredVoice;
+            getSpeechRateAndPitch(uttr);
+            if (callback) {
+                uttr.onend = callback;
+            }
+            synth.speak(uttr);
+        }
+
+        function getSpeechRateAndPitch(uttr) {
+            uttr.rate = 0.72;
+            uttr.pitch = 1.15;
+        }
+
+        function speakLyric() {
+            speak("I like pink! Pink is my favorite color! Do you like pink? Yes, I do! I blink and wink when I see pink!");
+        }
+
+        // ページ切り替え
+        function nextPage(pageNumber) {
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page' + pageNumber).classList.add('active');
+            if(pageNumber === 2) setupPage2();
+            if(pageNumber === 3) setupPage3();
+            if(pageNumber === 4) setupPage4();
+        }
+
+        // --- Page 2: Drag & Drop ---
+        const dragItemsData = [
+            { id: 'p1', emoji: '💝', text: 'A pink heart', isPink: true },
+            { id: 'p2', emoji: '🎀', text: 'A pink bow', isPink: true },
+            { id: 'p3', emoji: '🩰', text: 'Pink shoes', isPink: true },
+            { id: 'p4', emoji: '🦩', text: 'A pink flamingo', isPink: true },
+            { id: 'o1', emoji: '🎩', text: 'A black hat', isPink: false },
+            { id: 'o2', emoji: '🍏', text: 'A green apple', isPink: false },
+            { id: 'o3', emoji: '🍌', text: 'A yellow banana', isPink: false },
+            { id: 'o4', emoji: '🚙', text: 'A blue car', isPink: false },
+            { id: 'o5', emoji: '🍇', text: 'Purple grapes', isPink: false }
+        ];
+        let sortedCount = 0;
+
+        function setupPage2() {
+            sortedCount = 0;
+            document.getElementById('next2').style.visibility = 'hidden';
+            document.getElementById('basket-toast').textContent = '';
+            
+            document.querySelectorAll('.basket').forEach(b => {
+                const title = b.querySelector('.basket-title');
+                b.innerHTML = '';
+                b.appendChild(title);
+            });
+
+            const pool = document.getElementById('item-pool');
+            pool.innerHTML = '';
+            
+            const shuffled = [...dragItemsData].sort(() => Math.random() - 0.5);
+            shuffled.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'drag-item';
+                el.id = item.id;
+                el.textContent = item.emoji;
+                el.draggable = true;
+                
+                el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', item.id); });
+                el.addEventListener('touchstart', onTouchStart, {passive: false});
+                el.addEventListener('touchmove', onTouchMove, {passive: false});
+                el.addEventListener('touchend', onTouchEnd, {passive: false});
+                
+                pool.appendChild(el);
+            });
+        }
+
+        let activeTouchElement = null;
+        function onTouchStart(e) {
+            activeTouchElement = e.currentTarget;
+            activeTouchElement.style.position = 'fixed';
+            moveAt(e.touches[0].clientX, e.touches[0].clientY);
+        }
+        function onTouchMove(e) {
+            if (!activeTouchElement) return;
+            e.preventDefault();
+            moveAt(e.touches[0].clientX, e.touches[0].clientY);
+        }
+        function moveAt(clientX, clientY) {
+            activeTouchElement.style.left = clientX - 35 + 'px';
+            activeTouchElement.style.top = clientY - 35 + 'px';
+            activeTouchElement.style.zIndex = 1000;
+        }
+        function onTouchEnd(e) {
+            if (!activeTouchElement) return;
+            const touch = e.changedTouches[0];
+            activeTouchElement.style.position = '';
+            activeTouchElement.style.zIndex = '';
+            
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            let basket = target ? target.closest('.basket') : null;
+            
+            if (basket) {
+                const bType = basket.classList.contains('pink-basket') ? 'pink' : 'other';
+                executeDrop(activeTouchElement.id, bType, basket);
+            } else {
+                setupPage2();
+            }
+            activeTouchElement = null;
+        }
+
+        function allowDrop(e) { e.preventDefault(); }
+        function dropItem(e, basketType) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            let basket = e.currentTarget;
+            executeDrop(id, basketType, basket);
+        }
+
+        function executeDrop(id, basketType, basketElement) {
+            const item = dragItemsData.find(i => i.id === id);
+            if (!item) return;
+
+            const isCorrectBasket = (basketType === 'pink' && item.isPink) || (basketType === 'other' && !item.isPink);
+            const toast = document.getElementById('basket-toast');
+
+            if (isCorrectBasket) {
+                toast.style.color = '#2ecc71';
+                toast.textContent = `Good job! ✨ ${item.text}!`;
+                speak(item.text);
+                
+                const itemEl = document.getElementById(id);
+                if(itemEl) {
+                    itemEl.draggable = false;
+                    itemEl.style.cursor = 'default';
+                    itemEl.style.transform = 'scale(0.8)';
+                    basketElement.appendChild(itemEl);
+                }
+                
+                sortedCount++;
+                if (sortedCount === dragItemsData.length) {
+                    document.getElementById('next2').style.visibility = 'visible';
+                }
+            } else {
+                toast.style.color = '#e74c3c';
+                toast.textContent = `Oops! That's ${item.text}!`;
+                speak(`Oops! That's ${item.text}!`);
+                if (activeTouchElement) setupPage2();
+            }
+        }
+
+        // --- Page 3: Word Search (ぴったり賞ロジック＆はみ出し救済仕様) ---
+        const wordsData = ["pink", "wink", "blink", "color", "like"];
+        const boardSize = 6;
+        let grid = [];
+        let wordLocations = {}; // 各単語の【正確な開始マスと終了マス】を記録するオブジェクト
+        let foundWords = new Set();
+        let isDragging = false, dragType = null, startR = null, startC = null;
+
+        function setupPage3() {
+            const board = document.getElementById("board");
+            const listEl = document.getElementById("ws-list");
+            board.innerHTML = ""; listEl.innerHTML = ""; wordLocations = {}; foundWords.clear();
+            document.getElementById('next3').style.visibility = 'hidden';
+
+            grid = Array.from({length: boardSize}, () => Array(boardSize).fill(''));
+            let sortedWords = [...wordsData].sort((a,b) => b.length - a.length);
+            
+            sortedWords.forEach(word => {
+                let placed = false; let attempts = 0;
+                while (!placed && attempts < 300) {
+                    attempts++;
+                    let isH = Math.random() < 0.5;
+                    let r = Math.floor(Math.random() * (isH ? boardSize : (boardSize - word.length + 1)));
+                    let c = Math.floor(Math.random() * (isH ? (boardSize - word.length + 1) : boardSize));
+                    
+                    let canPlace = true;
+                    for (let i = 0; i < word.length; i++) {
+                        let currR = isH ? r : r + i; let currC = isH ? c + i : c;
+                        if (grid[currR][currC] !== '' && grid[currR][currC] !== word[i]) { canPlace = false; break; }
+                    }
+                    
+                    if (canPlace) {
+                        for (let i = 0; i < word.length; i++) {
+                            let currR = isH ? r : r + i; let currC = isH ? c + i : c;
+                            grid[currR][currC] = word[i];
+                        }
+                        // 正解マスの開始座標と終了座標を完全に記録
+                        wordLocations[word] = {
+                            startR: r,
+                            startC: c,
+                            endR: isH ? r : r + word.length - 1,
+                            endC: isH ? c + word.length - 1 : c,
+                            type: isH ? 'h' : 'v'
+                        };
+                        placed = true;
+                    }
+                }
+            });
+
+            for(let i=0; i<boardSize; i++){
+                for(let j=0; j<boardSize; j++){
+                    if(grid[i][j] === '') grid[i][j] = String.fromCharCode(97 + Math.floor(Math.random()*26));
+                }
+            }
+
+            grid.forEach((row, r) => row.forEach((ch, c) => {
+                const cell = document.createElement("div");
+                cell.className = "cell"; cell.textContent = ch;
+                cell.dataset.r = r; cell.dataset.c = c;
+                cell.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(r, c); });
+                cell.addEventListener('mouseenter', () => { if(isDragging) onMove(r, c); });
+                board.appendChild(cell);
+            }));
+
+            board.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (target && target.classList.contains('cell')) {
+                    onStart(parseInt(target.dataset.r), parseInt(target.dataset.c));
+                }
+                e.preventDefault();
+            }, {passive: false});
+
+            board.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (target && target.classList.contains('cell')) {
+                    onMove(parseInt(target.dataset.r), parseInt(target.dataset.c));
+                }
+                e.preventDefault();
+            }, {passive: false});
+
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchend', onEnd);
+
+            wordsData.forEach(w => {
+                const tag = document.createElement('span');
+                tag.className = 'word-tag';
+                tag.id = 'tag-' + w;
+                tag.textContent = w;
+                listEl.appendChild(tag);
+            });
+        }
+
+        // ドラッグ開始時に一時的なハイライトクラスを一旦リセット可能にする
+        function onStart(r, c) {
+            isDragging = true; startR = r; startC = c; dragType = null;
+            clearTemporaryMarkers();
+        }
+
+        function onMove(r, c) {
+            if (!isDragging) return;
+            if (dragType === null) {
+                if (r !== startR) { dragType = 'v'; }
+                else if (c !== startC) { dragType = 'h'; }
+                else { return; }
+            }
+            
+            clearTemporaryMarkers();
+
+            // 現在ドラッグ中の範囲だけをリアルタイムに塗る処理
+            let minR = Math.min(startR, r), maxR = Math.max(startR, r);
+            let minC = Math.min(startC, c), maxC = Math.max(startC, c);
+
+            if (dragType === 'h') {
+                for(let currC = minC; currC <= maxC; currC++) {
+                    const cell = document.querySelector(`.cell[data-r="${startR}"][data-c="${currC}"]`);
+                    if(cell) cell.classList.add('h');
+                }
+            } else if (dragType === 'v') {
+                for(let currR = minR; currR <= maxR; currR++) {
+                    const cell = document.querySelector(`.cell[data-r="${currR}"][data-c="${startC}"]`);
+                    if(cell) cell.classList.add('v');
+                }
+            }
+            updateEdgeStyles();
+        }
+
+        // 指を離した時：【ぴったり賞】判定
+        function onEnd() { 
+            if (!isDragging) return;
+            isDragging = false;
+
+            // 各マスをチェックし、現在引かれたラインの「実際の開始・終了座標」を取得
+            let currentCells = document.querySelectorAll('.cell.h, .cell.v');
+            if(currentCells.length === 0) return;
+
+            let finalMinR = 99, finalMaxR = -1, finalMinC = 99, finalMaxC = -1;
+            currentCells.forEach(cell => {
+                let r = parseInt(cell.dataset.r);
+                let c = parseInt(cell.dataset.c);
+                // すでに確定(found)しているマスは今回の判定から除外
+                if(cell.classList.contains('locked')) return; 
+                
+                if(r < finalMinR) finalMinR = r;
+                if(r > finalMaxR) finalMaxR = r;
+                if(c < finalMinC) finalMinC = c;
+                if(c > finalMaxC) finalMaxC = c;
+            });
+
+            let matchedWord = null;
+            wordsData.forEach(word => {
+                if (foundWords.has(word)) return;
+                let loc = wordLocations[word];
+                if (!loc) return;
+
+                // ユーザーの引いたラインが、単語の登録座標（正解）と【最初から最後までぴったり一致】しているか判定
+                let matchNormal = (finalMinR === loc.startR && finalMaxR === loc.endR && finalMinC === loc.startC && finalMaxC === loc.endC);
+                // 逆向きドラッグ（後ろから前に向かって引いた場合）のぴったり判定
+                let matchReverse = (finalMinR === loc.startR && finalMaxR === loc.endR && finalMinC === loc.startC && finalMaxC === loc.endC);
+
+                if ((matchNormal || matchReverse) && dragType === loc.type) {
+                    matchedWord = word;
+                }
+            });
+
+            if (matchedWord) {
+                // ぴったり一致：正解として確定（固定ロック）
+                currentCells.forEach(cell => {
+                    if (cell.classList.contains(dragType)) {
+                        cell.classList.add('locked'); // 固定用クラスを付与
+                    }
+                });
+                markWordFound(matchedWord);
+            } else {
+                // はみ出ていた、または間違っていた場合：未確定のマーカーをすべて消して「引き直し」
+                clearTemporaryMarkers();
+            }
+            updateEdgeStyles();
+        }
+
+        // 確定していないマーカーをリセットする関数
+        function clearTemporaryMarkers() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                if(!cell.classList.contains('locked')) {
+                    cell.classList.remove('h', 'v', 'h-start', 'h-end', 'v-start', 'v-end');
+                }
+            });
+        }
+
+        function updateEdgeStyles() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('h-start', 'h-end', 'v-start', 'v-end');
+                const r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
+                if (cell.classList.contains('h')) {
+                    const prev = document.querySelector(`.cell[data-r="${r}"][data-c="${c-1}"]`);
+                    const next = document.querySelector(`.cell[data-r="${r}"][data-c="${c+1}"]`);
+                    if (!prev || !prev.classList.contains('h')) cell.classList.add('h-start');
+                    if (!next || !next.classList.contains('h')) cell.classList.add('h-end');
+                }
+                if (cell.classList.contains('v')) {
+                    const prev = document.querySelector(`.cell[data-r="${r-1}"][data-c="${c}"]`);
+                    const next = document.querySelector(`.cell[data-r="${r+1}"][data-c="${c}"]`);
+                    if (!prev || !prev.classList.contains('v')) cell.classList.add('v-start');
+                    if (!next || !next.classList.contains('v')) cell.classList.add('v-end');
+                }
+            });
+        }
+
+        function markWordFound(word) {
+            foundWords.add(word);
+            const tag = document.getElementById('tag-' + word);
+            if(tag) tag.classList.add('found');
+            speak(word);
+
+            if (foundWords.size === wordsData.length) {
+                document.getElementById('next3').style.visibility = 'visible';
+            }
+        }
+
+        // --- Page 4: Survey ---
+        const surveyItems = [
+            { emoji: '🦩', text: 'flamingos' },
+            { emoji: '🍎', text: 'apples' },
+            { emoji: '🍌', text: 'bananas' },
+            { emoji: '🐸', text: 'frogs' }
+        ];
+        let currentSurveyIdx = 0;
+        let userLikes = [];
+        let userDislikes = [];
+
+        function setupPage4() {
+            currentSurveyIdx = 0;
+            userLikes = [];
+            userDislikes = [];
+            showSurveyQuestion();
+        }
+
+        function showSurveyQuestion() {
+            const item = surveyItems[currentSurveyIdx];
+            document.getElementById('survey-item-emoji').textContent = item.emoji;
+            document.getElementById('survey-question').textContent = `Do you like ${item.text}?`;
+        }
+
+        function speakQuestion() {
+            const item = surveyItems[currentSurveyIdx];
+            speak(`Do you like ${item.text}?`);
+        }
+
+        function answerSurvey(likesIt) {
+            const item = surveyItems[currentSurveyIdx];
+            if (likesIt) {
+                userLikes.push(item.text);
+            } else {
+                userDislikes.push(item.text);
+            }
+
+            const textToSpeak = likesIt ? "Yes, I do!" : "No, I don't.";
+            speak(textToSpeak, () => {
+                currentSurveyIdx++;
+                if (currentSurveyIdx < surveyItems.length) {
+                    showSurveyQuestion();
+                } else {
+                    nextPage(5);
+                }
+            });
+        }
+
+        // --- Page 5: Profile Report ---
+        function formatListWithAnd(array, isDislikes) {
+            if (array.length === 0) return "";
+            if (array.length === 1) return array[0];
+            if (array.length === 2) return array.join(isDislikes ? " or " : " and ");
+            
+            const lastSeparator = isDislikes ? ", or " : ", and ";
+            return array.slice(0, -1).join(", ") + lastSeparator + array[array.length - 1];
+        }
+
+        function generateReport() {
+            const nameInput = document.getElementById('student-name').value.trim();
+            const pronoun = document.getElementById('pronoun-select').value;
+            const reportEl = document.getElementById('report-text');
+
+            if (!nameInput) {
+                reportEl.textContent = "Please enter your name above.";
+                return;
+            }
+
+            let likesWord = (pronoun === 'I') ? 'like' : 'likes';
+            let dislikesWord = (pronoun === 'I') ? "don't like" : "doesn't like";
+            let subject = (pronoun === 'I') ? 'I' : nameInput;
+
+            let text = "";
+            if (userLikes.length > 0) {
+                const likesList = formatListWithAnd(userLikes, false);
+                text += `${subject} ${likesWord} ${likesList}. `;
+            }
+            if (userDislikes.length > 0) {
+                const dislikesList = formatListWithAnd(userDislikes, true);
+                if (pronoun === 'I') {
+                    text += `But I ${dislikesWord} ${dislikesList}.`;
+                } else {
+                    text += `But ${pronoun} ${dislikesWord} ${dislikesList}.`;
+                }
+            }
+
+            reportEl.textContent = text;
+        }
+
+        function speakReport() {
+            const reportText = document.getElementById('report-text').textContent;
+            speak(reportText);
+        }
+    </script>
+</body>
+</html>
