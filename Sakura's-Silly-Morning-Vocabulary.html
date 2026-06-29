@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sakura's Silly Morning - Vocabulary</title>
+    <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* ストーリーブックに合わせた楽しい色 */
+            --primary-orange: #ff7f50; /* アクセントのオレンジ */
+            --primary-pink: #ff78ae;   /* アクセントのピンク */
+            --bg-color: #fffde7;       /* 優しい黄色 */
+            --text-color: #333;
+            --card-bg: white;
+            --tab-bg: #fff3e0;         /* 薄いオレンジ */
+            --correct-green: #2ecc71;
+            --wrong-red: #ef4444;
+        }
+
+        body {
+            font-family: 'M PLUS Rounded 1c', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+        }
+
+        .header {
+            background-color: var(--primary-orange);
+            color: white;
+            text-align: center;
+            padding: 25px 10px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 26px;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            margin: 8px 0 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            background-color: var(--tab-bg);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            border-bottom: 2px solid #ffd54f;
+        }
+
+        .tab-button {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            flex: 1;
+            max-width: 160px;
+            padding: 15px 5px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: bold;
+            color: #e65100;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            border-bottom: 4px solid transparent;
+        }
+
+        .tab-button.active {
+            color: var(--primary-orange);
+            border-bottom: 4px solid var(--primary-orange);
+            background-color: var(--card-bg);
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 20px auto;
+            padding: 0 15px 80px 15px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .quiz-card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 3px solid #ffe0b2;
+        }
+
+        .quiz-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .q-number {
+            background-color: #ffe0b2;
+            color: #e65100;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .word-display {
+            font-size: 26px;
+            font-weight: bold;
+            color: #0f172a;
+            flex-grow: 1;
+        }
+
+        .audio-btn {
+            background-color: var(--primary-pink);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 0 #d64d8a;
+            transition: all 0.1s;
+        }
+
+        .audio-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #d64d8a;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .option-btn {
+            font-family: 'M PLUS Rounded 1c', sans-serif;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 16px 10px;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 85px;
+            box-shadow: 0 3px 0 #e2e8f0;
+        }
+
+        .option-btn:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #e2e8f0;
+        }
+
+        .option-btn .emoji-pic {
+            font-size: 60px;
+            line-height: 1;
+            margin: 5px 0;
+        }
+
+        .option-btn .color-pic {
+            width: 85px;
+            height: 55px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+        }
+
+        .quiz-card.correct .option-btn.selected-correct {
+            background-color: #dcfce7;
+            border-color: var(--correct-green);
+            color: #15803d;
+            box-shadow: 0 3px 0 #22c55e;
+        }
+
+        .quiz-card.wrong .option-btn.selected-wrong {
+            background-color: #fee2e2;
+            border-color: var(--wrong-red);
+            color: #b91c1c;
+            box-shadow: 0 3px 0 #ef4444;
+        }
+
+        .quiz-card.correct .option-btn:not(.selected-correct),
+        .quiz-card.wrong .option-btn:not(.selected-wrong) {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .feedback {
+            margin-top: 15px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 16px;
+            display: none;
+        }
+
+        .quiz-card.correct .feedback.correct-text {
+            display: block;
+            color: var(--correct-green);
+        }
+
+        .quiz-card.wrong .feedback.wrong-text {
+            display: block;
+            color: var(--wrong-red);
+        }
+
+        .score-board {
+            background: linear-gradient(135deg, #fff9c4, #fff176);
+            border: 3px dashed var(--primary-orange);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .score-title {
+            font-size: 20px;
+            color: #e65100;
+            margin: 0 0 10px 0;
+            font-weight: bold;
+        }
+
+        .score-number {
+            font-size: 32px;
+            color: var(--primary-orange);
+            font-weight: bold;
+            margin: 0;
+        }
+
+        @media (max-width: 480px) {
+            .option-btn {
+                font-size: 14px;
+                padding: 12px 5px;
+            }
+            .option-btn .emoji-pic {
+                font-size: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Sakura's Silly Morning - Vocabulary</h1>
+    <p>Choose the correct one!</p>
+</div>
+
+<div class="tabs">
+    <button class="tab-button active" onclick="switchTab('verbs')">うごき<br>(Verbs)</button>
+    <button class="tab-button" onclick="switchTab('nouns')">もの・なまえ<br>(Nouns)</button>
+    <button class="tab-button" onclick="switchTab('others')">ようす・そのた<br>(Others)</button>
+</div>
+
+<div class="container">
+    <div id="verbs" class="tab-content active"></div>
+    <div id="nouns" class="tab-content"></div>
+    <div id="others" class="tab-content"></div>
+</div>
+
+<script>
+    const verbsData = [
+        { word: "go out", options: ["そとにでる", "なかにいる", "ねる"], correct: 0 },
+        { word: "look at 〜", options: ["きく", "〜をみる", "はなす"], correct: 1 },
+        { word: "wait", options: ["まつ", "はしる", "とぶ"], correct: 0 },
+        { word: "say", options: ["たべる", "よむ", "いう"], correct: 2 },
+        { word: "brush teeth", options: ["かおをあらう", "はをみがく", "かみをとかす"], correct: 1 },
+        { word: "eat", options: ["たべる", "のむ", "つくる"], correct: 0 },
+        { word: "love", options: ["おこる", "だいすき", "なみだ"], correct: 1 },
+        { word: "wear", options: ["きる・みにつける", "ぬぐ", "あらう"], correct: 0 },
+        { word: "get dressed", options: ["ふくをきがえる", "おふろにはいる", "かたづける"], correct: 0 },
+        { word: "hold", options: ["なげる", "もつ・にぎる", "おく"], correct: 1 },
+        { word: "fix", options: ["こわす", "つかう", "なおす"], correct: 2 }
+    ];
+
+    const nounsData = [
+        { word: "backpack", options: [{emoji:"🎒"}, {emoji:"💼"}, {emoji:"🏠"}], correct: 0, isPic: true },
+        { word: "pencil", options: [{emoji:"✂️"}, {emoji:"✏️"}, {emoji:"📏"}], correct: 1, isPic: true },
+        { word: "eraser", options: ["けしゴム", "えんぴつ", "ノート"], correct: 0 },
+        { word: "notebook", options: [{emoji:"🖥️"}, {emoji:"📓"}, {emoji:"✏️"}], correct: 1, isPic: true },
+        { word: "book", options: [{emoji:"📖"}, {emoji:"✉️"}, {emoji:"📄"}], correct: 0, isPic: true },
+        { word: "desk", options: ["つくえ", "いす", "まど"], correct: 0 },
+        { word: "homework", options: ["しゅくだい", "がっこう", "テスト"], correct: 0 },
+        { word: "bathroom", options: ["バスルーム", "キッチン", "ベッドルーム"], correct: 0 },
+        { word: "breakfast", options: ["あさごはん", "ひるごはん", "ばんごはん"], correct: 0 },
+        { word: "salmon", options: ["サケ", "にく", "たまご"], correct: 0 },
+        { word: "rice", options: [{emoji:"🍞"}, {emoji:"🍚"}, {emoji:"🍜"}], correct: 1, isPic: true },
+        { word: "miso soup", options: ["みそしる", "ミルク", "ジュース"], correct: 0 },
+        { word: "green tea", options: [{emoji:"☕"}, {emoji:"🍵"}, {emoji:"🥤"}], correct: 1, isPic: true },
+        { word: "table", options: ["テーブル", "ソファー", "ベッド"], correct: 0 },
+        { word: "PJs", options: ["パジャマ", "くつ", "ぼうし"], correct: 0 },
+        { word: "T-shirt", options: [{emoji:"👕"}, {emoji:"👖"}, {emoji:"🧢"}], correct: 0, isPic: true },
+        { word: "skirt", options: ["スカート", "ズボン", "くつした"], correct: 0 },
+        { word: "hair", options: [{emoji:"💇"}, {emoji:"👀"}, {emoji:"👂"}], correct: 0, isPic: true },
+        { word: "bow", options: [{emoji:"🕶️"}, {emoji:"🎀"}, {emoji:"🧢"}], correct: 1, isPic: true, speechWord: "a bow" }
+    ];
+
+    const othersData = [
+        { word: "surprised", options: ["びっくりした", "ねむい", "うれしい"], correct: 0 },
+        { word: "ready", options: ["おわり", "じゅんびOK", "はじめ"], correct: 1 },
+        { word: "empty", options: ["からっぽ", "いっぱい", "おもい"], correct: 0 },
+        { word: "full", options: ["すこし", "からっぽ", "いっぱい"], correct: 2 },
+        { word: "favorite", options: ["お気に入りの", "きらいな", "あたらしい"], correct: 0 },
+        { word: "here", options: ["あそこ", "どこ", "ここ"], correct: 2 },
+        { word: "Where?", options: ["どこ？", "なに？", "だれ？"], correct: 0 },
+        { word: "What?", options: ["どこ？", "なに？", "いつ？"], correct: 1 },
+        { word: "now", options: ["いま", "あとでおいで", "むかし"], correct: 0 },
+        { word: "yellow", options: [{color:"#facc15"}, {color:"#3b82f6"}, {color:"#ec4899"}], correct: 0, isColor: true },
+        { word: "blue", options: [{color:"#facc15"}, {color:"#3b82f6"}, {color:"#ec4899"}], correct: 1, isColor: true },
+        { word: "messy", options: ["きれいな", "ちらかった", "しずかな"], correct: 1 },
+        { word: "pink", options: [{color:"#facc15"}, {color:"#3b82f6"}, {color:"#ec4899"}], correct: 2, isColor: true }
+    ];
+
+    const scores = { verbs: 0, nouns: 0, others: 0 };
+    const answeredCount = { verbs: 0, nouns: 0, others: 0 };
+    let preferredVoice = null;
+
+    function loadVoices() {
+        if (!window.speechSynthesis) return;
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira"))) ||
+            voices.find(v => v.lang.startsWith("en"));
+    }
+    
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+    }
+
+    function speak(word, speechWord) {
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const textToSpeak = speechWord ? speechWord : word.replace('〜', '');
+            const uttr = new SpeechSynthesisUtterance(textToSpeak);
+            uttr.lang = 'en-US';
+            uttr.rate = 0.72;  
+            uttr.pitch = 1.15; 
+            if (preferredVoice) uttr.voice = preferredVoice;
+            window.speechSynthesis.speak(uttr);
+        }
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function checkAnswer(cardId, optionIdx, correctIdx, btnElement, tabId, totalQuestions) {
+        const card = document.getElementById(cardId);
+        if (card.classList.contains('correct') || card.classList.contains('wrong')) return;
+
+        answeredCount[tabId]++;
+
+        if (optionIdx === correctIdx) {
+            card.classList.add('correct');
+            btnElement.classList.add('selected-correct');
+            scores[tabId]++;
+        } else {
+            card.classList.add('wrong');
+            btnElement.classList.add('selected-wrong');
+            
+            setTimeout(() => {
+                const buttons = card.querySelectorAll('.option-btn');
+                buttons[correctIdx].style.borderColor = "var(--correct-green)";
+                buttons[correctIdx].style.backgroundColor = "#dcfce7";
+                buttons[correctIdx].style.boxShadow = "0 3px 0 #22c55e";
+            }, 250);
+        }
+
+        if (answeredCount[tabId] === totalQuestions) {
+            setTimeout(() => {
+                const scoreBoard = document.getElementById(`score-${tabId}`);
+                scoreBoard.innerHTML = `
+                    <p class="score-title">🌟 Your Score 🌟</p>
+                    <p class="score-number">${scores[tabId]} / ${totalQuestions}</p>
+                `;
+                scoreBoard.style.display = 'block';
+                scoreBoard.scrollIntoView({ behavior: 'smooth' });
+            }, 600);
+        }
+    }
+
+    function renderQuiz(data, targetId) {
+        const container = document.getElementById(targetId);
+        const totalQuestions = data.length;
+
+        // 問題の順番は固定したまま、各問題の「選択肢」だけをシャッフルする
+        data.forEach((q, idx) => {
+            const cardId = `${targetId}-q-${idx}`;
+            
+            // 正解のオブジェクトをあらかじめ記憶しておく
+            const correctObj = q.options[q.correct];
+
+            // 選択肢の配列をコピーしてシャッフル
+            let shuffledOptions = [...q.options];
+            for (let i = shuffledOptions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledOptions[i], shuffledOptions[j]] = [shuffledOptions[j], shuffledOptions[i]];
+            }
+
+            // シャッフル後の配列から、新しい正解のインデックス（番号）を探して更新する
+            const newCorrectIdx = shuffledOptions.indexOf(correctObj);
+
+            let optionsHTML = '';
+            shuffledOptions.forEach((opt, optIdx) => {
+                let content = '';
+                if (q.isPic) {
+                    content = `<span class="emoji-pic">${opt.emoji}</span>`;
+                } else if (q.isColor) {
+                    content = `<div class="color-pic" style="background-color: ${opt.color}"></div>`;
+                } else {
+                    content = opt;
+                }
+                // 新しいインデックス（newCorrectIdx）を紐付ける
+                optionsHTML += `<button class="option-btn" onclick="checkAnswer('${cardId}', ${optIdx}, ${newCorrectIdx}, this, '${targetId}', ${totalQuestions})">${content}</button>`;
+            });
+
+            const card = document.createElement('div');
+            card.className = 'quiz-card';
+            card.id = cardId;
+            
+            const speechParam = q.speechWord ? `, '${q.speechWord}'` : '';
+
+            card.innerHTML = `
+                <div class="quiz-header">
+                    <div class="q-number">${idx + 1}</div>
+                    <div class="word-display">${q.word}</div>
+                    <button class="audio-btn" onclick="speak('${q.word}'${speechParam})">🔊</button>
+                </div>
+                <div class="options-container">
+                    ${optionsHTML}
+                </div>
+                <div class="feedback correct-text">⭕️ Great job! You did it! 🎉</div>
+                <div class="feedback wrong-text">❌ Nice try! Let's listen again! ❤️</div>
+            `;
+            container.appendChild(card);
+        });
+
+        const scoreDiv = document.createElement('div');
+        scoreDiv.id = `score-${targetId}`;
+        scoreDiv.className = 'score-board';
+        scoreDiv.style.display = 'none';
+        container.appendChild(scoreDiv);
+    }
+
+    renderQuiz(verbsData, 'verbs');
+    renderQuiz(nounsData, 'nouns');
+    renderQuiz(othersData, 'others');
+</script>
+
+</body>
+</html>
