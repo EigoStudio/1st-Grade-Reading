@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Spelling Game 🚀</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Hiragino Kaku Gothic ProN', sans-serif;
+            /* 🎨 【修正！】背景をパープル（紫色）のグラデーションに変更 */
+            background: linear-gradient(135deg, #2d004b, #6a1b9a, #9c27b0);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #fff;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        h1 {
+            color: #fff;
+            text-shadow: 0 0 10px #e1bee7, 0 0 20px #e1bee7;
+            font-size: 3rem;
+            margin: 0 0 25px 0;
+        }
+
+        #main-layout {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            max-width: 1100px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+
+        /* Scoreboard */
+        #scoreboard {
+            flex: 0 0 250px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            border: 3px solid #fff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .team-box {
+            padding: 20px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            transition: all 0.3s ease;
+        }
+        .team-box:last-child { border-bottom: none; }
+
+        .active-team {
+            background: rgba(225, 190, 231, 0.25); /* 薄いパープルの光 */
+            box-shadow: inset 0 0 20px #e1bee7;
+            transform: scale(1.05);
+        }
+
+        .team-name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin: 0;
+        }
+        .team-score {
+            font-size: 3.5rem;
+            font-weight: bold;
+            margin: 10px 0 0 0;
+            color: #ffeb3b; /* スコアはイエローのまま強調 */
+        }
+
+        /* Game Container */
+        #game-container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            min-width: 600px;
+        }
+
+        #turn-announcement {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffeb3b;
+            margin-bottom: 25px;
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        #visual-status-area {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-bottom: 20px;
+        }
+
+        /* Audio Button */
+        .audio-btn {
+            /* 🎨 【修正！】ボタンを背景に合わせたマゼンタ・ピンクパープルに変更 */
+            background: linear-gradient(135deg, #e91e63, #ba1a52);
+            color: white;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            width: 95px;
+            height: 95px;
+            font-size: 3rem;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.4);
+            transition: transform 0.1s, background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .audio-btn:hover { transform: scale(1.05); }
+        .audio-btn:active { transform: scale(0.95); }
+
+        #rocket-area {
+            background: rgba(0,0,0,0.4); /* パープル背景用に少し暗く */
+            padding: 15px 25px;
+            border-radius: 15px;
+        }
+        #rocket-visual { font-size: 4rem; margin: 0; }
+        #rocket-status {
+            font-size: 1.3rem;
+            color: #ffeb3b;
+            margin-top: 5px;
+        }
+
+        /* Word Display */
+        #word-display {
+            font-size: min(3rem, 5.5vw); 
+            letter-spacing: 0.1em; 
+            white-space: nowrap; 
+            margin: 35px 0;
+            font-weight: bold;
+            text-shadow: 0 0 10px #e1bee7; /* 光をパープル系に */
+            min-height: 70px;
+            display: block;
+        }
+
+        #guess-section { margin: 20px 0; }
+        #letter-input {
+            font-size: 2.5rem;
+            width: 70px;
+            padding: 8px;
+            text-align: center;
+            border-radius: 10px;
+            border: 3px solid #e1bee7; /* 枠もパープル系に */
+            background-color: #fff;
+            color: #333;
+            font-weight: bold;
+        }
+        #submit-btn, #next-btn, #restart-btn {
+            font-family: inherit;
+            font-size: 1.5rem;
+            padding: 12px 30px;
+            border: 2px solid #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-left: 15px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        #submit-btn { background-color: #e1bee7; color: #2d004b; } /* パープル系のOKボタン */
+        #next-btn { background-color: #4caf50; color: white; display: none; margin: 20px auto 0 auto; }
+        #restart-btn { background-color: #ffeb3b; color: #2d004b; display: block; margin: 25px auto 0 auto; }
+
+        #message { font-size: 1.5rem; font-weight: bold; margin: 20px 0; min-height: 40px; }
+        
+        /* 🎨 【修正！】Great job! 等の成功メッセージをグリーン（緑色）に変更 */
+        .success { color: #00e676; text-shadow: 1px 1px 2px #000; }
+        /* 🎨 【修正！】 Wrong! 等の失敗メッセージを鮮やかなレッドに変更 */
+        .danger { color: #ff3d00; text-shadow: 1px 1px 2px #000; }
+        
+        #used-letters { font-size: 1.3rem; color: #e0e0e0; margin-top: 15px; font-weight: bold; }
+
+        /* 結果発表の大文字スタイル */
+        .winner-announcement {
+            font-size: 2.5rem;
+            color: #ffeb3b;
+            font-weight: bold;
+            text-shadow: 0 0 15px #ffeb3b, 2px 2px 4px #000;
+            margin: 20px 0;
+            animation: pulse 1s infinite alternate;
+        }
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.03); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 Spelling Game 🚀</h1>
+
+    <div id="main-layout">
+        
+        <div id="scoreboard">
+            <div id="teamA-box" class="team-box active-team">
+                <p class="team-name">🔴 TEAM A</p>
+                <p id="scoreA" class="team-score">0</p>
+            </div>
+            <div id="teamB-box" class="team-box">
+                <p class="team-name">🔵 TEAM B</p>
+                <p id="scoreB" class="team-score">0</p>
+            </div>
+        </div>
+
+        <div id="game-container">
+            <div id="turn-announcement">🔴 TEAM A's Turn!</div>
+
+            <div id="visual-status-area">
+                <div>
+                    <button class="audio-btn" onclick="speakWord()" title="Listen">🔊</button>
+                </div>
+                
+                <div id="rocket-area">
+                    <div id="rocket-visual">🚀🔥✨</div>
+                    <div id="rocket-status">Rocket Fuel: 6 / 6</div>
+                </div>
+            </div>
+
+            <div id="word-display">_ _ _ _</div>
+
+            <div id="guess-section">
+                <input type="text" id="letter-input" maxlength="1" autofocus autocomplete="off">
+                <button id="submit-btn" onclick="handleGuess()">OK</button>
+            </div>
+
+            <div id="message"></div>
+            <div id="used-letters">Used Letters: None</div>
+            
+            <button id="next-btn" onclick="nextWord()">Next Word ➡️</button>
+        </div>
+
+    </div>
+
+    <script>
+        const wordBank = ["look", "cherry", "blossoms", "beautiful", "picnic", "tree", "bring", "party"];
+
+        let currentIndex = 0;
+        let currentWord = "";
+        let guessedLetters = [];
+        let maxWrong = 6;
+        let wrongGuesses = 0;
+
+        let scores = { A: 0, B: 0 };
+        let currentTeam = 'A'; 
+
+        const rocketStages = ["🚀🔥✨", "🚀🔥", "🚀", "🛸", "⚗️", "⚓", "💥"];
+        let preferredVoice = null;
+
+        function loadVoices() {
+            if (!window.speechSynthesis) return;
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length === 0) return;
+            preferredVoice = 
+                voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+                voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+                voices.find(v => v.lang.startsWith("en-US") && (v.name.includes("Female") || v.name.includes("Zira"))) ||
+                voices.find(v => v.lang.startsWith("en"));
+        }
+        
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices();
+        }
+
+        function initGame() {
+            currentWord = wordBank[currentIndex].toLowerCase();
+            guessedLetters = [];
+            wrongGuesses = 0;
+            
+            document.getElementById("message").innerHTML = "";
+            document.getElementById("message").className = "";
+            document.getElementById("next-btn").style.display = "none";
+            document.getElementById("guess-section").style.display = "block";
+            document.getElementById("letter-input").value = "";
+            document.getElementById("letter-input").disabled = false;
+            document.getElementById("submit-btn").disabled = false;
+            
+            updateDisplay();
+            updateTurnUI();
+        }
+
+        function updateDisplay() {
+            let displayString = "";
+            for (let char of currentWord) {
+                if (guessedLetters.includes(char)) {
+                    displayString += char.toLowerCase() + " ";
+                } else {
+                    displayString += "_ ";
+                }
+            }
+            document.getElementById("word-display").innerHTML = displayString.trim();
+
+            let fuelLeft = maxWrong - wrongGuesses;
+            document.getElementById("rocket-status").innerText = `Rocket Fuel: ${fuelLeft} / ${maxWrong}`;
+            document.getElementById("rocket-visual").innerText = rocketStages[wrongGuesses];
+
+            if(guessedLetters.length === 0) {
+                document.getElementById("used-letters").innerText = "Used Letters: None";
+            } else {
+                document.getElementById("used-letters").innerText = "Used Letters: " + guessedLetters.join(", ").toLowerCase();
+            }
+
+            document.getElementById("scoreA").innerText = scores.A;
+            document.getElementById("scoreB").innerText = scores.B;
+        }
+
+        function updateTurnUI() {
+            const turnText = currentTeam === 'A' ? "🔴 TEAM A's Turn!" : "🔵 TEAM B's Turn!";
+            document.getElementById("turn-announcement").innerText = turnText;
+
+            if (currentTeam === 'A') {
+                document.getElementById("teamA-box").classList.add("active-team");
+                document.getElementById("teamB-box").classList.remove("active-team");
+            } else {
+                document.getElementById("teamB-box").classList.add("active-team");
+                document.getElementById("teamA-box").classList.remove("active-team");
+            }
+        }
+
+        function speakWord() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                let uttr = new SpeechSynthesisUtterance(currentWord);
+                uttr.lang = 'en-US'; 
+                uttr.rate = 0.72;  
+                uttr.pitch = 1.15; 
+                if (preferredVoice) uttr.voice = preferredVoice;
+                window.speechSynthesis.speak(uttr);
+            }
+        }
+
+        function handleGuess() {
+            let inputElement = document.getElementById("letter-input");
+            let guess = inputElement.value.toLowerCase().trim(); 
+            inputElement.value = ""; 
+            inputElement.focus();
+
+            if (!guess || guess.length !== 1 || !/[a-z]/.test(guess)) {
+                alert("Please enter 1 alphabet letter!");
+                return;
+            }
+
+            if (guessedLetters.includes(guess)) {
+                document.getElementById("message").innerHTML = "Already used! 🤔";
+                document.getElementById("message").className = "danger";
+                return;
+            }
+
+            guessedLetters.push(guess);
+
+            let matchCount = 0;
+            for (let char of currentWord) {
+                if (char === guess) {
+                    matchCount++;
+                }
+            }
+
+            if (matchCount > 0) {
+                scores[currentTeam] += matchCount;
+                document.getElementById("message").innerHTML = `Correct! TEAM ${currentTeam} gets ${matchCount} point(s)! 🎉`;
+                document.getElementById("message").className = "success";
+            } else {
+                wrongGuesses++;
+                document.getElementById("message").innerHTML = `Wrong! Next Team's Turn! 🧑‍🚀`;
+                document.getElementById("message").className = "danger";
+                currentTeam = (currentTeam === 'A') ? 'B' : 'A';
+            }
+
+            updateDisplay();
+            updateTurnUI();
+            checkGameStatus();
+        }
+
+        function checkGameStatus() {
+            let won = true;
+            for (let char of currentWord) {
+                if (!guessedLetters.includes(char)) {
+                    won = false;
+                    break;
+                }
+            }
+
+            if (won) {
+                document.getElementById("message").innerHTML = `🌟 Wonderful! Clear! 🚀✨`;
+                document.getElementById("message").className = "success";
+                document.getElementById("rocket-visual").innerText = "🚀💨⚡⭐";
+                endRound();
+            } else if (wrongGuesses >= maxWrong) {
+                document.getElementById("message").innerHTML = `Game Over! The word was: <strong>${currentWord.toLowerCase()}</strong>`;
+                document.getElementById("message").className = "danger";
+                endRound();
+            }
+        }
+
+        function endRound() {
+            document.getElementById("letter-input").disabled = true;
+            document.getElementById("submit-btn").disabled = true;
+            document.getElementById("guess-section").style.display = "none";
+            
+            if (currentIndex >= wordBank.length - 1) {
+                showFinalResult();
+            } else {
+                document.getElementById("next-btn").style.display = "block";
+            }
+        }
+
+        function showFinalResult() {
+            document.getElementById("turn-announcement").innerText = "🏆 FINAL RESULT 🏆";
+            document.getElementById("teamA-box").classList.remove("active-team");
+            document.getElementById("teamB-box").classList.remove("active-team");
+
+            let resultHTML = "";
+            if (scores.A > scores.B) {
+                resultHTML = `<div class="winner-announcement">🎉 🔴 TEAM A WINS! 🎉</div>`;
+            } else if (scores.B > scores.A) {
+                resultHTML = `<div class="winner-announcement">🎉 🔵 TEAM B WINS! 🎉</div>`;
+            } else {
+                resultHTML = `<div class="winner-announcement">🤝 IT's A TIE! (DRAW) 🤝</div>`;
+            }
+
+            document.getElementById("message").innerHTML = resultHTML;
+            document.getElementById("message").className = "";
+            
+            const restartBtn = document.createElement("button");
+            restartBtn.id = "restart-btn";
+            restartBtn.innerText = "Play Again 🔄";
+            restartBtn.onclick = resetWholeGame;
+            document.getElementById("message").appendChild(restartBtn);
+        }
+
+        function resetWholeGame() {
+            currentIndex = 0;
+            scores.A = 0;
+            scores.B = 0;
+            currentTeam = 'A';
+            initGame();
+        }
+
+        function nextWord() {
+            currentIndex++; 
+            initGame();
+        }
+
+        document.getElementById("letter-input").addEventListener("keyup", function(event) {
+            if (event.key === "Enter") {
+                handleGuess();
+            }
+        });
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
