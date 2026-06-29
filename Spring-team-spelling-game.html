@@ -7,9 +7,8 @@
     <style>
         body {
             font-family: 'Comic Sans MS', 'Chalkboard SE', 'Hiragino Kaku Gothic ProN', sans-serif;
-            background: linear-gradient(135deg, #2d004b, #6a1b9a, #9c27b0);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            /* 🎨 【修正】アニメーションを完全に廃止し、目に優しい落ち着いたディープパープルに固定 */
+            background-color: #311b92; 
             color: #fff;
             text-align: center;
             padding: 20px;
@@ -19,10 +18,11 @@
             -webkit-user-select: none;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        h1 {
+            color: #fff;
+            text-shadow: 0 0 10px #e1bee7, 0 0 20px #e1bee7;
+            font-size: 3rem;
+            margin: 0 0 25px 0;
         }
 
         /* 👑 画面最上部のステータスバー */
@@ -50,28 +50,23 @@
             background: rgba(255,255,255,0.05);
             min-width: 140px;
             border: 2px solid transparent;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
         
-        /* 🔴 TEAM A がアクティブな時のド派手な演出 */
+        /* 🔴 TEAM A がアクティブな時（点滅なし・色固定） */
         .active-team-A {
-            background: rgba(255, 64, 129, 0.4) !important;
+            background: rgba(255, 64, 129, 0.5) !important;
             border-color: #ff4081 !important;
-            box-shadow: 0 0 30px #ff4081;
-            animation: intensePulse 0.8s infinite alternate;
+            box-shadow: 0 0 20px #ff4081;
+            transform: scale(1.05);
         }
 
-        /* 🔵 TEAM B がアクティブな時のド派手な演出 */
+        /* 🔵 TEAM B がアクティブな時（点滅なし・色固定） */
         .active-team-B {
-            background: rgba(0, 230, 255, 0.4) !important;
+            background: rgba(0, 230, 255, 0.5) !important;
             border-color: #00e6ff !important;
-            box-shadow: 0 0 30px #00e6ff;
-            animation: intensePulse 0.8s infinite alternate;
-        }
-
-        @keyframes intensePulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.08); }
+            box-shadow: 0 0 20px #00e6ff;
+            transform: scale(1.05);
         }
 
         .score-val {
@@ -146,16 +141,16 @@
             min-height: 70px;
         }
 
-        /* ⌨️ 【修正！】13列×2段（2行）に完全固定したスクリーンキーボード */
+        /* ⌨️ 13列×2段に固定されたキーボード */
         #onscreen-keyboard {
             display: grid;
-            grid-template-columns: repeat(13, 1fr); /* 13列に固定することで確実に2行になります */
+            grid-template-columns: repeat(13, 1fr); 
             gap: 10px;
             margin: 25px auto;
             background: rgba(0,0,0,0.3);
             padding: 20px;
             border-radius: 20px;
-            max-width: 950px; /* 横幅を広げて2段に収まるように調整 */
+            max-width: 950px; 
         }
 
         .key-btn {
@@ -209,7 +204,6 @@
             font-weight: bold;
             text-shadow: 0 0 15px #ffeb3b, 2px 2px 4px #000;
             margin: 20px 0;
-            animation: pulse 1s infinite alternate;
         }
     </style>
 </head>
@@ -351,6 +345,7 @@
             }
         }
 
+        // 音声呼び出し処理
         function speakWord() {
             if ('speechSynthesis' in window) {
                 window.speechSynthesis.cancel(); 
