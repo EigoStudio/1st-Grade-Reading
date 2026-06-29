@@ -108,7 +108,7 @@
         }
         .speaker-btn:active { transform: translateY(2px); box-shadow: none; }
 
-        /* イラストを見るボタン */
+        /* Pictureを見るボタン */
         .picture-btn {
             background: var(--accent-orange); color: white; border: none; padding: 8px 14px;
             border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;
@@ -116,7 +116,7 @@
         }
         .picture-btn:active { transform: translateY(2px); box-shadow: none; }
 
-        /* イラストポップアップ（画像対応） */
+        /* Pictureポップアップ（画像対応） */
         .illustration-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255, 255, 255, 0.98); border-radius: 18px;
@@ -402,7 +402,7 @@
                 audioBtnHtml += `<button class="speaker-btn" onclick="speakLines(${sIdx}, [${part.join(',')}])">🔊 Part ${pIdx + 1}</button>`;
             });
 
-            audioBtnHtml += `<button class="picture-btn" onclick="toggleOverlay(${sIdx}, true)">🎨 イラスト</button>`;
+            audioBtnHtml += `<button class="picture-btn" onclick="toggleOverlay(${sIdx}, true)">🎨 Picture</button>`;
 
             let quizHtml = '';
             data.questions.forEach((q, qIdx) => {
