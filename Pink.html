@@ -206,6 +206,7 @@
             border: 3px solid #ebd3dd;
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            position: relative;
         }
         .cell { 
             width: var(--cell-size); 
@@ -218,7 +219,15 @@
             position: relative; 
             pointer-events: auto; 
         }
-        .cell::after, .cell::before { content: ""; position: absolute; z-index: -1; mix-blend-mode: multiply; display: none; }
+        /* マーカー（線）のタッチイベントを完全に無視させ、下の文字をいつでも感知できるように修正 */
+        .cell::after, .cell::before { 
+            content: ""; 
+            position: absolute; 
+            z-index: -1; 
+            mix-blend-mode: multiply; 
+            display: none; 
+            pointer-events: none; 
+        }
         .cell.h::after { display: block; left: 0; right: 0; top: 15%; bottom: 15%; background-color: var(--marker-h); }
         .cell.v::before { display: block; left: 15%; right: 15%; top: 0; bottom: 0; background-color: var(--marker-v); }
         .cell.h-start::after { border-top-left-radius: 30px; border-bottom-left-radius: 30px; }
@@ -503,13 +512,14 @@
             }
         }
 
-        // --- Page 3: Word Search (ぴったり賞ロジック＆はみ出し救済仕様) ---
+        // --- Page 3: Word Search (ホワイトボード・交差バグ完全改修仕様) ---
         const wordsData = ["pink", "wink", "blink", "color", "like"];
         const boardSize = 6;
         let grid = [];
-        let wordLocations = {}; // 各単語の【正確な開始マスと終了マス】を記録するオブジェクト
+        let wordLocations = {}; 
         let foundWords = new Set();
         let isDragging = false, dragType = null, startR = null, startC = null;
+        let cellRects = []; // 各マスの絶対座標を保持する配列
 
         function setupPage3() {
             const board = document.getElementById("board");
@@ -539,7 +549,6 @@
                             let currR = isH ? r : r + i; let currC = isH ? c + i : c;
                             grid[currR][currC] = word[i];
                         }
-                        // 正解マスの開始座標と終了座標を完全に記録
                         wordLocations[word] = {
                             startR: r,
                             startC: c,
@@ -562,31 +571,37 @@
                 const cell = document.createElement("div");
                 cell.className = "cell"; cell.textContent = ch;
                 cell.dataset.r = r; cell.dataset.c = c;
+                
                 cell.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(r, c); });
                 cell.addEventListener('mouseenter', () => { if(isDragging) onMove(r, c); });
                 board.appendChild(cell);
             }));
 
+            // ホワイトボード等のタッチ判定用に各マスの絶対座標情報を取得・更新する関数
+            setTimeout(updateCellRects, 300);
+
             board.addEventListener('touchstart', (e) => {
+                updateCellRects(); // 直前のスクロールやリサイズに備えて座標を再同期
                 const touch = e.touches[0];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (target && target.classList.contains('cell')) {
-                    onStart(parseInt(target.dataset.r), parseInt(target.dataset.c));
+                const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
+                if (targetCell) {
+                    onStart(parseInt(targetCell.dataset.r), parseInt(targetCell.dataset.c));
                 }
                 e.preventDefault();
             }, {passive: false});
 
             board.addEventListener('touchmove', (e) => {
                 const touch = e.touches[0];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (target && target.classList.contains('cell')) {
-                    onMove(parseInt(target.dataset.r), parseInt(target.dataset.c));
+                const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
+                if (targetCell) {
+                    onMove(parseInt(targetCell.dataset.r), parseInt(targetCell.dataset.c));
                 }
                 e.preventDefault();
             }, {passive: false});
 
             window.addEventListener('mouseup', onEnd);
             window.addEventListener('touchend', onEnd);
+            window.addEventListener('resize', updateCellRects);
 
             wordsData.forEach(w => {
                 const tag = document.createElement('span');
@@ -597,7 +612,32 @@
             });
         }
 
-        // ドラッグ開始時に一時的なハイライトクラスを一旦リセット可能にする
+        // 全マスの現在の絶対位置（四角形エリア）を配列にキャッシュする関数
+        function updateCellRects() {
+            cellRects = [];
+            document.querySelectorAll('#board .cell').forEach(cell => {
+                const rect = cell.getBoundingClientRect();
+                cellRects.push({
+                    element: cell,
+                    left: rect.left,
+                    right: rect.right,
+                    top: rect.top,
+                    bottom: rect.bottom
+                });
+            });
+        }
+
+        // 指定されたX, Y座標（タッチ位置）がどのマスに入っているかを四角形判定で返す関数
+        function getCellFromCoords(x, y) {
+            for (let i = 0; i < cellRects.length; i++) {
+                const c = cellRects[i];
+                if (x >= c.left && x <= c.right && y >= c.top && y <= c.bottom) {
+                    return c.element;
+                }
+            }
+            return null;
+        }
+
         function onStart(r, c) {
             isDragging = true; startR = r; startC = c; dragType = null;
             clearTemporaryMarkers();
@@ -613,7 +653,6 @@
             
             clearTemporaryMarkers();
 
-            // 現在ドラッグ中の範囲だけをリアルタイムに塗る処理
             let minR = Math.min(startR, r), maxR = Math.max(startR, r);
             let minC = Math.min(startC, c), maxC = Math.max(startC, c);
 
@@ -631,12 +670,10 @@
             updateEdgeStyles();
         }
 
-        // 指を離した時：【ぴったり賞】判定
         function onEnd() { 
             if (!isDragging) return;
             isDragging = false;
 
-            // 各マスをチェックし、現在引かれたラインの「実際の開始・終了座標」を取得
             let currentCells = document.querySelectorAll('.cell.h, .cell.v');
             if(currentCells.length === 0) return;
 
@@ -644,7 +681,6 @@
             currentCells.forEach(cell => {
                 let r = parseInt(cell.dataset.r);
                 let c = parseInt(cell.dataset.c);
-                // すでに確定(found)しているマスは今回の判定から除外
                 if(cell.classList.contains('locked')) return; 
                 
                 if(r < finalMinR) finalMinR = r;
@@ -659,32 +695,26 @@
                 let loc = wordLocations[word];
                 if (!loc) return;
 
-                // ユーザーの引いたラインが、単語の登録座標（正解）と【最初から最後までぴったり一致】しているか判定
                 let matchNormal = (finalMinR === loc.startR && finalMaxR === loc.endR && finalMinC === loc.startC && finalMaxC === loc.endC);
-                // 逆向きドラッグ（後ろから前に向かって引いた場合）のぴったり判定
-                let matchReverse = (finalMinR === loc.startR && finalMaxR === loc.endR && finalMinC === loc.startC && finalMaxC === loc.endC);
 
-                if ((matchNormal || matchReverse) && dragType === loc.type) {
+                if (matchNormal && dragType === loc.type) {
                     matchedWord = word;
                 }
             });
 
             if (matchedWord) {
-                // ぴったり一致：正解として確定（固定ロック）
                 currentCells.forEach(cell => {
                     if (cell.classList.contains(dragType)) {
-                        cell.classList.add('locked'); // 固定用クラスを付与
+                        cell.classList.add('locked'); 
                     }
                 });
                 markWordFound(matchedWord);
             } else {
-                // はみ出ていた、または間違っていた場合：未確定のマーカーをすべて消して「引き直し」
                 clearTemporaryMarkers();
             }
             updateEdgeStyles();
         }
 
-        // 確定していないマーカーをリセットする関数
         function clearTemporaryMarkers() {
             document.querySelectorAll('.cell').forEach(cell => {
                 if(!cell.classList.contains('locked')) {
