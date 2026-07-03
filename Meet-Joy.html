@@ -133,7 +133,7 @@
         .nav-btn:hover { background: #ffa726; }
         .nav-btn:active { transform: translateY(2px); box-shadow: none; }
 
-        /* --- Page 1: Joy Meaning (絵文字のみ) --- */
+        /* --- Page 1: Joy Meaning --- */
         .quiz-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -186,7 +186,6 @@
             touch-action: none;
         }
         
-        /* nanobanana様の画像を綺麗に表示するブロック */
         .image-block {
             width: 80px;
             height: 80px;
@@ -205,7 +204,7 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            pointer-events: none; /* ドラッグの邪魔をしないように設定 */
+            pointer-events: none;
         }
         
         .grid-numbers {
@@ -238,6 +237,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            pointer-events: none; /* スマホのタッチ判定をすり抜けさせて外枠でキャッチする技 */
         }
 
         .snack-container {
@@ -370,13 +370,13 @@
             <div class="instruction">Drag the word blocks to the correct numbers!</div>
             <div class="drag-pool" id="num-pool"></div>
             <div class="grid-numbers">
-                <div class="drop-box"><span class="num-label">1</span><div class="target-slot" data-num="one" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
-                <div class="drop-box"><span class="num-label">2</span><div class="target-slot" data-num="two" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
-                <div class="drop-box"><span class="num-label">3</span><div class="target-slot" data-num="three" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
-                <div class="drop-box"><span class="num-label">4</span><div class="target-slot" data-num="four" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
-                <div class="drop-box"><span class="num-label">5</span><div class="target-slot" data-num="five" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
-                <div class="drop-box"><span class="num-label">6</span><div class="target-slot" data-num="six" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
-                <div class="drop-box"><span class="num-label">7</span><div class="target-slot" data-num="seven" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
+                <div class="drop-box" data-num="one"><span class="num-label">1</span><div class="target-slot"></div></div>
+                <div class="drop-box" data-num="two"><span class="num-label">2</span><div class="target-slot"></div></div>
+                <div class="drop-box" data-num="three"><span class="num-label">3</span><div class="target-slot"></div></div>
+                <div class="drop-box" data-num="four"><span class="num-label">4</span><div class="target-slot"></div></div>
+                <div class="drop-box" data-num="five"><span class="num-label">5</span><div class="target-slot"></div></div>
+                <div class="drop-box" data-num="six"><span class="num-label">6</span><div class="target-slot"></div></div>
+                <div class="drop-box" data-num="seven"><span class="num-label">7</span><div class="target-slot"></div></div>
             </div>
             <button class="nav-btn" onclick="nextPage(3)" style="visibility: hidden;" id="next2">Next ➔</button>
         </div>
@@ -424,7 +424,7 @@
     </div>
 
     <script>
-        // --- 音声読み上げ設定（前作完全継承バージョン） ---
+        // --- 音声読み上げ設定 ---
         let preferredVoice = null;
         function loadVoices() {
             const voices = window.speechSynthesis.getVoices();
@@ -446,13 +446,12 @@
             synth.cancel();
             const uttr = new SpeechSynthesisUtterance(text);
             if (preferredVoice) uttr.voice = preferredVoice;
-            uttr.rate = 0.72;  // 聞き取りやすい前作と同じ速度
-            uttr.pitch = 1.15; // 可愛い高めのトーン
+            uttr.rate = 0.72;
+            uttr.pitch = 1.15;
             if (callback) uttr.onend = callback;
             synth.speak(uttr);
         }
 
-        // ページ切り替え機能
         function nextPage(pageNumber) {
             if (window.speechSynthesis) window.speechSynthesis.cancel();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -461,12 +460,11 @@
             if(pageNumber === 2) setupPage2();
             if(pageNumber === 3) setupPage3();
             if(pageNumber === 4) setupPage4();
-            if(pageNumber === 5) document.getElementById('joy-ant').style.transform = "scale(1)";
         }
 
         function allowDrop(e) { e.preventDefault(); }
 
-        // --- Touch Drag Support Helper ---
+        // --- Touch Drag Helper ---
         let activeTouchElement = null;
         function onTouchStart(e) {
             activeTouchElement = e.currentTarget;
@@ -479,9 +477,8 @@
             moveAt(e.touches[0].clientX, e.touches[0].clientY);
         }
         function moveAt(clientX, clientY) {
-            // タッチ中心の調整用
             activeTouchElement.style.left = clientX - 40 + 'px';
-            activeTouchElement.style.top = clientY - 40 + 'px';
+            activeTouchElement.style.top = clientY - 30 + 'px';
             activeTouchElement.style.zIndex = 1000;
         }
         function setupTouchEvents(element) {
@@ -489,18 +486,18 @@
             element.addEventListener('touchmove', onTouchMove, {passive: false});
         }
 
-        // --- Page 1: Quiz Logic ---
+        // --- Page 1 ---
         function checkAnswerPage1(element, isCorrect) {
             if(isCorrect) {
                 element.classList.add('correct');
-                speak("Joy means happiness!"); // 読み上げは正しい名詞で行う
+                speak("Joy means happiness!");
                 document.getElementById('next1').style.visibility = 'visible';
             } else {
                 element.classList.add('wrong');
             }
         }
 
-        // --- Page 2: Numbers Logic ---
+        // --- Page 2: Numbers Logic (スマホ判定を強化) ---
         const numWords = ['one', 'two', 'three', 'four', 'five', 'six', 'seven'];
         let matchedNumbersCount = 0;
 
@@ -510,7 +507,11 @@
             const pool = document.getElementById('num-pool');
             pool.innerHTML = '';
             
-            document.querySelectorAll('.target-slot').forEach(slot => {
+            // パソコン用のPCドラッグイベント対応
+            document.querySelectorAll('.drop-box').forEach(box => {
+                box.addEventListener('dragover', allowDrop);
+                box.addEventListener('drop', dropNumPC);
+                const slot = box.querySelector('.target-slot');
                 slot.innerHTML = '';
                 slot.style.background = 'transparent';
             });
@@ -529,35 +530,45 @@
             });
         }
 
+        // PC用のドロップ処理
+        function dropNumPC(e) {
+            e.preventDefault();
+            const word = e.dataTransfer.getData('text');
+            const box = e.currentTarget;
+            executeNumDrop(word, box);
+        }
+
+        // スマホ用のタッチ終了処理（外枠の.drop-boxをしっかり捕まえる）
         function onTouchEndNum(e) {
             if (!activeTouchElement) return;
             const touch = e.changedTouches[0];
             activeTouchElement.style.position = '';
             activeTouchElement.style.zIndex = '';
+            
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
-            const slot = target ? target.closest('.target-slot') : null;
-            if (slot) {
-                executeNumDrop(activeTouchElement.id.replace('num-', ''), slot);
+            const box = target ? target.closest('.drop-box') : null;
+            
+            if (box) {
+                executeNumDrop(activeTouchElement.id.replace('num-', ''), box);
             } else {
-                setupPage2();
+                setupPage2(); // 枠外ならリセットして戻す
             }
             activeTouchElement = null;
         }
 
-        function dropNum(e) {
-            e.preventDefault();
-            const word = e.dataTransfer.getData('text');
-            const slot = e.currentTarget;
-            executeNumDrop(word, slot);
-        }
-
-        function executeNumDrop(word, slot) {
-            const targetWord = slot.getAttribute('data-num');
+        // コア判定ロジック
+        function executeNumDrop(word, boxElement) {
+            const targetWord = boxElement.getAttribute('data-num');
+            const slot = boxElement.querySelector('.target-slot');
+            
             if(word === targetWord) {
                 slot.innerHTML = `<span style="font-weight:bold; color:#2ecc71;">${word}</span>`;
                 slot.style.background = '#e8f5e9';
+                slot.style.border = '2px solid #2ecc71';
+                
                 const originalBlock = document.getElementById('num-' + word);
                 if(originalBlock) originalBlock.style.display = 'none';
+                
                 speak(word);
                 matchedNumbersCount++;
                 if(matchedNumbersCount === 7) {
@@ -569,7 +580,7 @@
             }
         }
 
-        // --- Page 3: Snack Logic (nanobanana様イラスト対応版) ---
+        // --- Page 3: Snack Logic ---
         const snacks = [
             { id: 's1', file: 'caramel.jpg', name: 'caramel', isJelly: false },
             { id: 's2', file: 'chocolate.jpg', name: 'chocolate', isJelly: false },
@@ -591,7 +602,6 @@
                 block.className = 'image-block';
                 block.id = snack.id;
                 
-                // 画像タグの生成（フォルダ指定）
                 const img = document.createElement('img');
                 img.src = 'images-snacks/' + snack.file;
                 img.alt = snack.name;
@@ -642,7 +652,7 @@
             }
         }
 
-        // --- Page 4: Word Search Logic ---
+        // --- Page 4: Word Search ---
         const targetActions = ["clap", "hop", "jump", "skip", "flip"];
         const boardSize = 6;
         let grid = [];
@@ -670,9 +680,7 @@
                     let canPlace = true;
                     for (let i = 0; i < word.length; i++) {
                         let currR = isH ? r : r + i; let currC = isH ? c + i : c;
-                        if (grid[currR][currC] !== '' && grid[grid[currR][currC]] !== word[i]) {
-                            if(grid[currR][currC] !== '') { canPlace = false; break; }
-                        }
+                        if (grid[currR][currC] !== '' && grid[currR][currC] !== word[i]) { canPlace = false; break; }
                     }
                     
                     if (canPlace) {
@@ -839,7 +847,7 @@
             });
         }
 
-        // --- Page 5: Finale Singalong ---
+        // --- Page 5 ---
         function singWholeSong() {
             const ant = document.getElementById('joy-ant');
             ant.style.transform = "scale(1.4) rotate(360deg)";
