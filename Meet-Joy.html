@@ -237,7 +237,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            pointer-events: none; /* スマホのタッチ判定をすり抜けさせて外枠でキャッチする技 */
         }
 
         .snack-container {
@@ -284,6 +283,7 @@
             border: 3px solid #ffd54f;
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            position: relative;
         }
         .cell { 
             width: var(--cell-size); 
@@ -294,8 +294,16 @@
             font-weight: 700; 
             cursor: pointer; 
             position: relative; 
+            pointer-events: auto;
         }
-        .cell::after, .cell::before { content: ""; position: absolute; z-index: -1; mix-blend-mode: multiply; display: none; }
+        .cell::after, .cell::before { 
+            content: ""; 
+            position: absolute; 
+            z-index: -1; 
+            mix-blend-mode: multiply; 
+            display: none; 
+            pointer-events: none;
+        }
         .cell.h::after { display: block; left: 0; right: 0; top: 15%; bottom: 15%; background-color: var(--marker-h); }
         .cell.v::before { display: block; left: 15%; right: 15%; top: 0; bottom: 0; background-color: var(--marker-v); }
         .cell.h-start::after { border-top-left-radius: 30px; border-bottom-left-radius: 30px; }
@@ -370,13 +378,13 @@
             <div class="instruction">Drag the word blocks to the correct numbers!</div>
             <div class="drag-pool" id="num-pool"></div>
             <div class="grid-numbers">
-                <div class="drop-box" data-num="one"><span class="num-label">1</span><div class="target-slot"></div></div>
-                <div class="drop-box" data-num="two"><span class="num-label">2</span><div class="target-slot"></div></div>
-                <div class="drop-box" data-num="three"><span class="num-label">3</span><div class="target-slot"></div></div>
-                <div class="drop-box" data-num="four"><span class="num-label">4</span><div class="target-slot"></div></div>
-                <div class="drop-box" data-num="five"><span class="num-label">5</span><div class="target-slot"></div></div>
-                <div class="drop-box" data-num="six"><span class="num-label">6</span><div class="target-slot"></div></div>
-                <div class="drop-box" data-num="seven"><span class="num-label">7</span><div class="target-slot"></div></div>
+                <div class="drop-box"><span class="num-label">1</span><div class="target-slot" data-num="one" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
+                <div class="drop-box"><span class="num-label">2</span><div class="target-slot" data-num="two" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
+                <div class="drop-box"><span class="num-label">3</span><div class="target-slot" data-num="three" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
+                <div class="drop-box"><span class="num-label">4</span><div class="target-slot" data-num="four" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
+                <div class="drop-box"><span class="num-label">5</span><div class="target-slot" data-num="five" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
+                <div class="drop-box"><span class="num-label">6</span><div class="target-slot" data-num="six" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
+                <div class="drop-box"><span class="num-label">7</span><div class="target-slot" data-num="seven" ondragover="allowDrop(event)" ondrop="dropNum(event)"></div></div>
             </div>
             <button class="nav-btn" onclick="nextPage(3)" style="visibility: hidden;" id="next2">Next ➔</button>
         </div>
@@ -446,12 +454,13 @@
             synth.cancel();
             const uttr = new SpeechSynthesisUtterance(text);
             if (preferredVoice) uttr.voice = preferredVoice;
-            uttr.rate = 0.72;
-            uttr.pitch = 1.15;
+            uttr.rate = 0.72;  
+            uttr.pitch = 1.15; 
             if (callback) uttr.onend = callback;
             synth.speak(uttr);
         }
 
+        // ページ切り替え機能
         function nextPage(pageNumber) {
             if (window.speechSynthesis) window.speechSynthesis.cancel();
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -460,11 +469,12 @@
             if(pageNumber === 2) setupPage2();
             if(pageNumber === 3) setupPage3();
             if(pageNumber === 4) setupPage4();
+            if(pageNumber === 5) document.getElementById('joy-ant').style.transform = "scale(1)";
         }
 
         function allowDrop(e) { e.preventDefault(); }
 
-        // --- Touch Drag Helper ---
+        // --- Touch Drag Support Helper ---
         let activeTouchElement = null;
         function onTouchStart(e) {
             activeTouchElement = e.currentTarget;
@@ -478,7 +488,7 @@
         }
         function moveAt(clientX, clientY) {
             activeTouchElement.style.left = clientX - 40 + 'px';
-            activeTouchElement.style.top = clientY - 30 + 'px';
+            activeTouchElement.style.top = clientY - 40 + 'px';
             activeTouchElement.style.zIndex = 1000;
         }
         function setupTouchEvents(element) {
@@ -486,18 +496,18 @@
             element.addEventListener('touchmove', onTouchMove, {passive: false});
         }
 
-        // --- Page 1 ---
+        // --- Page 1: Quiz Logic ---
         function checkAnswerPage1(element, isCorrect) {
             if(isCorrect) {
                 element.classList.add('correct');
-                speak("Joy means happiness!");
+                speak("Joy means happiness!"); 
                 document.getElementById('next1').style.visibility = 'visible';
             } else {
                 element.classList.add('wrong');
             }
         }
 
-        // --- Page 2: Numbers Logic (スマホ判定を強化) ---
+        // --- Page 2: Numbers Logic ---
         const numWords = ['one', 'two', 'three', 'four', 'five', 'six', 'seven'];
         let matchedNumbersCount = 0;
 
@@ -507,11 +517,7 @@
             const pool = document.getElementById('num-pool');
             pool.innerHTML = '';
             
-            // パソコン用のPCドラッグイベント対応
-            document.querySelectorAll('.drop-box').forEach(box => {
-                box.addEventListener('dragover', allowDrop);
-                box.addEventListener('drop', dropNumPC);
-                const slot = box.querySelector('.target-slot');
+            document.querySelectorAll('.target-slot').forEach(slot => {
                 slot.innerHTML = '';
                 slot.style.background = 'transparent';
             });
@@ -530,45 +536,35 @@
             });
         }
 
-        // PC用のドロップ処理
-        function dropNumPC(e) {
-            e.preventDefault();
-            const word = e.dataTransfer.getData('text');
-            const box = e.currentTarget;
-            executeNumDrop(word, box);
-        }
-
-        // スマホ用のタッチ終了処理（外枠の.drop-boxをしっかり捕まえる）
         function onTouchEndNum(e) {
             if (!activeTouchElement) return;
             const touch = e.changedTouches[0];
             activeTouchElement.style.position = '';
             activeTouchElement.style.zIndex = '';
-            
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
-            const box = target ? target.closest('.drop-box') : null;
-            
-            if (box) {
-                executeNumDrop(activeTouchElement.id.replace('num-', ''), box);
+            const slot = target ? target.closest('.target-slot') : null;
+            if (slot) {
+                executeNumDrop(activeTouchElement.id.replace('num-', ''), slot);
             } else {
-                setupPage2(); // 枠外ならリセットして戻す
+                setupPage2();
             }
             activeTouchElement = null;
         }
 
-        // コア判定ロジック
-        function executeNumDrop(word, boxElement) {
-            const targetWord = boxElement.getAttribute('data-num');
-            const slot = boxElement.querySelector('.target-slot');
-            
+        function dropNum(e) {
+            e.preventDefault();
+            const word = e.dataTransfer.getData('text');
+            const slot = e.currentTarget;
+            executeNumDrop(word, slot);
+        }
+
+        function executeNumDrop(word, slot) {
+            const targetWord = slot.getAttribute('data-num');
             if(word === targetWord) {
                 slot.innerHTML = `<span style="font-weight:bold; color:#2ecc71;">${word}</span>`;
                 slot.style.background = '#e8f5e9';
-                slot.style.border = '2px solid #2ecc71';
-                
                 const originalBlock = document.getElementById('num-' + word);
                 if(originalBlock) originalBlock.style.display = 'none';
-                
                 speak(word);
                 matchedNumbersCount++;
                 if(matchedNumbersCount === 7) {
@@ -652,13 +648,14 @@
             }
         }
 
-        // --- Page 4: Word Search ---
+        // --- Page 4: Word Search Logic (交差・色が消えるバグ完全改修仕様) ---
         const targetActions = ["clap", "hop", "jump", "skip", "flip"];
         const boardSize = 6;
         let grid = [];
         let wordLocations = {};
         let foundWords = new Set();
         let isDragging = false, dragType = null, startR = null, startC = null;
+        let cellRects = []; 
 
         function setupPage4() {
             const board = document.getElementById("board");
@@ -680,7 +677,9 @@
                     let canPlace = true;
                     for (let i = 0; i < word.length; i++) {
                         let currR = isH ? r : r + i; let currC = isH ? c + i : c;
-                        if (grid[currR][currC] !== '' && grid[currR][currC] !== word[i]) { canPlace = false; break; }
+                        if (grid[currR][currC] !== '' && grid[currR][currC] !== word[i]) {
+                            canPlace = false; break;
+                        }
                     }
                     
                     if (canPlace) {
@@ -714,26 +713,30 @@
                 board.appendChild(cell);
             }));
 
+            setTimeout(updateCellRects, 300);
+
             board.addEventListener('touchstart', (e) => {
+                updateCellRects(); 
                 const touch = e.touches[0];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (target && target.classList.contains('cell')) {
-                    onStart(parseInt(target.dataset.r), parseInt(target.dataset.c));
+                const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
+                if (targetCell) {
+                    onStart(parseInt(targetCell.dataset.r), parseInt(targetCell.dataset.c));
                 }
                 e.preventDefault();
             }, {passive: false});
 
             board.addEventListener('touchmove', (e) => {
                 const touch = e.touches[0];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (target && target.classList.contains('cell')) {
-                    onMove(parseInt(target.dataset.r), parseInt(target.dataset.c));
+                const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
+                if (targetCell) {
+                    onMove(parseInt(targetCell.dataset.r), parseInt(targetCell.dataset.c));
                 }
                 e.preventDefault();
             }, {passive: false});
 
             window.addEventListener('mouseup', onEnd);
             window.addEventListener('touchend', onEnd);
+            window.addEventListener('resize', updateCellRects);
 
             targetActions.forEach(w => {
                 const tag = document.createElement('span');
@@ -742,6 +745,30 @@
                 tag.textContent = w;
                 listEl.appendChild(tag);
             });
+        }
+
+        function updateCellRects() {
+            cellRects = [];
+            document.querySelectorAll('#board .cell').forEach(cell => {
+                const rect = cell.getBoundingClientRect();
+                cellRects.push({
+                    element: cell,
+                    left: rect.left,
+                    right: rect.right,
+                    top: rect.top,
+                    bottom: rect.bottom
+                });
+            });
+        }
+
+        function getCellFromCoords(x, y) {
+            for (let i = 0; i < cellRects.length; i++) {
+                const c = cellRects[i];
+                if (x >= c.left && x <= c.right && y >= c.top && y <= c.bottom) {
+                    return c.element;
+                }
+            }
+            return null;
         }
 
         function onStart(r, c) {
@@ -784,9 +811,9 @@
 
             let finalMinR = 99, finalMaxR = -1, finalMinC = 99, finalMaxC = -1;
             currentCells.forEach(cell => {
+                if(cell.classList.contains('locked')) return; 
                 let r = parseInt(cell.dataset.r);
                 let c = parseInt(cell.dataset.c);
-                if(cell.classList.contains('locked')) return; 
                 if(r < finalMinR) finalMinR = r;
                 if(r > finalMaxR) finalMaxR = r;
                 if(c < finalMinC) finalMinC = c;
@@ -809,6 +836,13 @@
                 foundWords.add(matchedWord);
                 const tag = document.getElementById('tag-' + matchedWord);
                 if(tag) tag.classList.add('found');
+                
+                // ロックされたマスの方向フラグを保持
+                document.querySelectorAll('.cell.locked').forEach(cell => {
+                    if(cell.classList.contains('h')) cell.classList.add('h-locked-flag');
+                    if(cell.classList.contains('v')) cell.classList.add('v-locked-flag');
+                });
+                
                 speak(matchedWord);
 
                 if (foundWords.size === targetActions.length) {
@@ -824,6 +858,9 @@
             document.querySelectorAll('.cell').forEach(cell => {
                 if(!cell.classList.contains('locked')) {
                     cell.classList.remove('h', 'v', 'h-start', 'h-end', 'v-start', 'v-end');
+                } else {
+                    if(!cell.classList.contains('h-locked-flag')) cell.classList.remove('h');
+                    if(!cell.classList.contains('v-locked-flag')) cell.classList.remove('v');
                 }
             });
         }
@@ -847,7 +884,7 @@
             });
         }
 
-        // --- Page 5 ---
+        // --- Page 5: Finale Singalong ---
         function singWholeSong() {
             const ant = document.getElementById('joy-ant');
             ant.style.transform = "scale(1.4) rotate(360deg)";
