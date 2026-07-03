@@ -219,7 +219,6 @@
             position: relative; 
             pointer-events: auto; 
         }
-        /* マーカー（線）のタッチイベントを完全に無視させ、下の文字をいつでも感知できるように修正 */
         .cell::after, .cell::before { 
             content: ""; 
             position: absolute; 
@@ -512,14 +511,14 @@
             }
         }
 
-        // --- Page 3: Word Search (ホワイトボード・交差バグ完全改修仕様) ---
+        // --- Page 3: Word Search (交差バグ・色が消えるバグ完全改修仕様) ---
         const wordsData = ["pink", "wink", "blink", "color", "like"];
         const boardSize = 6;
         let grid = [];
         let wordLocations = {}; 
         let foundWords = new Set();
         let isDragging = false, dragType = null, startR = null, startC = null;
-        let cellRects = []; // 各マスの絶対座標を保持する配列
+        let cellRects = []; 
 
         function setupPage3() {
             const board = document.getElementById("board");
@@ -577,11 +576,10 @@
                 board.appendChild(cell);
             }));
 
-            // ホワイトボード等のタッチ判定用に各マスの絶対座標情報を取得・更新する関数
             setTimeout(updateCellRects, 300);
 
             board.addEventListener('touchstart', (e) => {
-                updateCellRects(); // 直前のスクロールやリサイズに備えて座標を再同期
+                updateCellRects(); 
                 const touch = e.touches[0];
                 const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
                 if (targetCell) {
@@ -612,7 +610,6 @@
             });
         }
 
-        // 全マスの現在の絶対位置（四角形エリア）を配列にキャッシュする関数
         function updateCellRects() {
             cellRects = [];
             document.querySelectorAll('#board .cell').forEach(cell => {
@@ -627,7 +624,6 @@
             });
         }
 
-        // 指定されたX, Y座標（タッチ位置）がどのマスに入っているかを四角形判定で返す関数
         function getCellFromCoords(x, y) {
             for (let i = 0; i < cellRects.length; i++) {
                 const c = cellRects[i];
@@ -679,10 +675,10 @@
 
             let finalMinR = 99, finalMaxR = -1, finalMinC = 99, finalMaxC = -1;
             currentCells.forEach(cell => {
+                if(cell.classList.contains('locked')) return; // ロックされたマスは新規判定から除外
+                
                 let r = parseInt(cell.dataset.r);
                 let c = parseInt(cell.dataset.c);
-                if(cell.classList.contains('locked')) return; 
-                
                 if(r < finalMinR) finalMinR = r;
                 if(r > finalMaxR) finalMaxR = r;
                 if(c < finalMinC) finalMinC = c;
@@ -715,10 +711,15 @@
             updateEdgeStyles();
         }
 
+        // 確定（ロック）されていないマーカーだけを完全に消去するようロジックを修正
         function clearTemporaryMarkers() {
             document.querySelectorAll('.cell').forEach(cell => {
                 if(!cell.classList.contains('locked')) {
                     cell.classList.remove('h', 'v', 'h-start', 'h-end', 'v-start', 'v-end');
+                } else {
+                    // 交差部分の上を通ったときに、ロック済みのマスクラスが誤って上書き削除されるのを防止
+                    if(!cell.classList.contains('h-locked-flag')) cell.classList.remove('h');
+                    if(!cell.classList.contains('v-locked-flag')) cell.classList.remove('v');
                 }
             });
         }
@@ -746,6 +747,13 @@
             foundWords.add(word);
             const tag = document.getElementById('tag-' + word);
             if(tag) tag.classList.add('found');
+            
+            // 確定したマスの方向（縦・横）を消去されないようにフラグ保持
+            document.querySelectorAll('.cell.locked').forEach(cell => {
+                if(cell.classList.contains('h')) cell.classList.add('h-locked-flag');
+                if(cell.classList.contains('v')) cell.classList.add('v-locked-flag');
+            });
+            
             speak(word);
 
             if (foundWords.size === wordsData.length) {
