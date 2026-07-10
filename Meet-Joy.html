@@ -479,6 +479,10 @@
         function onTouchStart(e) {
             activeTouchElement = e.currentTarget;
             activeTouchElement.style.position = 'fixed';
+            // 要素の中心が指の真下に来るよう調整
+            const rect = activeTouchElement.getBoundingClientRect();
+            activeTouchElement.dataset.offsetX = rect.width / 2;
+            activeTouchElement.dataset.offsetY = rect.height / 2;
             moveAt(e.touches[0].clientX, e.touches[0].clientY);
         }
         function onTouchMove(e) {
@@ -487,8 +491,10 @@
             moveAt(e.touches[0].clientX, e.touches[0].clientY);
         }
         function moveAt(clientX, clientY) {
-            activeTouchElement.style.left = clientX - 40 + 'px';
-            activeTouchElement.style.top = clientY - 40 + 'px';
+            const offsetX = parseFloat(activeTouchElement.dataset.offsetX) || 0;
+            const offsetY = parseFloat(activeTouchElement.dataset.offsetY) || 0;
+            activeTouchElement.style.left = (clientX - offsetX) + 'px';
+            activeTouchElement.style.top = (clientY - offsetY) + 'px';
             activeTouchElement.style.zIndex = 1000;
         }
         function setupTouchEvents(element) {
@@ -539,14 +545,20 @@
         function onTouchEndNum(e) {
             if (!activeTouchElement) return;
             const touch = e.changedTouches[0];
+            
+            // スタイルを一時的にリセットして、背後にある要素を取得できるようにする
             activeTouchElement.style.position = '';
             activeTouchElement.style.zIndex = '';
+            activeTouchElement.style.left = '';
+            activeTouchElement.style.top = '';
+            
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
             const slot = target ? target.closest('.target-slot') : null;
+            
             if (slot) {
                 executeNumDrop(activeTouchElement.id.replace('num-', ''), slot);
             } else {
-                setupPage2();
+                speak("Try again!");
             }
             activeTouchElement = null;
         }
@@ -572,7 +584,6 @@
                 }
             } else {
                 speak("Try again!");
-                if(activeTouchElement) setupPage2();
             }
         }
 
@@ -614,14 +625,21 @@
         function onTouchEndSnack(e) {
             if (!activeTouchElement) return;
             const touch = e.changedTouches[0];
+            
+            // スタイルを一時的にリセット
             activeTouchElement.style.position = '';
             activeTouchElement.style.zIndex = '';
+            activeTouchElement.style.left = '';
+            activeTouchElement.style.top = '';
+            
             const target = document.elementFromPoint(touch.clientX, touch.clientY);
             const basket = target ? target.closest('.jellybean-basket') : null;
+            
             if(basket) {
                 executeSnackDrop(activeTouchElement.id);
             } else {
-                setupPage3();
+                const item = snacks.find(s => s.id === activeTouchElement.id);
+                speak(item ? `No, that's ${item.name}!` : "Try again!");
             }
             activeTouchElement = null;
         }
@@ -644,7 +662,6 @@
                 document.getElementById('next3').style.visibility = 'visible';
             } else {
                 speak(`No, that's ${item.name}!`);
-                if(activeTouchElement) setupPage3();
             }
         }
 
