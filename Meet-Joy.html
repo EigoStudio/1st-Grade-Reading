@@ -479,7 +479,6 @@
         function onTouchStart(e) {
             activeTouchElement = e.currentTarget;
             activeTouchElement.style.position = 'fixed';
-            // 要素の中心が指の真下に来るよう調整
             const rect = activeTouchElement.getBoundingClientRect();
             activeTouchElement.dataset.offsetX = rect.width / 2;
             activeTouchElement.dataset.offsetY = rect.height / 2;
@@ -546,17 +545,22 @@
             if (!activeTouchElement) return;
             const touch = e.changedTouches[0];
             
-            // スタイルを一時的にリセットして、背後にある要素を取得できるようにする
+            // ドラッグ中の要素を一瞬非表示にして、その下にある真のターゲット（枠）を検知する
+            activeTouchElement.style.display = 'none';
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            activeTouchElement.style.display = ''; // すぐに表示を戻す
+            
+            const slot = target ? target.closest('.target-slot') : null;
+            const word = activeTouchElement.id.replace('num-', '');
+            
+            // ドラッグ用スタイルを完全にリセット
             activeTouchElement.style.position = '';
             activeTouchElement.style.zIndex = '';
             activeTouchElement.style.left = '';
             activeTouchElement.style.top = '';
             
-            const target = document.elementFromPoint(touch.clientX, touch.clientY);
-            const slot = target ? target.closest('.target-slot') : null;
-            
             if (slot) {
-                executeNumDrop(activeTouchElement.id.replace('num-', ''), slot);
+                executeNumDrop(word, slot);
             } else {
                 speak("Try again!");
             }
@@ -626,19 +630,23 @@
             if (!activeTouchElement) return;
             const touch = e.changedTouches[0];
             
-            // スタイルを一時的にリセット
+            // ドラッグ中の要素を一瞬非表示にして、その下にあるカゴを検知する
+            activeTouchElement.style.display = 'none';
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            activeTouchElement.style.display = '';
+            
+            const basket = target ? target.closest('.jellybean-basket') : null;
+            const id = activeTouchElement.id;
+            
             activeTouchElement.style.position = '';
             activeTouchElement.style.zIndex = '';
             activeTouchElement.style.left = '';
             activeTouchElement.style.top = '';
             
-            const target = document.elementFromPoint(touch.clientX, touch.clientY);
-            const basket = target ? target.closest('.jellybean-basket') : null;
-            
             if(basket) {
-                executeSnackDrop(activeTouchElement.id);
+                executeSnackDrop(id);
             } else {
-                const item = snacks.find(s => s.id === activeTouchElement.id);
+                const item = snacks.find(s => s.id === id);
                 speak(item ? `No, that's ${item.name}!` : "Try again!");
             }
             activeTouchElement = null;
