@@ -328,8 +328,16 @@
             display: none; 
             pointer-events: none; 
         }
-        .cell.h::after { display: block; left: 0; right: 0; top: 15%; bottom: 15%; background-color: var(--marker-h); }
-        .cell.v::before { display: block; left: 15%; right: 15%; top: 0; bottom: 0; background-color: var(--marker-v); }
+        
+        /* 動的なアクティブなドラッグ用 */
+        .cell.active-h::after { display: block; left: 0; right: 0; top: 15%; bottom: 15%; background-color: var(--marker-h); }
+        .cell.active-v::before { display: block; left: 15%; right: 15%; top: 0; bottom: 0; background-color: var(--marker-v); }
+        
+        /* 確定ロック用 */
+        .cell.h-locked-flag::after { display: block; left: 0; right: 0; top: 15%; bottom: 15%; background-color: var(--marker-h); }
+        .cell.v-locked-flag::before { display: block; left: 15%; right: 15%; top: 0; bottom: 0; background-color: var(--marker-v); }
+        
+        /* 端っこのデザイン（active、locked両対応） */
         .cell.h-start::after { border-top-left-radius: 30px; border-bottom-left-radius: 30px; }
         .cell.h-end::after { border-top-right-radius: 30px; border-bottom-right-radius: 30px; }
         .cell.v-start::before { border-top-left-radius: 30px; border-top-right-radius: 30px; }
@@ -421,7 +429,7 @@
             <h2>Word Search! <button class="speaker-btn" onclick="speak('Find five words in the grid!')">🔊 Listen</button></h2>
             <div class="instruction">Tap the word list tags to listen! Find: sugar, march, carry, rest, nest</div>
             <div class="wordsearch-layout">
-                <div id="board"></div>
+                <div id="board" style="touch-action: none;"></div>
                 <div class="word-list-side" id="ws-list"></div>
             </div>
             <div class="action-button-group" id="ws-actions" style="visibility: hidden;">
@@ -463,7 +471,7 @@
             synth.speak(uttr);
         }
 
-        // --- Page 1: Story Slides Data with local image paths ---
+        // --- Page 1: Story Slides Data ---
         const slides = [
             {
                 image: "images-marching/marching.jpg",
@@ -577,7 +585,6 @@
             document.getElementById('next2').style.visibility = 'hidden';
             document.getElementById('match-toast').textContent = '';
             
-            // 1. 下側のドロップ用画像ターゲットもシャッフルしてHTML生成
             const container = document.getElementById('match-container');
             container.innerHTML = '';
             
@@ -592,7 +599,6 @@
                 container.appendChild(box);
             });
 
-            // 2. 上側のドラッグ用英単語プールをシャッフル生成
             const pool = document.getElementById('match-pool');
             pool.innerHTML = '';
             
@@ -616,7 +622,7 @@
             });
         }
 
-        // Touch handlers
+        // Touch handlers for matching game
         let activeTouchElement = null;
         function onTouchStart(e) {
             activeTouchElement = e.currentTarget;
@@ -693,7 +699,7 @@
             }
         }
 
-        // --- Page 3: Word Search (交差バグ完全改修) ---
+        // --- Page 3: Word Search (完全バグ改修) ---
         const wordsData = ["sugar", "march", "carry", "rest", "nest"];
         const boardSize = 6;
         let grid = [];
@@ -753,30 +759,39 @@
                 cell.className = "cell"; cell.textContent = ch.toLowerCase();
                 cell.dataset.r = r; cell.dataset.c = c;
                 
-                cell.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(r, c); });
-                cell.addEventListener('mouseenter', () => { if(isDragging) onMove(r, c); });
+                // PC用マウスイベント
+                cell.addEventListener('mousedown', (e) => { 
+                    e.preventDefault(); 
+                    onStart(r, c); 
+                });
+                cell.addEventListener('mouseenter', () => { 
+                    if (isDragging) {
+                        onMove(r, c); 
+                    }
+                });
                 board.appendChild(cell);
             }));
 
             setTimeout(updateCellRects, 300);
 
+            // スマホ用タッチイベント
             board.addEventListener('touchstart', (e) => {
+                e.preventDefault(); 
                 updateCellRects(); 
                 const touch = e.touches[0];
                 const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
                 if (targetCell) {
                     onStart(parseInt(targetCell.dataset.r), parseInt(targetCell.dataset.c));
                 }
-                e.preventDefault();
             }, {passive: false});
 
             board.addEventListener('touchmove', (e) => {
+                e.preventDefault(); 
                 const touch = e.touches[0];
                 const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
                 if (targetCell) {
                     onMove(parseInt(targetCell.dataset.r), parseInt(targetCell.dataset.c));
                 }
-                e.preventDefault();
             }, {passive: false});
 
             window.addEventListener('mouseup', onEnd);
@@ -814,7 +829,7 @@
         function getCellFromCoords(x, y) {
             for (let i = 0; i < cellRects.length; i++) {
                 const c = cellRects[i];
-                if (x >= c.left && x <= c.right && y >= c.top && y <= c.bottom) {
+                if (x >= c.left - 2 && x <= c.right + 2 && y >= c.top - 2 && y <= c.bottom + 2) {
                     return c.element;
                 }
             }
@@ -822,16 +837,24 @@
         }
 
         function onStart(r, c) {
-            isDragging = true; startR = r; startC = c; dragType = null;
+            isDragging = true; 
+            startR = r; 
+            startC = c; 
+            dragType = null;
             clearTemporaryMarkers();
         }
 
         function onMove(r, c) {
             if (!isDragging) return;
+            
             if (dragType === null) {
-                if (r !== startR) { dragType = 'v'; }
-                else if (c !== startC) { dragType = 'h'; }
-                else { return; }
+                if (r !== startR) { 
+                    dragType = 'v'; 
+                } else if (c !== startC) { 
+                    dragType = 'h'; 
+                } else { 
+                    return; 
+                }
             }
             
             clearTemporaryMarkers();
@@ -839,15 +862,16 @@
             let minR = Math.min(startR, r), maxR = Math.max(startR, r);
             let minC = Math.min(startC, c), maxC = Math.max(startC, c);
 
+            // ロックされたもの（*-locked-flag）はそのままに、ドラッグ中のラインに active-* クラスをつける
             if (dragType === 'h') {
-                for(let currC = minC; currC <= maxC; currC++) {
+                for (let currC = minC; currC <= maxC; currC++) {
                     const cell = document.querySelector(`.cell[data-r="${startR}"][data-c="${currC}"]`);
-                    if(cell) cell.classList.add('h');
+                    if (cell) cell.classList.add('active-h');
                 }
             } else if (dragType === 'v') {
-                for(let currR = minR; currR <= maxR; currR++) {
+                for (let currR = minR; currR <= maxR; currR++) {
                     const cell = document.querySelector(`.cell[data-r="${currR}"][data-c="${startC}"]`);
-                    if(cell) cell.classList.add('v');
+                    if (cell) cell.classList.add('active-v');
                 }
             }
             updateEdgeStyles();
@@ -857,17 +881,15 @@
             if (!isDragging) return;
             isDragging = false;
 
-            // 引いたラインのマス一覧を取得
-            let currentCells = document.querySelectorAll('.cell.h, .cell.v');
-            if(currentCells.length === 0) return;
+            // 「今ドラッグしている active ラインだけ」を対象に取得！
+            let currentCells = document.querySelectorAll('.cell.active-h, .cell.active-v');
+            if (currentCells.length === 0) return;
 
-            // 新規ドラッグ中のマスだけで最小・最大の行と列を計算
-            // （ロック済みのマスを無視して純粋な新規ドラッグラインを出す）
             let finalMinR = 99, finalMaxR = -1, finalMinC = 99, finalMaxC = -1;
             let hasActiveNewDrag = false;
             
             currentCells.forEach(cell => {
-                // すでにその方向（hまたはv）でロックされているマス以外を処理
+                // すでにその方向で正解済みの場合は判定から除外
                 const isAlreadyLockedInThisDirection = (dragType === 'h' && cell.classList.contains('h-locked-flag')) || 
                                                        (dragType === 'v' && cell.classList.contains('v-locked-flag'));
                 if (isAlreadyLockedInThisDirection) return;
@@ -875,10 +897,10 @@
                 hasActiveNewDrag = true;
                 let r = parseInt(cell.dataset.r);
                 let c = parseInt(cell.dataset.c);
-                if(r < finalMinR) finalMinR = r;
-                if(r > finalMaxR) finalMaxR = r;
-                if(c < finalMinC) finalMinC = c;
-                if(c > finalMaxC) finalMaxC = c;
+                if (r < finalMinR) finalMinR = r;
+                if (r > finalMaxR) finalMaxR = r;
+                if (c < finalMinC) finalMinC = c;
+                if (c > finalMaxC) finalMaxC = c;
             });
 
             if (!hasActiveNewDrag) {
@@ -893,7 +915,6 @@
                 let loc = wordLocations[word];
                 if (!loc) return;
 
-                // 位置が合致しているか確認
                 let matchNormal = (finalMinR === loc.startR && finalMaxR === loc.endR && finalMinC === loc.startC && finalMaxC === loc.endC);
 
                 if (matchNormal && dragType === loc.type) {
@@ -902,10 +923,12 @@
             });
 
             if (matchedWord) {
-                // 合致した場合、マスを「locked」にする
+                // 完全に一致した単語であれば、独自の locked-flag を付与して背景を固定する
                 currentCells.forEach(cell => {
-                    if (cell.classList.contains(dragType)) {
-                        cell.classList.add('locked'); 
+                    if (dragType === 'h') {
+                        cell.classList.add('h-locked-flag');
+                    } else if (dragType === 'v') {
+                        cell.classList.add('v-locked-flag');
                     }
                 });
                 markWordFound(matchedWord);
@@ -917,32 +940,39 @@
 
         function clearTemporaryMarkers() {
             document.querySelectorAll('.cell').forEach(cell => {
-                // ロックされていないマスはマーカーを全消去
-                if(!cell.classList.contains('locked')) {
-                    cell.classList.remove('h', 'v', 'h-start', 'h-end', 'v-start', 'v-end');
-                } else {
-                    // ロック済みのマスについて、ドラッグ判定での消去を完全に防ぐ
-                    if(!cell.classList.contains('h-locked-flag')) cell.classList.remove('h');
-                    if(!cell.classList.contains('v-locked-flag')) cell.classList.remove('v');
-                }
+                // 動的ドラッグクラスを真っ新にリセット
+                cell.classList.remove('active-h', 'active-v');
             });
         }
 
         function updateEdgeStyles() {
             document.querySelectorAll('.cell').forEach(cell => {
+                // 端っこの丸みスタイルを毎フレーム判定して綺麗に整える
                 cell.classList.remove('h-start', 'h-end', 'v-start', 'v-end');
                 const r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
-                if (cell.classList.contains('h')) {
+                
+                // 横マーカー（ドラッグ中 or 確定済みのいずれか）
+                if (cell.classList.contains('active-h') || cell.classList.contains('h-locked-flag')) {
                     const prev = document.querySelector(`.cell[data-r="${r}"][data-c="${c-1}"]`);
                     const next = document.querySelector(`.cell[data-r="${r}"][data-c="${c+1}"]`);
-                    if (!prev || !prev.classList.contains('h')) cell.classList.add('h-start');
-                    if (!next || !next.classList.contains('h')) cell.classList.add('h-end');
+                    
+                    const hasLeftMatch = prev && (prev.classList.contains('active-h') || prev.classList.contains('h-locked-flag'));
+                    const hasRightMatch = next && (next.classList.contains('active-h') || next.classList.contains('h-locked-flag'));
+                    
+                    if (!hasLeftMatch) cell.classList.add('h-start');
+                    if (!hasRightMatch) cell.classList.add('h-end');
                 }
-                if (cell.classList.contains('v')) {
+                
+                // 縦マーカー（ドラッグ中 or 確定済みのいずれか）
+                if (cell.classList.contains('active-v') || cell.classList.contains('v-locked-flag')) {
                     const prev = document.querySelector(`.cell[data-r="${r-1}"][data-c="${c}"]`);
                     const next = document.querySelector(`.cell[data-r="${r+1}"][data-c="${c}"]`);
-                    if (!prev || !prev.classList.contains('v')) cell.classList.add('v-start');
-                    if (!next || !next.classList.contains('v')) cell.classList.add('v-end');
+                    
+                    const hasTopMatch = prev && (prev.classList.contains('active-v') || prev.classList.contains('v-locked-flag'));
+                    const hasBottomMatch = next && (next.classList.contains('active-v') || next.classList.contains('v-locked-flag'));
+                    
+                    if (!hasTopMatch) cell.classList.add('v-start');
+                    if (!hasBottomMatch) cell.classList.add('v-end');
                 }
             });
         }
@@ -950,13 +980,7 @@
         function markWordFound(word) {
             foundWords.add(word);
             const tag = document.getElementById('tag-' + word);
-            if(tag) tag.classList.add('found');
-            
-            // 確定したマスの方向（縦・横）を消去されないようにフラグ保持
-            document.querySelectorAll('.cell.locked').forEach(cell => {
-                if(cell.classList.contains('h')) cell.classList.add('h-locked-flag');
-                if(cell.classList.contains('v')) cell.classList.add('v-locked-flag');
-            });
+            if (tag) tag.classList.add('found');
             
             speak(word);
 
