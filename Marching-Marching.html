@@ -230,13 +230,12 @@
             touch-action: none;
             background-color: #fff9e6;
         }
-        /* マッチング単語をタップしたときのフィードバック効果 */
         .drag-word:active {
             background-color: #ffeaa7;
         }
         .match-container {
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5列表示に変更 */
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
             width: 100%;
         }
@@ -356,7 +355,7 @@
             text-align: center;
             box-shadow: 0 3px 0 #d2b48c;
             text-transform: lowercase;
-            cursor: pointer; /* タップ可能を示すカーソル */
+            cursor: pointer;
             transition: 0.1s;
         }
         .word-tag:active {
@@ -390,20 +389,15 @@
 
     <div id="game-container">
         
-        <!-- Page 1: Stories & Lyrics -->
         <div id="page1" class="page active">
             <h2>Let's Sing and Learn! <button class="speaker-btn" onclick="speakCurrentSlide()">🔊 Read All</button></h2>
             <div class="story-container">
-                <!-- Illustrated Scene Area with Local Image -->
                 <div class="scene-display" id="scene-illustration">
                     <img src="" id="story-img" alt="Story Scene">
                 </div>
-                <!-- Slide Dots -->
                 <div class="slide-dots" id="slide-dots"></div>
-                <!-- Lyrics of current scene -->
                 <div class="lyric-box" id="slide-lyrics">
-                    <!-- Dynamic lyric rows with individual play buttons -->
-                </div>
+                    </div>
             </div>
             <div style="display: flex; gap: 20px;">
                 <button class="nav-btn" style="background: #95a5a6; box-shadow:0 4px 0 #7f8c8d;" onclick="prevSlide()">◀ Back</button>
@@ -411,7 +405,6 @@
             </div>
         </div>
 
-        <!-- Page 2: Matching Game -->
         <div id="page2" class="page">
             <h2>Match Vocabulary & Pictures! <button class="speaker-btn" onclick="speak('Tap words to listen, then drag them to the correct pictures!')">🔊 Listen</button></h2>
             <div class="instruction">Tap words to hear pronunciation! Drag them to the pictures!</div>
@@ -419,33 +412,11 @@
             
             <div class="matching-layout">
                 <div class="item-pool" id="match-pool"></div>
-                <div class="match-container">
-                    <div class="match-box">
-                        <div class="match-image-box"><img src="images-marching/ant.jpg" alt="ant"></div>
-                        <div class="drop-zone" id="drop-ant" ondragover="allowDrop(event)" ondrop="dropItem(event, 'ant')">Drop Here</div>
-                    </div>
-                    <div class="match-box">
-                        <div class="match-image-box"><img src="images-marching/sugar.jpg" alt="sugar"></div>
-                        <div class="drop-zone" id="drop-sugar" ondragover="allowDrop(event)" ondrop="dropItem(event, 'sugar')">Drop Here</div>
-                    </div>
-                    <div class="match-box">
-                        <div class="match-image-box"><img src="images-marching/carry.jpg" alt="carry"></div>
-                        <div class="drop-zone" id="drop-carry" ondragover="allowDrop(event)" ondrop="dropItem(event, 'carry')">Drop Here</div>
-                    </div>
-                    <div class="match-box">
-                        <div class="match-image-box"><img src="images-marching/rest.jpg" alt="rest"></div>
-                        <div class="drop-zone" id="drop-rest" ondragover="allowDrop(event)" ondrop="dropItem(event, 'rest')">Drop Here</div>
-                    </div>
-                    <div class="match-box">
-                        <div class="match-image-box"><img src="images-marching/nest.jpg" alt="nest"></div>
-                        <div class="drop-zone" id="drop-nest" ondragover="allowDrop(event)" ondrop="dropItem(event, 'nest')">Drop Here</div>
-                    </div>
-                </div>
+                <div class="match-container" id="match-container"></div>
             </div>
             <button class="nav-btn" onclick="nextPage(3)" style="visibility: hidden;" id="next2">Next Activity ➔</button>
         </div>
 
-        <!-- Page 3: Word Search (FINAL PAGE) -->
         <div id="page3" class="page">
             <h2>Word Search! <button class="speaker-btn" onclick="speak('Find five words in the grid!')">🔊 Listen</button></h2>
             <div class="instruction">Tap the word list tags to listen! Find: sugar, march, carry, rest, nest</div>
@@ -453,7 +424,6 @@
                 <div id="board"></div>
                 <div class="word-list-side" id="ws-list"></div>
             </div>
-            <!-- ワードサーチ完了時に現れるお祝いとPlay Againボタン -->
             <div class="action-button-group" id="ws-actions" style="visibility: hidden;">
                 <div class="congrats-text">🎉 Super Job! You Found Them All! 🎉</div>
                 <button class="nav-btn" onclick="resetAllGame()" style="background-color: #e67e22; box-shadow: 0 4px 0 #d35400; margin-top: 5px;">Play Again 🔄</button>
@@ -536,10 +506,8 @@
             const lyricBox = document.getElementById('slide-lyrics');
             const dotsContainer = document.getElementById('slide-dots');
 
-            // ローカルフォルダの画像をセット
             imgElement.src = slides[index].image;
 
-            // 歌詞テキスト更新
             lyricBox.innerHTML = '';
             slides[index].lyrics.forEach(line => {
                 const cleanLine = line.replace(/[!?.,]/g, '');
@@ -552,7 +520,6 @@
                 lyricBox.appendChild(row);
             });
 
-            // インジケータードット更新
             dotsContainer.innerHTML = '';
             slides.forEach((_, sIdx) => {
                 const dot = document.createElement('div');
@@ -596,7 +563,6 @@
         }
 
         // --- Page 2: Drag & Drop Matching Game ---
-        // nestを足した5単語にアップグレード
         const matchingWords = [
             { id: 'm-ant', text: 'ant' },
             { id: 'm-sugar', text: 'sugar' },
@@ -611,25 +577,33 @@
             document.getElementById('next2').style.visibility = 'hidden';
             document.getElementById('match-toast').textContent = '';
             
-            const targets = ['ant', 'sugar', 'carry', 'rest', 'nest'];
-            targets.forEach(t => {
-                const zone = document.getElementById('drop-' + t);
-                zone.textContent = 'Drop Here';
-                zone.className = 'drop-zone';
+            // 1. 下側のドロップ用画像ターゲットもシャッフルしてHTML生成
+            const container = document.getElementById('match-container');
+            container.innerHTML = '';
+            
+            const shuffledTargets = [...matchingWords].sort(() => Math.random() - 0.5);
+            shuffledTargets.forEach(item => {
+                const box = document.createElement('div');
+                box.className = 'match-box';
+                box.innerHTML = `
+                    <div class="match-image-box"><img src="images-marching/${item.text}.jpg" alt="${item.text}"></div>
+                    <div class="drop-zone" id="drop-${item.text}" ondragover="allowDrop(event)" ondrop="dropItem(event, '${item.text}')">Drop Here</div>
+                `;
+                container.appendChild(box);
             });
 
+            // 2. 上側のドラッグ用英単語プールをシャッフル生成
             const pool = document.getElementById('match-pool');
             pool.innerHTML = '';
             
-            const shuffled = [...matchingWords].sort(() => Math.random() - 0.5);
-            shuffled.forEach(item => {
+            const shuffledWords = [...matchingWords].sort(() => Math.random() - 0.5);
+            shuffledWords.forEach(item => {
                 const el = document.createElement('div');
                 el.className = 'drag-word';
                 el.id = item.id;
                 el.textContent = item.text;
                 el.draggable = true;
                 
-                // タップまたはクリックした瞬間に発音を読み上げる
                 const playSound = () => speak(item.text);
                 el.addEventListener('click', playSound);
 
@@ -649,7 +623,6 @@
             activeTouchElement.style.position = 'fixed';
             moveAt(e.touches[0].clientX, e.touches[0].clientY);
             
-            // タッチ開始時にも単語を読み上げる
             const wordObj = matchingWords.find(w => w.id === activeTouchElement.id);
             if (wordObj) speak(wordObj.text);
         }
@@ -720,7 +693,7 @@
             }
         }
 
-        // --- Page 3: Word Search (Final Step) ---
+        // --- Page 3: Word Search (交差バグ完全改修) ---
         const wordsData = ["sugar", "march", "carry", "rest", "nest"];
         const boardSize = 6;
         let grid = [];
@@ -816,7 +789,6 @@
                 tag.id = 'tag-' + w;
                 tag.textContent = w.toLowerCase();
                 
-                // ワードリストの単語タグをタップしたときにも読み上げる
                 tag.addEventListener('click', () => {
                     speak(w);
                 });
@@ -885,13 +857,22 @@
             if (!isDragging) return;
             isDragging = false;
 
+            // 引いたラインのマス一覧を取得
             let currentCells = document.querySelectorAll('.cell.h, .cell.v');
             if(currentCells.length === 0) return;
 
+            // 新規ドラッグ中のマスだけで最小・最大の行と列を計算
+            // （ロック済みのマスを無視して純粋な新規ドラッグラインを出す）
             let finalMinR = 99, finalMaxR = -1, finalMinC = 99, finalMaxC = -1;
+            let hasActiveNewDrag = false;
+            
             currentCells.forEach(cell => {
-                if(cell.classList.contains('locked')) return; 
-                
+                // すでにその方向（hまたはv）でロックされているマス以外を処理
+                const isAlreadyLockedInThisDirection = (dragType === 'h' && cell.classList.contains('h-locked-flag')) || 
+                                                       (dragType === 'v' && cell.classList.contains('v-locked-flag'));
+                if (isAlreadyLockedInThisDirection) return;
+
+                hasActiveNewDrag = true;
                 let r = parseInt(cell.dataset.r);
                 let c = parseInt(cell.dataset.c);
                 if(r < finalMinR) finalMinR = r;
@@ -900,12 +881,19 @@
                 if(c > finalMaxC) finalMaxC = c;
             });
 
+            if (!hasActiveNewDrag) {
+                clearTemporaryMarkers();
+                updateEdgeStyles();
+                return;
+            }
+
             let matchedWord = null;
             wordsData.forEach(word => {
                 if (foundWords.has(word)) return;
                 let loc = wordLocations[word];
                 if (!loc) return;
 
+                // 位置が合致しているか確認
                 let matchNormal = (finalMinR === loc.startR && finalMaxR === loc.endR && finalMinC === loc.startC && finalMaxC === loc.endC);
 
                 if (matchNormal && dragType === loc.type) {
@@ -914,6 +902,7 @@
             });
 
             if (matchedWord) {
+                // 合致した場合、マスを「locked」にする
                 currentCells.forEach(cell => {
                     if (cell.classList.contains(dragType)) {
                         cell.classList.add('locked'); 
@@ -928,9 +917,11 @@
 
         function clearTemporaryMarkers() {
             document.querySelectorAll('.cell').forEach(cell => {
+                // ロックされていないマスはマーカーを全消去
                 if(!cell.classList.contains('locked')) {
                     cell.classList.remove('h', 'v', 'h-start', 'h-end', 'v-start', 'v-end');
                 } else {
+                    // ロック済みのマスについて、ドラッグ判定での消去を完全に防ぐ
                     if(!cell.classList.contains('h-locked-flag')) cell.classList.remove('h');
                     if(!cell.classList.contains('v-locked-flag')) cell.classList.remove('v');
                 }
@@ -961,6 +952,7 @@
             const tag = document.getElementById('tag-' + word);
             if(tag) tag.classList.add('found');
             
+            // 確定したマスの方向（縦・横）を消去されないようにフラグ保持
             document.querySelectorAll('.cell.locked').forEach(cell => {
                 if(cell.classList.contains('h')) cell.classList.add('h-locked-flag');
                 if(cell.classList.contains('v')) cell.classList.add('v-locked-flag');
