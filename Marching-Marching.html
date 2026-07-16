@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Marching Marching - Fun English Activity</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-brown: #a0522d;
+            --accent-green: #2ecc71;
+            --bg-color: #fcf8f2;
+            --text-color: #2c3e50;
+            --marker-h: rgba(255, 215, 0, 0.6); 
+            --marker-v: rgba(255, 127, 80, 0.5);
+            --cell-size: 65px;
+        }
+
+        body {
+            font-family: 'Comic Neue', cursive, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            touch-action: pan-y;
+        }
+
+        #game-container {
+            background: white;
+            border-radius: 25px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.15);
+            padding: 30px;
+            width: 100%;
+            max-width: 950px;
+            text-align: center;
+            border: 6px dashed var(--primary-brown);
+            position: relative;
+            min-height: 550px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            color: #8b4513;
+            font-size: 2.8rem;
+            margin-top: 0;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-color);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .instruction {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 0 0 15px 0;
+        }
+
+        .page {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* Speaker buttons */
+        .speaker-btn {
+            background: var(--primary-brown);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #5c2c0e;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.1s;
+        }
+        .speaker-btn:hover { background: #b5651d; }
+        .speaker-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        .line-speaker {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0 5px;
+            vertical-align: middle;
+        }
+
+        .nav-btn {
+            background-color: var(--accent-green);
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 1.5rem;
+            font-family: inherit;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #27ae60;
+            margin-top: 20px;
+            transition: 0.1s;
+        }
+        .nav-btn:hover { background: #2ecc71; }
+        .nav-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        /* Scene Images style */
+        .scene-display {
+            width: 100%;
+            max-width: 500px;
+            height: 250px;
+            background: #fdfaf6;
+            border: 3px double #d2b48c;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .scene-display img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Page 1: Story Slides */
+        .story-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+        .lyric-box {
+            font-size: 1.6rem;
+            line-height: 1.6;
+            margin: 10px 0;
+            background: #fffdf9;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #f5deb3;
+            width: 100%;
+            max-width: 700px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+        .lyric-line {
+            padding: 4px 0;
+            border-bottom: 1px dashed #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Slide Indicator Dots */
+        .slide-dots {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        .dot {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background-color: #ccc;
+            cursor: pointer;
+        }
+        .dot.active {
+            background-color: var(--primary-brown);
+        }
+
+        /* Page 2: Matching Game */
+        .matching-layout {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 20px;
+        }
+        .item-pool {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            align-items: center;
+            min-height: 80px;
+            background: #fdfaf6;
+            padding: 15px;
+            border-radius: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            border: 2px dashed #d2b48c;
+        }
+        .drag-word {
+            font-size: 1.4rem;
+            padding: 10px 22px;
+            background: white;
+            border: 3px solid #eee;
+            border-radius: 15px;
+            cursor: grab;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            display: inline-block;
+            font-weight: bold;
+            touch-action: none;
+            background-color: #fff9e6;
+        }
+        /* マッチング単語をタップしたときのフィードバック効果 */
+        .drag-word:active {
+            background-color: #ffeaa7;
+        }
+        .match-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5列表示に変更 */
+            gap: 10px;
+            width: 100%;
+        }
+        .match-box {
+            background: #fffdfa;
+            border: 2px solid #ebd3dd;
+            border-radius: 20px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 190px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .match-image-box {
+            width: 100%;
+            height: 90px;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+        }
+        .match-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .drop-zone {
+            width: 100%;
+            min-height: 40px;
+            border: 2px dashed #d2b48c;
+            border-radius: 10px;
+            background: #fcfcfc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #aaa;
+        }
+        .drop-zone.correct {
+            background: #e8f8f5;
+            border-color: #2ecc71;
+            color: #27ae60;
+            font-size: 1.1rem;
+        }
+        .feedback-toast { font-size: 1.4rem; font-weight: bold; color: #e67e22; height: 35px; margin-top: 5px; }
+
+        /* Page 3: Word Search */
+        .wordsearch-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            margin: 15px 0;
+            width: 100%;
+        }
+        #board { 
+            display: grid; 
+            grid-template-columns: repeat(6, var(--cell-size)); 
+            gap: 0; 
+            background-color: #fff; 
+            touch-action: none; 
+            user-select: none; 
+            isolation: isolate; 
+            border: 3px solid #ebd3dd;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .cell { 
+            width: var(--cell-size); 
+            height: var(--cell-size); 
+            line-height: var(--cell-size); 
+            font-size: 38px; 
+            text-align: center; 
+            font-weight: 700; 
+            cursor: pointer; 
+            position: relative; 
+            pointer-events: auto; 
+            text-transform: lowercase;
+        }
+        .cell::after, .cell::before { 
+            content: ""; 
+            position: absolute; 
+            z-index: -1; 
+            mix-blend-mode: multiply; 
+            display: none; 
+            pointer-events: none; 
+        }
+        .cell.h::after { display: block; left: 0; right: 0; top: 15%; bottom: 15%; background-color: var(--marker-h); }
+        .cell.v::before { display: block; left: 15%; right: 15%; top: 0; bottom: 0; background-color: var(--marker-v); }
+        .cell.h-start::after { border-top-left-radius: 30px; border-bottom-left-radius: 30px; }
+        .cell.h-end::after { border-top-right-radius: 30px; border-bottom-right-radius: 30px; }
+        .cell.v-start::before { border-top-left-radius: 30px; border-top-right-radius: 30px; }
+        .cell.v-end::before { border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; }
+        
+        .word-list-side { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 12px; 
+            justify-content: center;
+            align-items: flex-start;
+            min-width: 160px;
+        }
+        .word-tag { 
+            padding: 10px 22px; 
+            background: #fff9e6; 
+            border: 2px solid #f5deb3;
+            border-radius: 20px; 
+            font-weight: bold; 
+            font-size: 1.4rem; 
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 3px 0 #d2b48c;
+            text-transform: lowercase;
+            cursor: pointer; /* タップ可能を示すカーソル */
+            transition: 0.1s;
+        }
+        .word-tag:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+        .word-tag.found { background: #2ecc71; color: white; text-decoration: line-through; box-shadow: 0 3px 0 #27ae60; border-color: #27ae60; cursor: default; }
+
+        .action-button-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .congrats-text {
+            font-size: 1.8rem;
+            color: #2ecc71;
+            font-weight: bold;
+            animation: popIn 0.5s ease-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🐜 Marching Marching 🐜</h1>
+
+    <div id="game-container">
+        
+        <!-- Page 1: Stories & Lyrics -->
+        <div id="page1" class="page active">
+            <h2>Let's Sing and Learn! <button class="speaker-btn" onclick="speakCurrentSlide()">🔊 Read All</button></h2>
+            <div class="story-container">
+                <!-- Illustrated Scene Area with Local Image -->
+                <div class="scene-display" id="scene-illustration">
+                    <img src="" id="story-img" alt="Story Scene">
+                </div>
+                <!-- Slide Dots -->
+                <div class="slide-dots" id="slide-dots"></div>
+                <!-- Lyrics of current scene -->
+                <div class="lyric-box" id="slide-lyrics">
+                    <!-- Dynamic lyric rows with individual play buttons -->
+                </div>
+            </div>
+            <div style="display: flex; gap: 20px;">
+                <button class="nav-btn" style="background: #95a5a6; box-shadow:0 4px 0 #7f8c8d;" onclick="prevSlide()">◀ Back</button>
+                <button class="nav-btn" onclick="nextSlideOrPage()">Next ➔</button>
+            </div>
+        </div>
+
+        <!-- Page 2: Matching Game -->
+        <div id="page2" class="page">
+            <h2>Match Vocabulary & Pictures! <button class="speaker-btn" onclick="speak('Tap words to listen, then drag them to the correct pictures!')">🔊 Listen</button></h2>
+            <div class="instruction">Tap words to hear pronunciation! Drag them to the pictures!</div>
+            <div class="feedback-toast" id="match-toast"></div>
+            
+            <div class="matching-layout">
+                <div class="item-pool" id="match-pool"></div>
+                <div class="match-container">
+                    <div class="match-box">
+                        <div class="match-image-box"><img src="images-marching/ant.jpg" alt="ant"></div>
+                        <div class="drop-zone" id="drop-ant" ondragover="allowDrop(event)" ondrop="dropItem(event, 'ant')">Drop Here</div>
+                    </div>
+                    <div class="match-box">
+                        <div class="match-image-box"><img src="images-marching/sugar.jpg" alt="sugar"></div>
+                        <div class="drop-zone" id="drop-sugar" ondragover="allowDrop(event)" ondrop="dropItem(event, 'sugar')">Drop Here</div>
+                    </div>
+                    <div class="match-box">
+                        <div class="match-image-box"><img src="images-marching/carry.jpg" alt="carry"></div>
+                        <div class="drop-zone" id="drop-carry" ondragover="allowDrop(event)" ondrop="dropItem(event, 'carry')">Drop Here</div>
+                    </div>
+                    <div class="match-box">
+                        <div class="match-image-box"><img src="images-marching/rest.jpg" alt="rest"></div>
+                        <div class="drop-zone" id="drop-rest" ondragover="allowDrop(event)" ondrop="dropItem(event, 'rest')">Drop Here</div>
+                    </div>
+                    <div class="match-box">
+                        <div class="match-image-box"><img src="images-marching/nest.jpg" alt="nest"></div>
+                        <div class="drop-zone" id="drop-nest" ondragover="allowDrop(event)" ondrop="dropItem(event, 'nest')">Drop Here</div>
+                    </div>
+                </div>
+            </div>
+            <button class="nav-btn" onclick="nextPage(3)" style="visibility: hidden;" id="next2">Next Activity ➔</button>
+        </div>
+
+        <!-- Page 3: Word Search (FINAL PAGE) -->
+        <div id="page3" class="page">
+            <h2>Word Search! <button class="speaker-btn" onclick="speak('Find five words in the grid!')">🔊 Listen</button></h2>
+            <div class="instruction">Tap the word list tags to listen! Find: sugar, march, carry, rest, nest</div>
+            <div class="wordsearch-layout">
+                <div id="board"></div>
+                <div class="word-list-side" id="ws-list"></div>
+            </div>
+            <!-- ワードサーチ完了時に現れるお祝いとPlay Againボタン -->
+            <div class="action-button-group" id="ws-actions" style="visibility: hidden;">
+                <div class="congrats-text">🎉 Super Job! You Found Them All! 🎉</div>
+                <button class="nav-btn" onclick="resetAllGame()" style="background-color: #e67e22; box-shadow: 0 4px 0 #d35400; margin-top: 5px;">Play Again 🔄</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // 音声読み上げ設定
+        let preferredVoice = null;
+        function loadVoices() {
+            const voices = window.speechSynthesis.getVoices();
+            if (voices.length === 0) return;
+            preferredVoice = 
+                voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+                voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+                voices.find(v => v.lang.startsWith("en-US")) ||
+                voices.find(v => v.lang.startsWith("en"));
+        }
+        if (typeof window !== 'undefined' && window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = loadVoices;
+            loadVoices();
+        }
+
+        function speak(text, callback) {
+            const synth = window.speechSynthesis;
+            if (!synth) return;
+            synth.cancel();
+            const uttr = new SpeechSynthesisUtterance(text);
+            if (preferredVoice) uttr.voice = preferredVoice;
+            uttr.rate = 0.75;
+            uttr.pitch = 1.1;
+            if (callback) {
+                uttr.onend = callback;
+            }
+            synth.speak(uttr);
+        }
+
+        // --- Page 1: Story Slides Data with local image paths ---
+        const slides = [
+            {
+                image: "images-marching/marching.jpg",
+                lyrics: [
+                    "We are marching, marching! Won't take a rest.",
+                    "Marching, marching! Won't take a rest.",
+                    "Carrying sugar back to our nest.",
+                    "Carrying sugar back to our nest."
+                ]
+            },
+            {
+                image: "images-marching/girls.jpg",
+                lyrics: [
+                    "Ants! Aren't you supposed to be sleeping this time of year?"
+                ]
+            },
+            {
+                image: "images-marching/sweet-smell.jpg",
+                lyrics: [
+                    "Yeah!",
+                    "We were sleeping so tight.",
+                    "We were sleeping so tight.",
+                    "But the sweet smell woke us up at night!"
+                ]
+            },
+            {
+                image: "images-marching/back-to-nest.jpg",
+                lyrics: [
+                    "We are marching, marching! Won't take a rest.",
+                    "Carrying sugar back to our nest."
+                ]
+            }
+        ];
+
+        let currentSlideIdx = 0;
+
+        function loadSlide(index) {
+            currentSlideIdx = index;
+            const imgElement = document.getElementById('story-img');
+            const lyricBox = document.getElementById('slide-lyrics');
+            const dotsContainer = document.getElementById('slide-dots');
+
+            // ローカルフォルダの画像をセット
+            imgElement.src = slides[index].image;
+
+            // 歌詞テキスト更新
+            lyricBox.innerHTML = '';
+            slides[index].lyrics.forEach(line => {
+                const cleanLine = line.replace(/[!?.,]/g, '');
+                const row = document.createElement('div');
+                row.className = 'lyric-line';
+                row.innerHTML = `
+                    <span>${line}</span>
+                    <button class="line-speaker" onclick="speak('${cleanLine.replace(/'/g, "\\'")}')">🔊</button>
+                `;
+                lyricBox.appendChild(row);
+            });
+
+            // インジケータードット更新
+            dotsContainer.innerHTML = '';
+            slides.forEach((_, sIdx) => {
+                const dot = document.createElement('div');
+                dot.className = `dot ${sIdx === index ? 'active' : ''}`;
+                dot.onclick = () => loadSlide(sIdx);
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        function speakCurrentSlide() {
+            const allLyrics = slides[currentSlideIdx].lyrics.join('. ');
+            speak(allLyrics);
+        }
+
+        function prevSlide() {
+            if (currentSlideIdx > 0) {
+                loadSlide(currentSlideIdx - 1);
+            }
+        }
+
+        function nextSlideOrPage() {
+            if (currentSlideIdx < slides.length - 1) {
+                loadSlide(currentSlideIdx + 1);
+            } else {
+                nextPage(2);
+            }
+        }
+
+        // --- Navigation ---
+        function nextPage(pageNumber) {
+            if (window.speechSynthesis) window.speechSynthesis.cancel();
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page' + pageNumber).classList.add('active');
+            if(pageNumber === 1) loadSlide(0);
+            if(pageNumber === 2) setupPage2();
+            if(pageNumber === 3) setupPage3();
+        }
+
+        function resetAllGame() {
+            nextPage(1);
+        }
+
+        // --- Page 2: Drag & Drop Matching Game ---
+        // nestを足した5単語にアップグレード
+        const matchingWords = [
+            { id: 'm-ant', text: 'ant' },
+            { id: 'm-sugar', text: 'sugar' },
+            { id: 'm-carry', text: 'carry' },
+            { id: 'm-rest', text: 'rest' },
+            { id: 'm-nest', text: 'nest' }
+        ];
+        let correctMatches = 0;
+
+        function setupPage2() {
+            correctMatches = 0;
+            document.getElementById('next2').style.visibility = 'hidden';
+            document.getElementById('match-toast').textContent = '';
+            
+            const targets = ['ant', 'sugar', 'carry', 'rest', 'nest'];
+            targets.forEach(t => {
+                const zone = document.getElementById('drop-' + t);
+                zone.textContent = 'Drop Here';
+                zone.className = 'drop-zone';
+            });
+
+            const pool = document.getElementById('match-pool');
+            pool.innerHTML = '';
+            
+            const shuffled = [...matchingWords].sort(() => Math.random() - 0.5);
+            shuffled.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'drag-word';
+                el.id = item.id;
+                el.textContent = item.text;
+                el.draggable = true;
+                
+                // タップまたはクリックした瞬間に発音を読み上げる
+                const playSound = () => speak(item.text);
+                el.addEventListener('click', playSound);
+
+                el.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/plain', item.id); });
+                el.addEventListener('touchstart', onTouchStart, {passive: false});
+                el.addEventListener('touchmove', onTouchMove, {passive: false});
+                el.addEventListener('touchend', onTouchEnd, {passive: false});
+                
+                pool.appendChild(el);
+            });
+        }
+
+        // Touch handlers
+        let activeTouchElement = null;
+        function onTouchStart(e) {
+            activeTouchElement = e.currentTarget;
+            activeTouchElement.style.position = 'fixed';
+            moveAt(e.touches[0].clientX, e.touches[0].clientY);
+            
+            // タッチ開始時にも単語を読み上げる
+            const wordObj = matchingWords.find(w => w.id === activeTouchElement.id);
+            if (wordObj) speak(wordObj.text);
+        }
+        function onTouchMove(e) {
+            if (!activeTouchElement) return;
+            e.preventDefault();
+            moveAt(e.touches[0].clientX, e.touches[0].clientY);
+        }
+        function moveAt(clientX, clientY) {
+            activeTouchElement.style.left = clientX - 50 + 'px';
+            activeTouchElement.style.top = clientY - 20 + 'px';
+            activeTouchElement.style.zIndex = 1000;
+        }
+        function onTouchEnd(e) {
+            if (!activeTouchElement) return;
+            const touch = e.changedTouches[0];
+            activeTouchElement.style.position = '';
+            activeTouchElement.style.zIndex = '';
+            
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            let dropZone = target ? target.closest('.drop-zone') : null;
+            
+            if (dropZone) {
+                const targetKey = dropZone.id.replace('drop-', '');
+                executeMatching(activeTouchElement.id, targetKey, dropZone);
+            } else {
+                setupPage2();
+            }
+            activeTouchElement = null;
+        }
+
+        function allowDrop(e) { e.preventDefault(); }
+        function dropItem(e, targetKey) {
+            e.preventDefault();
+            const id = e.dataTransfer.getData('text/plain');
+            let dropZone = e.currentTarget;
+            executeMatching(id, targetKey, dropZone);
+        }
+
+        function executeMatching(wordId, targetKey, dropZoneElement) {
+            const wordObj = matchingWords.find(w => w.id === wordId);
+            if (!wordObj) return;
+
+            const isCorrect = (wordObj.text === targetKey);
+            const toast = document.getElementById('match-toast');
+
+            if (isCorrect) {
+                toast.style.color = '#2ecc71';
+                toast.textContent = `Correct! ✨ ${wordObj.text}`;
+                speak(wordObj.text);
+
+                dropZoneElement.textContent = wordObj.text;
+                dropZoneElement.classList.add('correct');
+
+                const origEl = document.getElementById(wordId);
+                if (origEl) origEl.remove();
+
+                correctMatches++;
+                if (correctMatches === matchingWords.length) {
+                    toast.textContent = "Awesome! You completed all matches! 🎉";
+                    document.getElementById('next2').style.visibility = 'visible';
+                }
+            } else {
+                toast.style.color = '#e74c3c';
+                toast.textContent = `Try again! That's not the correct matching.`;
+                speak("Try again");
+                if (activeTouchElement) setupPage2();
+            }
+        }
+
+        // --- Page 3: Word Search (Final Step) ---
+        const wordsData = ["sugar", "march", "carry", "rest", "nest"];
+        const boardSize = 6;
+        let grid = [];
+        let wordLocations = {}; 
+        let foundWords = new Set();
+        let isDragging = false, dragType = null, startR = null, startC = null;
+        let cellRects = []; 
+
+        function setupPage3() {
+            const board = document.getElementById("board");
+            const listEl = document.getElementById("ws-list");
+            board.innerHTML = ""; listEl.innerHTML = ""; wordLocations = {}; foundWords.clear();
+            document.getElementById('ws-actions').style.visibility = 'hidden';
+
+            grid = Array.from({length: boardSize}, () => Array(boardSize).fill(''));
+            let sortedWords = [...wordsData].sort((a,b) => b.length - a.length);
+            
+            sortedWords.forEach(word => {
+                let placed = false; let attempts = 0;
+                while (!placed && attempts < 300) {
+                    attempts++;
+                    let isH = Math.random() < 0.5;
+                    let r = Math.floor(Math.random() * (isH ? boardSize : (boardSize - word.length + 1)));
+                    let c = Math.floor(Math.random() * (isH ? (boardSize - word.length + 1) : boardSize));
+                    
+                    let canPlace = true;
+                    for (let i = 0; i < word.length; i++) {
+                        let currR = isH ? r : r + i; let currC = isH ? c + i : c;
+                        if (grid[currR][currC] !== '' && grid[currR][currC] !== word[i]) { canPlace = false; break; }
+                    }
+                    
+                    if (canPlace) {
+                        for (let i = 0; i < word.length; i++) {
+                            let currR = isH ? r : r + i; let currC = isH ? c + i : c;
+                            grid[currR][currC] = word[i];
+                        }
+                        wordLocations[word] = {
+                            startR: r,
+                            startC: c,
+                            endR: isH ? r : r + word.length - 1,
+                            endC: isH ? c + word.length - 1 : c,
+                            type: isH ? 'h' : 'v'
+                        };
+                        placed = true;
+                    }
+                }
+            });
+
+            for(let i=0; i<boardSize; i++){
+                for(let j=0; j<boardSize; j++){
+                    if(grid[i][j] === '') grid[i][j] = String.fromCharCode(97 + Math.floor(Math.random()*26));
+                }
+            }
+
+            grid.forEach((row, r) => row.forEach((ch, c) => {
+                const cell = document.createElement("div");
+                cell.className = "cell"; cell.textContent = ch.toLowerCase();
+                cell.dataset.r = r; cell.dataset.c = c;
+                
+                cell.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(r, c); });
+                cell.addEventListener('mouseenter', () => { if(isDragging) onMove(r, c); });
+                board.appendChild(cell);
+            }));
+
+            setTimeout(updateCellRects, 300);
+
+            board.addEventListener('touchstart', (e) => {
+                updateCellRects(); 
+                const touch = e.touches[0];
+                const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
+                if (targetCell) {
+                    onStart(parseInt(targetCell.dataset.r), parseInt(targetCell.dataset.c));
+                }
+                e.preventDefault();
+            }, {passive: false});
+
+            board.addEventListener('touchmove', (e) => {
+                const touch = e.touches[0];
+                const targetCell = getCellFromCoords(touch.clientX, touch.clientY);
+                if (targetCell) {
+                    onMove(parseInt(targetCell.dataset.r), parseInt(targetCell.dataset.c));
+                }
+                e.preventDefault();
+            }, {passive: false});
+
+            window.addEventListener('mouseup', onEnd);
+            window.addEventListener('touchend', onEnd);
+            window.addEventListener('resize', updateCellRects);
+
+            wordsData.forEach(w => {
+                const tag = document.createElement('span');
+                tag.className = 'word-tag';
+                tag.id = 'tag-' + w;
+                tag.textContent = w.toLowerCase();
+                
+                // ワードリストの単語タグをタップしたときにも読み上げる
+                tag.addEventListener('click', () => {
+                    speak(w);
+                });
+
+                listEl.appendChild(tag);
+            });
+        }
+
+        function updateCellRects() {
+            cellRects = [];
+            document.querySelectorAll('#board .cell').forEach(cell => {
+                const rect = cell.getBoundingClientRect();
+                cellRects.push({
+                    element: cell,
+                    left: rect.left,
+                    right: rect.right,
+                    top: rect.top,
+                    bottom: rect.bottom
+                });
+            });
+        }
+
+        function getCellFromCoords(x, y) {
+            for (let i = 0; i < cellRects.length; i++) {
+                const c = cellRects[i];
+                if (x >= c.left && x <= c.right && y >= c.top && y <= c.bottom) {
+                    return c.element;
+                }
+            }
+            return null;
+        }
+
+        function onStart(r, c) {
+            isDragging = true; startR = r; startC = c; dragType = null;
+            clearTemporaryMarkers();
+        }
+
+        function onMove(r, c) {
+            if (!isDragging) return;
+            if (dragType === null) {
+                if (r !== startR) { dragType = 'v'; }
+                else if (c !== startC) { dragType = 'h'; }
+                else { return; }
+            }
+            
+            clearTemporaryMarkers();
+
+            let minR = Math.min(startR, r), maxR = Math.max(startR, r);
+            let minC = Math.min(startC, c), maxC = Math.max(startC, c);
+
+            if (dragType === 'h') {
+                for(let currC = minC; currC <= maxC; currC++) {
+                    const cell = document.querySelector(`.cell[data-r="${startR}"][data-c="${currC}"]`);
+                    if(cell) cell.classList.add('h');
+                }
+            } else if (dragType === 'v') {
+                for(let currR = minR; currR <= maxR; currR++) {
+                    const cell = document.querySelector(`.cell[data-r="${currR}"][data-c="${startC}"]`);
+                    if(cell) cell.classList.add('v');
+                }
+            }
+            updateEdgeStyles();
+        }
+
+        function onEnd() { 
+            if (!isDragging) return;
+            isDragging = false;
+
+            let currentCells = document.querySelectorAll('.cell.h, .cell.v');
+            if(currentCells.length === 0) return;
+
+            let finalMinR = 99, finalMaxR = -1, finalMinC = 99, finalMaxC = -1;
+            currentCells.forEach(cell => {
+                if(cell.classList.contains('locked')) return; 
+                
+                let r = parseInt(cell.dataset.r);
+                let c = parseInt(cell.dataset.c);
+                if(r < finalMinR) finalMinR = r;
+                if(r > finalMaxR) finalMaxR = r;
+                if(c < finalMinC) finalMinC = c;
+                if(c > finalMaxC) finalMaxC = c;
+            });
+
+            let matchedWord = null;
+            wordsData.forEach(word => {
+                if (foundWords.has(word)) return;
+                let loc = wordLocations[word];
+                if (!loc) return;
+
+                let matchNormal = (finalMinR === loc.startR && finalMaxR === loc.endR && finalMinC === loc.startC && finalMaxC === loc.endC);
+
+                if (matchNormal && dragType === loc.type) {
+                    matchedWord = word;
+                }
+            });
+
+            if (matchedWord) {
+                currentCells.forEach(cell => {
+                    if (cell.classList.contains(dragType)) {
+                        cell.classList.add('locked'); 
+                    }
+                });
+                markWordFound(matchedWord);
+            } else {
+                clearTemporaryMarkers();
+            }
+            updateEdgeStyles();
+        }
+
+        function clearTemporaryMarkers() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                if(!cell.classList.contains('locked')) {
+                    cell.classList.remove('h', 'v', 'h-start', 'h-end', 'v-start', 'v-end');
+                } else {
+                    if(!cell.classList.contains('h-locked-flag')) cell.classList.remove('h');
+                    if(!cell.classList.contains('v-locked-flag')) cell.classList.remove('v');
+                }
+            });
+        }
+
+        function updateEdgeStyles() {
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.classList.remove('h-start', 'h-end', 'v-start', 'v-end');
+                const r = parseInt(cell.dataset.r), c = parseInt(cell.dataset.c);
+                if (cell.classList.contains('h')) {
+                    const prev = document.querySelector(`.cell[data-r="${r}"][data-c="${c-1}"]`);
+                    const next = document.querySelector(`.cell[data-r="${r}"][data-c="${c+1}"]`);
+                    if (!prev || !prev.classList.contains('h')) cell.classList.add('h-start');
+                    if (!next || !next.classList.contains('h')) cell.classList.add('h-end');
+                }
+                if (cell.classList.contains('v')) {
+                    const prev = document.querySelector(`.cell[data-r="${r-1}"][data-c="${c}"]`);
+                    const next = document.querySelector(`.cell[data-r="${r+1}"][data-c="${c}"]`);
+                    if (!prev || !prev.classList.contains('v')) cell.classList.add('v-start');
+                    if (!next || !next.classList.contains('v')) cell.classList.add('v-end');
+                }
+            });
+        }
+
+        function markWordFound(word) {
+            foundWords.add(word);
+            const tag = document.getElementById('tag-' + word);
+            if(tag) tag.classList.add('found');
+            
+            document.querySelectorAll('.cell.locked').forEach(cell => {
+                if(cell.classList.contains('h')) cell.classList.add('h-locked-flag');
+                if(cell.classList.contains('v')) cell.classList.add('v-locked-flag');
+            });
+            
+            speak(word);
+
+            if (foundWords.size === wordsData.length) {
+                document.getElementById('ws-actions').style.visibility = 'visible';
+                speak("Super Job! You Found Them All!");
+            }
+        }
+
+        // 最初のスライドをロード
+        loadSlide(0);
+    </script>
+</body>
+</html>
