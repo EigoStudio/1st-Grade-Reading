@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survival School English Quiz!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3498db;
+            --success-green: #2ecc71;
+            --accent-orange: #e67e22;
+            --accent-pink: #e91e63;
+            --bg-color: #eef2f5;
+            --text-color: #2c3e50;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Comic Neue', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            border: 6px dashed #3498db;
+            position: relative;
+        }
+        h1 { color: #2c3e50; font-size: 2.2rem; margin-bottom: 5px; font-weight: 700; }
+        .subtitle { color: #7f8c8d; font-size: 1.1rem; margin-bottom: 25px; font-weight: bold; }
+        
+        .quiz-page { display: none; animation: fadeIn 0.4s ease-out; }
+        .quiz-page.active { display: block; }
+        
+        .page-indicator {
+            background: #e1f5fe; color: #0288d1; padding: 6px 18px; border-radius: 50px;
+            display: inline-block; margin-bottom: 20px; font-weight: bold; font-size: 1.1rem;
+        }
+        
+        /* シチュエーション表示エリア */
+        .situation-box {
+            background: #f8f9fa; border: 3px solid #dee2e6; border-radius: 20px;
+            padding: 20px; margin-bottom: 20px;
+        }
+        .situation-eng { font-size: 2rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 8px; }
+        .situation-jp { font-size: 1.2rem; color: #7f8c8d; font-weight: bold; }
+        
+        /* 問いかけバルーン */
+        .question-balloon {
+            background: #fff3e0; border: 3px dashed #ffb74d; border-radius: 15px;
+            padding: 12px; font-size: 1.6rem; font-weight: bold; color: #e65100;
+            margin: 15px auto; max-width: 500px;
+            animation: pulse 2s infinite;
+        }
+
+        /* 画像コンテナ */
+        .image-container {
+            width: 100%; max-width: 400px; aspect-ratio: 4 / 3; margin: 0 auto 20px auto;
+            background: #edf2f7; border-radius: 20px; overflow: hidden;
+            border: 3px solid #cbd5e0; display: flex; justify-content: center; align-items: center;
+        }
+        .image-container img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* 答え合わせボタン */
+        .check-btn {
+            background: var(--accent-orange); color: white; font-family: inherit;
+            font-size: 1.4rem; font-weight: bold; padding: 15px 40px; border: none;
+            border-radius: 50px; cursor: pointer; margin: 15px 0;
+            box-shadow: 0 5px 0 #d35400; transition: all 0.1s;
+        }
+        .check-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #d35400; }
+
+        /* バーン！と出る答えのボックス */
+        .answer-box {
+            display: none; opacity: 0; transform: scale(0.9); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #e8f8f5; border: 4px solid var(--success-green); border-radius: 25px; padding: 25px; margin: 25px 0;
+        }
+        .answer-box.show { display: block; opacity: 1; transform: scale(1); }
+        .answer-title { color: var(--success-green); font-size: 1.3rem; font-weight: bold; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* フレーズのデザイン */
+        .answer-phrases {
+            display: flex; flex-direction: column; gap: 12px; align-items: center; margin-bottom: 15px;
+        }
+        .phrase-item {
+            font-size: 2.1rem; font-weight: 700; color: #2c3e50; line-height: 1.3;
+            background: white; padding: 12px 25px; border-radius: 15px; border: 2px solid #a3e4d7;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05); width: 100%; max-width: 650px;
+        }
+        .answer-jp { font-size: 1.2rem; color: #566573; font-weight: bold; margin-top: 5px; }
+
+        /* コントロール周り */
+        .controls { margin-top: 30px; display: flex; justify-content: center; }
+        .btn-row { display: flex; justify-content: center; align-items: center; gap: 20px; width: 100%; max-width: 600px; }
+        
+        button { font-family: inherit; font-weight: bold; border: none; cursor: pointer; transition: all 0.2s; }
+        button:active { transform: translateY(2px); }
+        
+        .speaker-btn {
+            background: var(--accent-pink); color: white; font-size: 1.2rem;
+            padding: 10px 24px; border-radius: 50px; box-shadow: 0 4px 0 #c2185b;
+            display: inline-flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .speaker-btn:hover { background: #f06292; }
+        
+        .nav-btn { padding: 12px 30px; font-size: 1.2rem; border-radius: 50px; color: white; min-width: 140px; }
+        .prev-btn { background: #95a5a6; box-shadow: 0 4px 0 #7f8c8d; }
+        .next-btn { background: var(--primary-blue); box-shadow: 0 4px 0 #2980b9; }
+        .finish-btn { background: var(--success-green); box-shadow: 0 4px 0 #27ae60; }
+        
+        #ending-page { display: none; animation: fadeIn 0.5s ease-out; padding: 40px 20px; }
+        #ending-page h2 { color: var(--success-green); font-size: 3rem; margin-bottom: 15px; }
+        #ending-page p { font-size: 1.6rem; margin-bottom: 30px; color: #34495e; font-weight: bold; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quiz-container">
+        <h1>10 Useful Phrases! 🏫</h1>
+        <div class="subtitle">Let's practice and get ready for school!</div>
+        
+        <div id="dynamic-pages"></div>
+    </div>
+
+    <!-- エンディング画面 -->
+    <div id="ending-page">
+        <h2>You are Ready! 🌟</h2>
+        <p>You mastered all 10 school survival phrases!</p>
+        <div style="font-size: 6rem; margin-bottom: 40px;">🇯🇵🇻🇳🇬🇧🏫🎒</div>
+        <button class="nav-btn next-btn" onclick="location.reload()">Start Again</button>
+    </div>
+</div>
+
+<script>
+    const quizData = [
+        {
+            sitEng: "You have a question.",
+            sitJp: "しつもんがあるとき",
+            image: "images-survival-English/survival-1.jpg",
+            phrases: ["I have a question."],
+            phraseJp: "しつもんがあります！"
+        },
+        {
+            sitEng: "You want to go to the restroom.",
+            sitJp: "トイレにいきたいとき",
+            image: "images-survival-English/survival-2.jpg",
+            phrases: ["May I go to the restroom?"],
+            phraseJp: "トイレにいってもいいですか？"
+        },
+        {
+            sitEng: "Someone hit you!",
+            sitJp: "だれかが自分をたたいてきたとき",
+            image: "images-survival-English/survival-3.jpg",
+            phrases: ["He hit me!", "She hit me!"],
+            phraseJp: "たたかれました！"
+        },
+        {
+            sitEng: "Someone said something mean.",
+            sitJp: "だれかがいじわる・しつれいな事を言ってきたとき",
+            image: "images-survival-English/survival-4.jpg",
+            phrases: ["That's not nice."],
+            phraseJp: "それはよくないよ / しつれいだよ！"
+        },
+        {
+            sitEng: "You didn't hear them.",
+            sitJp: "もういちど言ってほしいとき（聞き取れなかったとき）",
+            image: "images-survival-English/survival-5.jpg",
+            phrases: ["I didn't get that. Say that again, please."],
+            phraseJp: "聞き取れなかったよ。もう一回言って？"
+        },
+        {
+            sitEng: "You don't understand.",
+            sitJp: "いみがわからないとき",
+            image: "images-survival-English/survival-6.jpg",
+            phrases: ["I don't get it."],
+            phraseJp: "（いみが）わかりません。わからなくなっちゃった。"
+        },
+        {
+            sitEng: "You need help.",
+            sitJp: "てつだってほしいとき",
+            image: "images-survival-English/survival-7.jpg",
+            phrases: ["Can you help me?", "I need help."],
+            phraseJp: "てつだって？ / たすけて！"
+        },
+        {
+            sitEng: "You want to play together.",
+            sitJp: "なかまに入りたいとき",
+            image: "images-survival-English/survival-8.jpg",
+            phrases: ["Can I join?", "Can I play?"],
+            phraseJp: "なかまにいれて？ / いっしょにあそぼう？"
+        },
+        {
+            sitEng: "It's your turn.",
+            sitJp: "じぶんの順番（ばん）のとき",
+            image: "images-survival-English/survival-9.jpg",
+            phrases: ["It's my turn."],
+            phraseJp: "わたしのばんだよ！"
+        },
+        {
+            sitEng: "You feel sick.",
+            sitJp: "からだの具合（ぐあい）がわるいとき",
+            image: "images-survival-English/survival-10.jpg",
+            phrases: ["I don't feel well.", "My tummy hurts."],
+            phraseJp: "きぶんがわるいです。 / おなかがいたいよ。"
+        }
+    ];
+
+    let preferredVoice = null;
+
+    function loadVoices() {
+        if (!window.speechSynthesis) return;
+        const voices = window.speechSynthesis.getVoices();
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US")) ||
+            voices.find(v => v.lang.startsWith("en"));
+    }
+    
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+    }
+
+    function speakText(text) {
+        const synth = window.speechSynthesis;
+        if (!synth) return;
+        synth.cancel();
+        
+        // 音声認識エラーを防ぐため、文字列をきれいにする処理を通します
+        const sanitizedText = text.replace(/["']/g, "").trim();
+        const uttr = new SpeechSynthesisUtterance(sanitizedText);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        uttr.rate = 0.75;  
+        uttr.pitch = 1.1; 
+        synth.speak(uttr);
+    }
+
+    // 複数のフレーズを安全につなげて読み上げるためのヘルパー関数
+    function speakPhrases(phrasesArray) {
+        // 各フレーズをドットやスペースで繋げて1つのなめらかな文章にする
+        const combinedText = phrasesArray.join(" ");
+        speakText(combinedText);
+    }
+
+    const pagesContainer = document.getElementById('dynamic-pages');
+    quizData.forEach((data, index) => {
+        const pageNum = index + 1;
+        const isFirst = pageNum === 1;
+        const isLast = pageNum === quizData.length;
+        
+        const phrasesHTML = data.phrases.map(p => `<div class="phrase-item">${p}</div>`).join('');
+        
+        // JSONの文字列エスケープ問題を回避するため、配列形式で安全に関数に渡す処理にしています
+        const escapedPhrasesJson = JSON.stringify(data.phrases).replace(/"/g, '&quot;');
+
+        const pageHTML = `
+            <div class="quiz-page ${isFirst ? 'active' : ''}" id="p${pageNum}">
+                <span class="page-indicator">Question ${pageNum} / ${quizData.length}</span>
+                
+                <div class="situation-box">
+                    <div class="situation-eng">${data.sitEng}</div>
+                    <div class="situation-jp">${data.sitJp}</div>
+                </div>
+
+                <div class="image-container">
+                    <img src="${data.image}" alt="${data.sitEng}">
+                </div>
+
+                <div class="question-balloon">What do you say?</div>
+                
+                <button class="check-btn" onclick="revealAnswer(${pageNum})">Answer</button>
+                
+                <div class="answer-box" id="answer-box-${pageNum}">
+                    <div class="answer-title">🎉 Answer</div>
+                    <div class="answer-phrases">
+                        ${phrasesHTML}
+                    </div>
+                    <div class="answer-jp">${data.phraseJp}</div>
+                    <div style="margin-top: 15px;">
+                        <button class="speaker-btn" onclick="speakPhrases(${escapedPhrasesJson})">🔊 Listen</button>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div class="btn-row">
+                        ${!isFirst ? `<button class="nav-btn prev-btn" onclick="prevPage(${pageNum})">⬅ Back</button>` : '<div style="width:140px"></div>'}
+                        ${!isLast ? `<button class="nav-btn next-btn" onclick="nextPage(${pageNum})">Next ➔</button>` : `<button class="nav-btn finish-btn" onclick="showEnding()">Finish ➔</button>`}
+                    </div>
+                </div>
+            </div>
+        `;
+        pagesContainer.insertAdjacentHTML('beforeend', pageHTML);
+    });
+
+    function speakSituation(pageNum) {
+        const data = quizData[pageNum - 1];
+        speakText(`${data.sitEng} ... What do you say?`);
+    }
+
+    setTimeout(() => { speakSituation(1); }, 600);
+
+    function revealAnswer(pageNum) {
+        const box = document.getElementById('answer-box-' + pageNum);
+        if (box && !box.classList.contains('show')) {
+            box.classList.add('show');
+            speakPhrases(quizData[pageNum - 1].phrases);
+        }
+    }
+
+    function nextPage(current) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current + 1)).classList.add('active');
+        setTimeout(() => { speakSituation(current + 1); }, 300);
+    }
+
+    function prevPage(current) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current - 1)).classList.add('active');
+        setTimeout(() => { speakSituation(current - 1); }, 300);
+    }
+
+    function showEnding() {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('ending-page').style.display = 'block';
+        speakText("Super good job! You mastered all 10 school survival phrases!");
+    }
+</script>
+</body>
+</html>
