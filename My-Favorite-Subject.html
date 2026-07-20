@@ -662,34 +662,56 @@
     }
 
     let activeTouchEl = null;
+
     function handleTouchStart(e) {
-        activeTouchEl = e.target;
-        activeTouchEl.style.position = 'absolute';
+        activeTouchEl = e.target.closest('.drag-word'); // 確実に要素を掴む
+        if (!activeTouchEl) return;
+        
+        // 絶対配置にして動かせるようにする
+        activeTouchEl.style.position = 'fixed'; // pageYのズレを防ぐためfixedを推奨
         activeTouchEl.style.zIndex = '1000';
+        
+        // 初期の位置を指の直下に合わせる
+        const touch = e.touches[0];
+        activeTouchEl.style.left = (touch.clientX - activeTouchEl.offsetWidth / 2) + 'px';
+        activeTouchEl.style.top = (touch.clientY - activeTouchEl.offsetHeight / 2) + 'px';
     }
+
     function handleTouchMove(e) {
         if (!activeTouchEl) return;
-        e.preventDefault();
+        e.preventDefault(); // 画面のスクロールを止める
+        
         const touch = e.touches[0];
-        activeTouchEl.style.left = (touch.pageX - activeTouchEl.offsetWidth / 2) + 'px';
-        activeTouchEl.style.top = (touch.pageY - activeTouchEl.offsetHeight / 2) + 'px';
+        activeTouchEl.style.left = (touch.clientX - activeTouchEl.offsetWidth / 2) + 'px';
+        activeTouchEl.style.top = (touch.clientY - activeTouchEl.offsetHeight / 2) + 'px';
+        
+        // 【重要】移動中は一時的に下の要素を検知できるようにポインターイベントを無効化
+        activeTouchEl.style.pointerEvents = 'none';
     }
+
     function handleTouchEnd(e) {
         if (!activeTouchEl) return;
+        
+        // changedTouches から指が離れた瞬間の座標を取得
         const touch = e.changedTouches[0];
+        
+        // 指のターゲットにある要素（ドロップ先）を探す
+        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+        const dropBox = targetEl ? targetEl.closest('.drop-box') : null;
+        
+        // スタイルを元に戻す
         activeTouchEl.style.position = '';
         activeTouchEl.style.left = '';
         activeTouchEl.style.top = '';
         activeTouchEl.style.zIndex = '';
+        activeTouchEl.style.pointerEvents = ''; // 元に戻す
 
-        const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
-        const dropBox = targetEl ? targetEl.closest('.drop-box') : null;
-        
         if (dropBox) {
             const draggedId = activeTouchEl.id.replace('drag-', '');
             const targetId = dropBox.id.replace('drop-', '');
             checkDrop(draggedId, targetId);
         }
+        
         activeTouchEl = null;
     }
 
