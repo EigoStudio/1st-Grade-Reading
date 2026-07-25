@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survival School English Role-Play Activity!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3498db;
+            --success-green: #2ecc71;
+            --accent-orange: #e67e22;
+            --accent-pink: #e91e63;
+            --bg-color: #eef2f5;
+            --text-color: #2c3e50;
+            --partner-bg: #f0f4f8;
+            --my-bg: #e3f2fd;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Comic Neue', 'Zen Maru Gothic', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            padding: 20px 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: center;
+            border: 4px dashed #3498db;
+            position: relative;
+        }
+        h1 { color: #2c3e50; font-size: 1.8rem; margin-bottom: 2px; font-weight: 700; }
+        .subtitle { color: #7f8c8d; font-size: 0.95rem; margin-bottom: 2px; font-weight: bold; }
+        .role-hint { color: #7f8c8d; font-size: 0.9rem; margin-bottom: 12px; font-weight: bold; }
+        
+        .quiz-page { display: none; animation: fadeIn 0.3s ease-out; }
+        .quiz-page.active { display: block; }
+        
+        .page-indicator {
+            background: #e1f5fe; color: #0288d1; padding: 4px 14px; border-radius: 50px;
+            display: inline-block; margin-bottom: 10px; font-weight: bold; font-size: 0.95rem;
+        }
+        
+        /* シチュエーション表示エリア */
+        .situation-box {
+            background: #f8f9fa; border: 2px solid #dee2e6; border-radius: 16px;
+            padding: 10px 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; text-align: left;
+        }
+        .situation-text { flex-grow: 1; }
+        .situation-eng { font-size: 1.3rem; font-weight: 700; color: var(--primary-blue); line-height: 1.2; }
+        .situation-jp { font-size: 0.95rem; color: #7f8c8d; font-weight: bold; margin-top: 2px; }
+        
+        /* Pictureボタン */
+        .picture-btn {
+            background: #9b59b6; color: white; font-family: inherit;
+            font-size: 1rem; font-weight: bold; padding: 6px 16px; border: none;
+            border-radius: 50px; cursor: pointer; white-space: nowrap; margin-left: 10px;
+            box-shadow: 0 3px 0 #8e44ad; transition: all 0.1s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .picture-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #8e44ad; }
+
+        /* 画像モーダル (ポップアップ) */
+        .modal {
+            display: none; position: fixed; z-index: 1000;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.85);
+            justify-content: center; align-items: center;
+            animation: fadeIn 0.2s;
+        }
+        .modal-content {
+            max-width: 90%; max-height: 85%; border-radius: 15px;
+            box-shadow: 0 0 25px rgba(255,255,255,0.2);
+            object-fit: contain;
+        }
+        .close-modal {
+            position: absolute; top: 20px; right: 35px;
+            color: #fff; font-size: 40px; font-weight: bold;
+            cursor: pointer; transition: color 0.2s;
+        }
+        .close-modal:hover { color: var(--accent-orange); }
+
+        /* 会話ダイアログ表示エリア */
+        .dialogue-box {
+            background: #fdfdfd; border: 2px solid #cbd5e0; border-radius: 18px; padding: 12px 14px; margin: 10px 0;
+            text-align: left;
+        }
+        
+        .dialogue-flow {
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        
+        .dialogue-bubble {
+            padding: 8px 14px; border-radius: 16px; position: relative; max-width: 88%; line-height: 1.3;
+            display: flex; align-items: center; gap: 10px; justify-content: space-between;
+        }
+        .partner-bubble {
+            background: var(--partner-bg); border: 2px solid #b0bec5; align-self: flex-start;
+            border-bottom-left-radius: 4px; color: #37474f;
+        }
+        .my-bubble {
+            background: var(--my-bg); border: 2px solid #90caf9; align-self: flex-end;
+            border-bottom-right-radius: 4px; color: #0d47a1; transition: all 0.2s ease;
+        }
+        
+        .bubble-content {
+            flex-grow: 1;
+        }
+        
+        .phrase-text { font-size: 1.25rem; font-weight: 700; word-break: break-word; }
+        .phrase-text.jp-mode { color: #1a237e; font-family: 'Zen Maru Gothic', sans-serif; font-size: 1.15rem; }
+        .phrase-text.eng-mode { color: #0d47a1; animation: fadeIn 0.2s; }
+
+        .audio-icon-btn {
+            background: #ffffff; border: 1.5px solid #cbd5e0; font-size: 1.1rem; cursor: pointer;
+            padding: 4px 8px; border-radius: 50px; flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.15s;
+            display: inline-flex; align-items: center; justify-content: center;
+        }
+        .audio-icon-btn:hover { background: #f1f5f9; transform: scale(1.05); }
+
+        /* Answerボタン */
+        .check-btn {
+            background: var(--accent-orange); color: white; font-family: inherit;
+            font-size: 1.2rem; font-weight: bold; padding: 10px 30px; border: none;
+            border-radius: 50px; cursor: pointer; margin: 6px 0 10px 0;
+            box-shadow: 0 4px 0 #d35400; transition: all 0.1s;
+        }
+        .check-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #d35400; }
+        .check-btn.revealed { background: var(--success-green); box-shadow: 0 4px 0 #27ae60; }
+
+        /* コントロール周り */
+        .controls { margin-top: 10px; display: flex; justify-content: center; }
+        .btn-row { display: flex; justify-content: center; align-items: center; gap: 15px; width: 100%; max-width: 500px; }
+        
+        button { font-family: inherit; font-weight: bold; border: none; cursor: pointer; transition: all 0.2s; }
+        button:active { transform: translateY(2px); }
+        
+        .nav-btn { padding: 10px 24px; font-size: 1.1rem; border-radius: 50px; color: white; min-width: 120px; }
+        .prev-btn { background: #95a5a6; box-shadow: 0 3px 0 #7f8c8d; }
+        .next-btn { background: var(--primary-blue); box-shadow: 0 3px 0 #2980b9; }
+        .finish-btn { background: var(--success-green); box-shadow: 0 3px 0 #27ae60; }
+        
+        #ending-page { display: none; animation: fadeIn 0.4s ease-out; padding: 30px 15px; }
+        #ending-page h2 { color: var(--success-green); font-size: 2.5rem; margin-bottom: 10px; }
+        #ending-page p { font-size: 1.4rem; margin-bottom: 25px; color: #34495e; font-weight: bold; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="quiz-container">
+        <h1>Role Play Survival English! 🏫</h1>
+        <div class="subtitle">Look at the Japanese dialogue, guess the English, then click Answer!</div>
+        <div class="role-hint">(The blue bubbles on the right are your part. Guess what to say!)</div>
+        
+        <div id="dynamic-pages"></div>
+    </div>
+
+    <!-- エンディング画面 -->
+    <div id="ending-page">
+        <h2>You are Ready! 🌟</h2>
+        <p>You mastered all Role Play dialogues!</p>
+        <div style="font-size: 5rem; margin-bottom: 30px;">🏫🎒🗣️✨</div>
+        <button class="nav-btn next-btn" onclick="location.reload()">Start Again</button>
+    </div>
+</div>
+
+<!-- 画像ポップアップ用モーダル -->
+<div id="imageModal" class="modal" onclick="closeModal()">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modalImage" alt="Enlarged view">
+</div>
+
+<script>
+    const quizData = [
+        {
+            sitEng: "Asking a Question",
+            sitJp: "質問があるとき",
+            image: "images-survival-English/survival-1.jpg",
+            dialogue: [
+                { role: "me", eng: "I have a question.", jp: "1つ質問があります。" },
+                { role: "partner", eng: "What is it?" },
+                { role: "me", eng: "What page are we on? / Where is it? / What does it mean?", jp: "今、何ページですか？ / それはどこにありますか？ / それは何という意味ですか？" }
+            ]
+        },
+        {
+            sitEng: "Going to the Restroom",
+            sitJp: "トイレに行きたいとき",
+            image: "images-survival-English/survival-2.jpg",
+            dialogue: [
+                { role: "me", eng: "May I go to the restroom?", jp: "トイレに行ってもいいですか？" },
+                { role: "partner", eng: "Sure, go ahead." },
+                { role: "me", eng: "Thank you.", jp: "ありがとうございます。" }
+            ]
+        },
+        {
+            sitEng: "Getting Hit / Pushed",
+            sitJp: "他の子供にぶたれた・押されたとき",
+            image: "images-survival-English/survival-3.jpg",
+            dialogue: [
+                { role: "partner", eng: "Are you all right?" },
+                { role: "me", eng: "No! He hit me! / No! She pushed me!", jp: "いいえ、彼にぶたれました！ / いいえ、彼女に押されました！" },
+                { role: "partner", eng: "Are you hurt?" },
+                { role: "me", eng: "Yes, my head hurts. / Yes, my knee hurts.", jp: "はい、頭が痛いです。 / はい、ひざが痛いです。" }
+            ]
+        },
+        {
+            sitEng: "Standing Up to Someone Mean",
+            sitJp: "意地悪な子に嫌味を言われたとき",
+            image: "images-survival-English/survival-4.jpg",
+            dialogue: [
+                { role: "me", eng: "That's not nice. You hurt my feelings.", jp: "それは良くないよ。あなたは、私の気持ちを傷つけたのよ。" },
+                { role: "partner", eng: "Sorry." },
+                { role: "me", eng: "That's okay.", jp: "いいよ。（一度目は許してあげましょう）" }
+            ]
+        },
+        {
+            sitEng: "Asking to Speak Slowly",
+            sitJp: "先生が早口で聞き取れなかったとき",
+            image: "images-survival-English/survival-5.jpg",
+            dialogue: [
+                { role: "me", eng: "I didn't get that. Say that again, please.", jp: "聞き取れませんでした。もう一度言ってください。" },
+                { role: "partner", eng: "(Repeats quickly...)" },
+                { role: "me", eng: "Slowly, please.", jp: "ゆっくりでお願いします。" }
+            ]
+        },
+        {
+            sitEng: "Needing Help & Don't Understand",
+            sitJp: "手伝ってほしい・解き方や意味が分からないとき",
+            image: "images-survival-English/survival-6.jpg",
+            dialogue: [
+                { role: "me", eng: "I need help. / Can you help me?", jp: "助けが必要です。/ 手伝ってくれますか？" },
+                { role: "partner", eng: "What's the matter?" },
+                { role: "me", eng: "This is too hard. I don't get it.", jp: "難しすぎます。分かりません。" },
+                { role: "partner", eng: "Let me help you out." }
+            ]
+        },
+        {
+            sitEng: "Joining a Game",
+            sitJp: "楽しそうに遊んでいる仲間に入りたいとき",
+            image: "images-survival-English/survival-8.jpg",
+            dialogue: [
+                { role: "me", eng: "That looks fun! Can I play too?", jp: "楽しそうだね！私もい〜れ〜て〜。" },
+                { role: "partner", eng: "Sure!" },
+                { role: "me", eng: "Thank you.", jp: "ありがとう。" }
+            ]
+        },
+        {
+            sitEng: "It's My Turn!",
+            sitJp: "ゲームで自分の番なのに飛ばされそうなとき",
+            image: "images-survival-English/survival-9.jpg",
+            dialogue: [
+                { role: "me", eng: "Hey! It's my turn!", jp: "ちょっと！私の番よ！" },
+                { role: "partner", eng: "Oh, sorry! Go ahead." }
+            ]
+        },
+        {
+            sitEng: "Feeling Sick",
+            sitJp: "具合が悪いとき",
+            image: "images-survival-English/survival-10.jpg",
+            dialogue: [
+                { role: "partner", eng: "Are you all right?" },
+                { role: "me", eng: "I don't feel well.", jp: "いいえ、具合が良くないです。" },
+                { role: "partner", eng: "What's wrong?" },
+                { role: "me", eng: "My tummy hurts. / My head hurts.", jp: "お腹が痛いです。/ 頭が痛いです。" }
+            ]
+        }
+    ];
+
+    let preferredVoice = null;
+
+    function loadVoices() {
+        if (!window.speechSynthesis) return;
+        const voices = window.speechSynthesis.getVoices();
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US")) ||
+            voices.find(v => v.lang.startsWith("en"));
+    }
+    
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+    }
+
+    // / も自然に or と発音するように変換（音声認識エラー対策含む）
+    function speakText(text) {
+        const synth = window.speechSynthesis;
+        if (!synth) return;
+        synth.cancel();
+        
+        const sanitizedText = text.replace(/\//g, " or ").replace(/["']/g, "").trim();
+
+        const uttr = new SpeechSynthesisUtterance(sanitizedText);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        uttr.rate = 0.8;  
+        uttr.pitch = 1.05; 
+        synth.speak(uttr);
+    }
+
+    function openModal(imgSrc) {
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        modal.style.display = "flex";
+        modalImg.src = imgSrc;
+    }
+
+    function closeModal() {
+        document.getElementById('imageModal').style.display = "none";
+    }
+
+    const pagesContainer = document.getElementById('dynamic-pages');
+    quizData.forEach((data, index) => {
+        const pageNum = index + 1;
+        const isFirst = pageNum === 1;
+        const isLast = pageNum === quizData.length;
+        
+        const dialogueHTML = data.dialogue.map((item, dIdx) => {
+            const isMe = item.role === "me";
+            const bubbleClass = isMe ? "my-bubble" : "partner-bubble";
+            // JavaScriptのonclick用にシングルクォーテーションを安全にエスケープ
+            const safeEng = item.eng.replace(/'/g, "\\'");
+            
+            const initialText = isMe ? item.jp : item.eng;
+            const textClass = isMe ? "phrase-text jp-mode" : "phrase-text";
+            
+            return `
+                <div class="dialogue-bubble ${bubbleClass}">
+                    <div class="bubble-content">
+                        <div class="${textClass}" id="text-${pageNum}-${dIdx}" data-eng="${safeEng}" data-jp="${item.jp || ''}">
+                            ${initialText}
+                        </div>
+                    </div>
+                    <button class="audio-icon-btn" onclick="speakText('${safeEng}')" title="Listen">🔊</button>
+                </div>
+            `;
+        }).join('');
+
+        const pageHTML = `
+            <div class="quiz-page ${isFirst ? 'active' : ''}" id="p${pageNum}">
+                <span class="page-indicator">Role Play ${pageNum} / ${quizData.length}</span>
+                
+                <div class="situation-box">
+                    <div class="situation-text">
+                        <div class="situation-eng">${data.sitEng}</div>
+                        <div class="situation-jp">${data.sitJp}</div>
+                    </div>
+                    <button class="picture-btn" onclick="openModal('${data.image}')">🖼️ Picture</button>
+                </div>
+                
+                <div class="dialogue-box">
+                    <div class="dialogue-flow">
+                        ${dialogueHTML}
+                    </div>
+                </div>
+
+                <button class="check-btn" id="ans-btn-${pageNum}" onclick="revealAnswer(${pageNum})">Answer</button>
+
+                <div class="controls">
+                    <div class="btn-row">
+                        ${!isFirst ? `<button class="nav-btn prev-btn" onclick="prevPage(${pageNum})">⬅ Back</button>` : '<div style="width:120px"></div>'}
+                        ${!isLast ? `<button class="nav-btn next-btn" onclick="nextPage(${pageNum})">Next ➔</button>` : `<button class="nav-btn finish-btn" onclick="showEnding()">Finish ➔</button>`}
+                    </div>
+                </div>
+            </div>
+        `;
+        pagesContainer.insertAdjacentHTML('beforeend', pageHTML);
+    });
+
+    function revealAnswer(pageNum) {
+        const data = quizData[pageNum - 1];
+        data.dialogue.forEach((item, dIdx) => {
+            if (item.role === "me") {
+                const el = document.getElementById(`text-${pageNum}-${dIdx}`);
+                if (el) {
+                    el.innerText = item.eng;
+                    el.className = "phrase-text eng-mode";
+                }
+            }
+        });
+
+        const btn = document.getElementById('ans-btn-' + pageNum);
+        if (btn) {
+            btn.innerText = "✨ Revealed!";
+            btn.classList.add("revealed");
+        }
+    }
+
+    function nextPage(current) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current + 1)).classList.add('active');
+    }
+
+    function prevPage(current) {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('p' + current).classList.remove('active');
+        document.getElementById('p' + (current - 1)).classList.add('active');
+    }
+
+    function showEnding() {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+        document.getElementById('quiz-container').style.display = 'none';
+        document.getElementById('ending-page').style.display = 'block';
+    }
+</script>
+</body>
+</html>
