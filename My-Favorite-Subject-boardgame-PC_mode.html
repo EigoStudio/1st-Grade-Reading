@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Favorite Subject - Dual Mode Board Game 🎒🎲</title>
+  <title>My Favorite Subject Game 🎒🎲</title>
   <script src="auth.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,32 +50,6 @@
     .title-area h1 { font-size: 1.3rem; margin: 0; color: #e67e22; font-weight: 800; }
 
     .controls-area { display: flex; align-items: center; gap: 12px; }
-
-    /* Mode Selector Toggle */
-    .mode-select-container {
-      display: flex;
-      background: #e2e8f0;
-      border-radius: 20px;
-      padding: 3px;
-    }
-
-    .mode-btn {
-      border: none;
-      background: transparent;
-      padding: 6px 14px;
-      border-radius: 16px;
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: #64748b;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .mode-btn.active {
-      background: #ffffff;
-      color: #3b82f6;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
 
     .btn-header {
       padding: 8px 16px;
@@ -275,26 +249,33 @@
       100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
 
+    /* 交代用矢印ボタン */
+    .btn-card-next {
+      border: none;
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      font-size: 1.8rem;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: none;
+      margin: 12px auto 0 auto;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      animation: bounceBtn 1.2s infinite alternate;
+    }
+    @keyframes bounceBtn {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.1); }
+    }
+
     .btn-tts {
       background: #3b82f6; color: white; border: none; padding: 8px 16px;
       border-radius: 20px; font-size: 1rem; font-weight: bold; cursor: pointer;
       display: inline-flex; align-items: center; gap: 6px; margin-bottom: 8px;
     }
-
-    /* Teacher Controls */
-    .teacher-zone {
-      margin-top: 16px; padding-top: 12px; border-top: 2px dashed #cbd5e1;
-      display: flex; flex-direction: column; align-items: center; gap: 8px;
-    }
-    .teacher-btns { display: flex; gap: 12px; width: 100%; }
-    .btn-teacher {
-      flex: 1; padding: 12px; border-radius: 14px; border: none; font-size: 1.1rem;
-      font-weight: 900; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      display: flex; align-items: center; justify-content: center; gap: 6px;
-    }
-    .btn-ok { background: #22c55e; color: white; }
-    .btn-retry { background: #f59e0b; color: white; }
-    .btn-ng { background: #94a3b8; color: white; }
 
     /* Celebration Overlay */
     .celebration-overlay {
@@ -319,12 +300,6 @@
       <h1>🎲 My Favorite Subject Game</h1>
     </div>
     <div class="controls-area">
-      <!-- Mode Toggle Switch -->
-      <div class="mode-select-container">
-        <button class="mode-btn active" id="mode-btn-class" onclick="setGameMode('class')">🏫 Class Mode</button>
-        <button class="mode-btn" id="mode-btn-pc" onclick="setGameMode('pc')">💻 Home PC Mode</button>
-      </div>
-
       <button class="btn-header" onclick="confirmReset()">🔄 Restart</button>
     </div>
   </header>
@@ -380,7 +355,7 @@
       <!-- Multiple Choices Section -->
       <div id="choices-section" class="choices-grid" style="display:none;"></div>
 
-      <!-- Recording / Speech Recognition Section -->
+      <!-- Recording Section -->
       <div id="recording-section" class="recording-section" style="display:none;">
         <div style="font-weight:bold; color:#64748b; font-size:0.95rem;" id="rec-instruction-text">
           Push to Speak! 🎤
@@ -388,21 +363,14 @@
         
         <button class="btn-circle-rec" id="rec-btn" onclick="handleSpeechStart()">🎤</button>
 
-        <!-- Transcript & AI Feedback Box -->
         <div class="speech-transcript-box" id="speech-transcript-box">
           Press 🎤 and speak in English!
         </div>
         <div class="speech-status-text" id="speech-status-text"></div>
       </div>
 
-      <!-- Teacher Control Buttons (Classroom Mode Only) -->
-      <div class="teacher-zone" id="teacher-zone">
-        <div class="teacher-btns">
-          <button class="btn-teacher btn-ok" onclick="teacherJudge('ok')">⭕️ OK!</button>
-          <button class="btn-teacher btn-retry" onclick="teacherJudge('retry')">💡 Listen again!</button>
-          <button class="btn-teacher btn-ng" onclick="teacherJudge('ng')">↩️ Go back!</button>
-        </div>
-      </div>
+      <!-- Next Turn Action Button -->
+      <button class="btn-card-next" id="btn-card-next" onclick="finishTurnAndAdvance()">➔</button>
     </div>
   </div>
 
@@ -417,7 +385,6 @@
   <div class="confetti-container" id="confetti-container"></div>
 
   <script>
-    /* Cards Pool */
     const masterChallengeCards = [
       // 1. Maya (art)
       { type: 'choice', question: "What is Maya's favorite subject?", imgSrc: "images-favorite-subject/art.jpg", choices: ["art", "music", "math", "P.E."], answer: "art" },
@@ -451,13 +418,7 @@
       { type: 'choice', question: "What is he doing?", imgSrc: "images-favorite-subject-vocab/run-very-fast.png", choices: ["He's running very fast.", "He's jumping high.", "He's playing soccer."], answer: "He's running very fast." },
       { type: 'choice', question: "What is he doing?", imgSrc: "images-favorite-subject-vocab/read-a-book.png", choices: ["He's reading a book.", "He's drawing a picture.", "He's looking at the map."], answer: "He's reading a book." },
       { type: 'choice', question: "What is she doing?", imgSrc: "images-favorite-subject-vocab/play-the-piano.png", choices: ["She's playing the piano.", "She's singing a song.", "She's speaking English."], answer: "She's playing the piano." },
-      { 
-        type: 'choice', 
-        question: "What's this?", 
-        imgSrc: "images-favorite-subject-vocab/a-small-book.png", 
-        choices: ["A small book.", "A cute cat.", "Flowers."], 
-        answer: "A small book." 
-      },
+      { type: 'choice', question: "What's this?", imgSrc: "images-favorite-subject-vocab/a-small-book.png", choices: ["A small book.", "A cute cat.", "Flowers."], answer: "A small book." },
 
       // Recording Challenge Cards
       { type: 'rec', question: "Say 'My favorite subject is English!'", targetText: "my favorite subject is english", emoji: "🏫" },
@@ -469,7 +430,6 @@
       { type: 'rec', question: "Say 'I love animals and bugs!'", targetText: "i love animals and bugs", imgSrc: "images-favorite-subject-vocab/bugs.png" }
     ];
 
-    let gameMode = 'class'; // 'class' or 'pc'
     let cardDeck = [];
     let currentDrawnCard = null;
 
@@ -485,6 +445,11 @@
     let players = [];
     let isRolling = false;
     let previousPositions = [];
+
+    // 判定結果フラグ
+    let isCurrentChallengePassed = false;
+    let hasSelectedChoice = false; // 初回タップフラグ
+    let recAttempts = 0; // レコーディング試行回数
 
     // Speech Recognition API
     let recognition = null;
@@ -505,17 +470,6 @@
       loadVoices();
     }
 
-    function setGameMode(mode) {
-      gameMode = mode;
-      document.getElementById("mode-btn-class").classList.toggle("active", mode === 'class');
-      document.getElementById("mode-btn-pc").classList.toggle("active", mode === 'pc');
-
-      const teacherZone = document.getElementById("teacher-zone");
-      if (teacherZone) {
-        teacherZone.style.display = mode === 'class' ? "flex" : "none";
-      }
-    }
-
     function shuffleArray(array) {
       const arr = [...array];
       for (let i = arr.length - 1; i > 0; i--) {
@@ -525,17 +479,34 @@
       return arr;
     }
 
-    function speakText(text, forceSpeak = true) {
-      if (!window.speechSynthesis) return;
+    /* 音声読み上げ関数（再生完了時にコールバックを実行） */
+    function speakText(text, onEndedCallback) {
+      if (!window.speechSynthesis) {
+        if (onEndedCallback) onEndedCallback();
+        return;
+      }
       window.speechSynthesis.cancel();
 
-      // 「Lucy」の発音を自然な「ルーシー」に修正
       let adjustedText = text.replace(/\bLucy\b/gi, "Loosee");
 
       const u = new SpeechSynthesisUtterance(adjustedText);
       if (preferredVoice) u.voice = preferredVoice;
       u.lang = "en-US";
       u.rate = 0.75;
+
+      if (onEndedCallback) {
+        let called = false;
+        const safeCallback = () => {
+          if (!called) {
+            called = true;
+            onEndedCallback();
+          }
+        };
+        u.onend = safeCallback;
+        u.onerror = safeCallback;
+        setTimeout(safeCallback, 6000); // 6秒の保護タイマー
+      }
+
       window.speechSynthesis.speak(u);
     }
 
@@ -716,6 +687,10 @@
     }
 
     function openCardModal(card) {
+      isCurrentChallengePassed = false;
+      hasSelectedChoice = false;
+      recAttempts = 0;
+
       document.getElementById("card-type-tag").textContent = card.type === 'rec' ? "RECORDING CHALLENGE 🎤" : "QUESTION ❓";
       document.getElementById("card-question-text").textContent = card.question;
       
@@ -732,9 +707,9 @@
 
       const choicesSec = document.getElementById("choices-section");
       const recSec = document.getElementById("recording-section");
-      const teacherZone = document.getElementById("teacher-zone");
+      const nextBtn = document.getElementById("btn-card-next");
 
-      teacherZone.style.display = gameMode === 'class' ? "flex" : "none";
+      nextBtn.style.display = "none"; // 初期状態では矢印ボタンを隠す
 
       if (card.type === 'choice') {
         choicesSec.style.display = "grid";
@@ -753,6 +728,7 @@
         choicesSec.style.display = "none";
         recSec.style.display = "flex";
         
+        document.getElementById("rec-btn").style.display = "flex";
         document.getElementById("speech-transcript-box").textContent = "Press 🎤 and speak in English!";
         document.getElementById("speech-status-text").textContent = "";
         document.getElementById("speech-status-text").className = "speech-status-text";
@@ -764,34 +740,38 @@
 
     function speakCurrentQuestion(forceSpeak = false) {
       if (currentDrawnCard) {
-        speakText(currentDrawnCard.question, forceSpeak);
+        speakText(currentDrawnCard.question);
       }
     }
 
-    /* 選択肢クイズの判定処理 */
+    /* 選択問題の判定処理 */
     function selectChoice(btn, selectedVal, correctVal) {
-      const allBtns = document.querySelectorAll(".btn-choice");
-      
-      if (selectedVal === correctVal) {
-        allBtns.forEach(b => b.classList.remove("selected"));
-        btn.classList.add("correct");
-        
-        // 正解の選択肢を読み上げる
-        speakText(`Great job! ${correctVal}`);
+      const isSelectedCorrect = (selectedVal === correctVal);
 
-        if (gameMode === 'pc') {
-          setTimeout(() => {
-            teacherJudge('ok');
-          }, 5000);
-        }
+      // 初回タップ時のみ、このターン全体の移動判定（isCurrentChallengePassed）を保存
+      if (!hasSelectedChoice) {
+        hasSelectedChoice = true;
+        isCurrentChallengePassed = isSelectedCorrect;
+      }
+
+      const nextBtn = document.getElementById("btn-card-next");
+      nextBtn.style.display = "none"; // 判定中は矢印を一旦非表示
+
+      if (isSelectedCorrect) {
+        btn.classList.add("correct");
+        // 正解音声を再生し、完全に読み上げ終わったら矢印を表示
+        speakText(`Great job! ${correctVal}`, () => {
+          nextBtn.style.display = "inline-flex";
+        });
       } else {
         btn.classList.add("wrong");
         btn.disabled = true;
-        speakText("Oops! Try again!");
+        // 不正解時はすぐに「Try again!」とだけ発話（矢印は出さない）
+        speakText("Try again!");
       }
     }
 
-    /* 音声認識処理 */
+    /* 音声認識（レコーディング判定）処理：復元版 */
     function handleSpeechStart() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -824,7 +804,6 @@
 
         let spokenText = event.results[0][0].transcript.toLowerCase().trim();
 
-        // Targetが「he」で始まる問題の際、AIが「she」や「they」と誤認識したら「he」へ補正
         const target = currentDrawnCard.targetText ? currentDrawnCard.targetText.toLowerCase() : "";
         if (target.startsWith("he ")) {
           spokenText = spokenText.replace(/^(she|they|it)\b/i, "he");
@@ -835,28 +814,23 @@
         const isPassed = checkStrictSpeechMatch(spokenText, target);
 
         if (isPassed) {
+          isCurrentChallengePassed = true;
           statusText.textContent = "⭕ Great job! Perfect!";
           statusText.className = "speech-status-text ok";
-          
-          // お手本の英文（targetText）を読み上げる
-          speakText(`Great job! ${target}`);
+          recBtn.style.display = "none";
 
-          if (gameMode === 'pc') {
-            setTimeout(() => {
-              teacherJudge('ok');
-            }, 5000);
-          }
+          speakText(`Great job! ${target}`, () => {
+            document.getElementById("btn-card-next").style.display = "inline-flex";
+          });
         } else {
-          statusText.textContent = "❌ Try again! (正しく発音・発言してみよう)";
-          statusText.className = "speech-status-text ng";
-          speakText("Try again!");
+          handleRecFail();
         }
       };
 
       recognition.onerror = () => {
         isSpeechListening = false;
         recBtn.classList.remove("recording");
-        transcriptBox.textContent = "Could not hear clearly. Try again! 🎤";
+        handleRecFail();
       };
 
       recognition.onend = () => {
@@ -865,7 +839,30 @@
       };
     }
 
-    /* 代名詞も含めてチェックする厳密判定ロジック */
+    function handleRecFail() {
+      recAttempts++;
+      const recBtn = document.getElementById("rec-btn");
+      const statusText = document.getElementById("speech-status-text");
+      const nextBtn = document.getElementById("btn-card-next");
+
+      if (recAttempts < 3) {
+        isCurrentChallengePassed = false;
+        statusText.textContent = `❌ Try again! (${recAttempts}/3)`;
+        statusText.className = "speech-status-text ng";
+        speakText("Try again!");
+      } else {
+        isCurrentChallengePassed = false;
+        statusText.textContent = "Nice try! ➔";
+        statusText.className = "speech-status-text ng";
+        recBtn.style.display = "none";
+
+        const target = currentDrawnCard.targetText ? currentDrawnCard.targetText : "";
+        speakText(`Nice try! ${target}`, () => {
+          nextBtn.style.display = "inline-flex";
+        });
+      }
+    }
+
     function checkStrictSpeechMatch(spoken, target) {
       if (!target) return true;
 
@@ -876,7 +873,6 @@
         return false;
       }
 
-      // 「a, an, the, is, am, are」などの動詞・冠詞のみを除外し、he / she 等の代名詞はチェック対象に含める
       const stopWords = ['a', 'an', 'the', 'is', 'am', 'are', 'to', 'in', 'at', 'on'];
       const keyTargetWords = cleanTarget.filter(w => !stopWords.includes(w));
       const checkWords = keyTargetWords.length > 0 ? keyTargetWords : cleanTarget;
@@ -890,21 +886,17 @@
       return matchCount === checkWords.length;
     }
 
-    function teacherJudge(action) {
-      if (action === 'retry') {
-        speakCurrentQuestion(true);
-        return;
-      }
-
+    /* 交代用矢印（➔）タップ時のバトンタッチ・コマ戻り判定 */
+    function finishTurnAndAdvance() {
       document.getElementById("card-modal").style.display = "none";
       const p = players[currentPlayer];
 
-      if (action === 'ok') {
+      if (isCurrentChallengePassed) {
         if (p.pos === 29) {
           showCelebration();
           return;
         }
-      } else if (action === 'ng') {
+      } else {
         p.pos = previousPositions[currentPlayer];
         renderPlayers();
       }
@@ -919,7 +911,7 @@
       const p = players[currentPlayer];
       document.getElementById("winner-text").textContent = `${p.name}, you're the winner! 👑`;
       document.getElementById("celebration").style.display = "flex";
-      speakText(`Congratulations, ${p.name}! You're the winner!`, true);
+      speakText(`Congratulations, ${p.name}! You're the winner!`);
       startConfetti();
     }
 
