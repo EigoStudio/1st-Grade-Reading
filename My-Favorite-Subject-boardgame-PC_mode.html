@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Favorite Subject - Dual Mode Board Game 🎒🎲</title>
-  <script src="auth.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400;1,700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
@@ -451,7 +450,13 @@
       { type: 'choice', question: "What is he doing?", imgSrc: "images-favorite-subject-vocab/run-very-fast.png", choices: ["He's running very fast.", "He's jumping high.", "He's playing soccer."], answer: "He's running very fast." },
       { type: 'choice', question: "What is he doing?", imgSrc: "images-favorite-subject-vocab/read-a-book.png", choices: ["He's reading a book.", "He's drawing a picture.", "He's looking at the map."], answer: "He's reading a book." },
       { type: 'choice', question: "What is she doing?", imgSrc: "images-favorite-subject-vocab/play-the-piano.png", choices: ["She's playing the piano.", "She's singing a song.", "She's speaking English."], answer: "She's playing the piano." },
-      { type: 'choice', question: "Where does she want to go?", imgSrc: "images-favorite-subject-vocab/go-to-egypt.png", choices: ["Go to Egypt", "Go to America", "Go to Australia"], answer: "Go to Egypt" },
+      { 
+        type: 'choice', 
+        question: "What's this?", 
+        imgSrc: "images-favorite-subject-vocab/a-small-book.png", 
+        choices: ["A small book.", "A cute cat.", "Flowers."], 
+        answer: "A small book." 
+      },
 
       // Recording Challenge Cards
       { type: 'rec', question: "Say 'My favorite subject is English!'", targetText: "my favorite subject is english", emoji: "🏫" },
@@ -522,7 +527,11 @@
     function speakText(text, forceSpeak = true) {
       if (!window.speechSynthesis) return;
       window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
+
+      // 「Lucy」の発音を自然な「ルーシー」に修正
+      let adjustedText = text.replace(/\bLucy\b/gi, "Loosee");
+
+      const u = new SpeechSynthesisUtterance(adjustedText);
       if (preferredVoice) u.voice = preferredVoice;
       u.lang = "en-US";
       u.rate = 0.75;
@@ -758,19 +767,21 @@
       }
     }
 
-    /* 選択肢クイズの判定処理（復活＆強化版） */
+    /* 選択肢クイズの判定処理 */
     function selectChoice(btn, selectedVal, correctVal) {
       const allBtns = document.querySelectorAll(".btn-choice");
       
       if (selectedVal === correctVal) {
         allBtns.forEach(b => b.classList.remove("selected"));
         btn.classList.add("correct");
-        speakText("Great job! Correct!");
+        
+        // 正解の選択肢を読み上げる
+        speakText(`Great job! ${correctVal}`);
 
         if (gameMode === 'pc') {
           setTimeout(() => {
             teacherJudge('ok');
-          }, 1200);
+          }, 5000);
         }
       } else {
         btn.classList.add("wrong");
@@ -779,7 +790,7 @@
       }
     }
 
-    /* 音声認識処理（厳密判定＆ガード機能付き） */
+    /* 音声認識処理 */
     function handleSpeechStart() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -810,21 +821,29 @@
         isSpeechListening = false;
         recBtn.classList.remove("recording");
 
-        const spokenText = event.results[0][0].transcript.toLowerCase().trim();
+        let spokenText = event.results[0][0].transcript.toLowerCase().trim();
+
+        // Targetが「he」で始まる問題の際、AIが「she」や「they」と誤認識したら「he」へ補正
+        const target = currentDrawnCard.targetText ? currentDrawnCard.targetText.toLowerCase() : "";
+        if (target.startsWith("he ")) {
+          spokenText = spokenText.replace(/^(she|they|it)\b/i, "he");
+        }
+
         transcriptBox.textContent = `You said: "${spokenText}"`;
 
-        const target = currentDrawnCard.targetText ? currentDrawnCard.targetText.toLowerCase() : "";
         const isPassed = checkStrictSpeechMatch(spokenText, target);
 
         if (isPassed) {
           statusText.textContent = "⭕ Great job! Perfect!";
           statusText.className = "speech-status-text ok";
-          speakText("Great job! Perfect!");
+          
+          // お手本の英文（targetText）を読み上げる
+          speakText(`Great job! ${target}`);
 
           if (gameMode === 'pc') {
             setTimeout(() => {
               teacherJudge('ok');
-            }, 1500);
+            }, 5000);
           }
         } else {
           statusText.textContent = "❌ Try again! (正しく発音・発言してみよう)";
@@ -845,7 +864,7 @@
       };
     }
 
-    /* コア単語100%一致 & 単語数判定ロジック */
+    /* 代名詞も含めてチェックする厳密判定ロジック */
     function checkStrictSpeechMatch(spoken, target) {
       if (!target) return true;
 
@@ -856,13 +875,14 @@
         return false;
       }
 
-      const stopWords = ['a', 'an', 'the', 'is', 'am', 'are', 'to', 'in', 'at', 'on', 'my', 'he', 'she', 'i'];
+      // 「a, an, the, is, am, are」などの動詞・冠詞のみを除外し、he / she 等の代名詞はチェック対象に含める
+      const stopWords = ['a', 'an', 'the', 'is', 'am', 'are', 'to', 'in', 'at', 'on'];
       const keyTargetWords = cleanTarget.filter(w => !stopWords.includes(w));
       const checkWords = keyTargetWords.length > 0 ? keyTargetWords : cleanTarget;
 
       let matchCount = 0;
       checkWords.forEach(kw => {
-        const hasMatch = cleanSpoken.some(sw => sw.includes(kw) || kw.includes(sw));
+        const hasMatch = cleanSpoken.some(sw => sw === kw);
         if (hasMatch) matchCount++;
       });
 
