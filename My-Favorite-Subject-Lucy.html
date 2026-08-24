@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>From 'Boring' to 'Fun!': Lucy's Story 🗺️</title>
+    <script src="auth.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:ital,wght@0,400;0,700;1,400;1,700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4a90e2;
+            --success-green: #6ab04c;
+            --accent-pink: #ff78ae;
+            --accent-orange: #ffa042;
+            --bg-color: #f7f9fc;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body, button, p, div, h1, span {
+            font-family: 'Comic Neue', 'Zen Maru Gothic', cursive, sans-serif !important;
+        }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+            text-align: center;
+            position: relative;
+        }
+
+        h1 {
+            color: #e67e22;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        /* プログレスバー */
+        .progress-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        .progress-bar {
+            flex: 1; height: 10px; background-color: #e2e8f0; border-radius: 5px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; width: 0%; background-color: var(--primary-blue); transition: width 0.3s ease;
+        }
+        .score-badge {
+            background: #edf2f7; padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 0.95rem;
+        }
+
+        /* ゲーム画面 */
+        #story-box { display: block; }
+        .scene-card { display: none; animation: fadeIn 0.4s ease forwards; }
+        .scene-card.active { display: block; }
+        .scene-header { font-size: 1.1rem; font-weight: bold; color: #718096; margin-bottom: 10px; }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+            text-align: left;
+            align-items: start;
+        }
+        @media(max-width: 768px) {
+            .content-grid { grid-template-columns: 1fr; }
+        }
+
+        .story-side {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 18px;
+            border: 2px solid var(--border-color);
+            position: relative;
+            min-height: 280px;
+        }
+        
+        .story-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        .speaker-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+            user-select: none;
+            flex-shrink: 0;
+        }
+        .story-text {
+            font-size: 1.25rem; font-weight: bold; line-height: 1.4; color: #334155;
+            user-select: none;
+        }
+
+        .clickable-word {
+            display: inline-block;
+            cursor: pointer;
+            border-bottom: 2px dashed transparent;
+            border-radius: 4px;
+            padding: 0 2px;
+            transition: 0.15s;
+        }
+        .clickable-word:hover {
+            background: #ffe3ec;
+            color: #d64d8a;
+            border-bottom-color: var(--accent-pink);
+        }
+
+        .audio-controls { display: flex; gap: 8px; margin-top: auto; padding-top: 10px; flex-wrap: wrap; }
+        .speaker-btn {
+            background: var(--accent-pink); color: white; border: none; padding: 8px 14px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;
+            box-shadow: 0 3px 0 #d64d8a; transition: 0.1s;
+        }
+        .speaker-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        .picture-btn {
+            background: var(--accent-orange); color: white; border: none; padding: 8px 14px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 0.9rem;
+            box-shadow: 0 3px 0 #d97d1e; transition: 0.1s; margin-left: auto;
+        }
+        .picture-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        .illustration-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.98); border-radius: 18px;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 10; padding: 15px; animation: fadeIn 0.2s ease;
+        }
+        .illustration-overlay.active { display: flex; }
+        .illustration-image { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; }
+        .close-overlay-btn {
+            position: absolute; top: 10px; right: 15px; background: #ef4444; color: white;
+            border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem;
+            font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 11;
+        }
+
+        /* クイズエリア */
+        .quiz-side { display: flex; flex-direction: column; gap: 12px; }
+        .quiz-box {
+            background: #f0fdf4; border: 2px dashed var(--success-green);
+            padding: 12px; border-radius: 16px; transition: opacity 0.3s;
+        }
+        .quiz-box.locked { opacity: 0.3; pointer-events: none; background: #f8fafc; border-color: #cbd5e1; }
+        .question-title { font-size: 0.9rem; color: #166534; font-weight: bold; margin-bottom: 4px; }
+        
+        .question-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .question-text { font-size: 1.15rem; font-weight: bold; color: #1e293b; text-align: left; }
+        
+        .q-audio-btn {
+            background: #e2e8f0; border: none; font-size: 0.9rem; cursor: pointer;
+            width: 28px; height: 28px; border-radius: 50%; display: flex; 
+            justify-content: center; align-items: center; transition: 0.15s;
+            flex-shrink: 0;
+        }
+        .q-audio-btn:hover { background: #cbd5e1; }
+
+        .choices-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .choice-btn {
+            background: white; border: 2px solid #cbd5e1; padding: 8px; border-radius: 12px;
+            font-weight: bold; font-size: 1rem; cursor: pointer; text-align: center;
+            box-shadow: 0 3px 0 #cbd5e1; transition: 0.1s; color: var(--text-color);
+        }
+        .choice-btn:hover { background: #f8fafc; }
+        .choice-btn:active { transform: translateY(2px); box-shadow: none; }
+        
+        .choice-btn.correct { background: #dcfce7 !important; border-color: var(--success-green) !important; color: #166434 !important; box-shadow: 0 3px 0 #bbf7d0 !important; }
+        .choice-btn.wrong { background: #fee2e2 !important; border-color: #ef4444 !important; color: #991b1b !important; box-shadow: 0 3px 0 #fecaca !important; opacity: 0.6; }
+        .choice-btn.disabled { pointer-events: none; }
+
+        .nav-row { margin-top: 15px; display: flex; justify-content: flex-end; }
+        .next-btn {
+            background: var(--primary-blue); color: white; border: none; padding: 10px 30px;
+            border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 0 #357abd; display: none;
+        }
+        .next-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        /* 結果画面 */
+        #result-page { display: none; padding: 30px 10px; }
+        #result-page h2 { color: var(--success-green); font-size: 2rem; margin-bottom: 15px; }
+        #result-page p { font-size: 1.3rem; line-height: 1.5; margin-bottom: 20px; }
+        .score-big { font-size: 3rem; color: var(--primary-blue); font-weight: bold; margin-bottom: 20px; }
+        
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            margin-top: 20px;
+        }
+        .report-btn {
+            background: #9b59b6; color: white; border: none; padding: 12px 35px;
+            border-radius: 50px; font-size: 1.1rem; font-weight: bold; cursor: pointer;
+            box-shadow: 0 4px 0 #8e44ad; transition: 0.1s;
+        }
+        .report-btn:active { transform: translateY(2px); box-shadow: none; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #popup-good {
+            position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(255, 160, 66, 0.95); color: white; padding: 15px 40px;
+            border-radius: 40px; font-weight: bold; font-size: 2rem; box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            opacity: 0; pointer-events: none; z-index: 1000;
+        }
+        #popup-good.animate-popup {
+            animation: popAndFade 1.6s forwards ease-in-out;
+        }
+
+        @keyframes popAndFade {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+            15% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+            70% { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+            100% { opacity: 0; transform: translate(-50%, -35%) scale(0.9); }
+        }
+    </style>
+</head>
+<body>
+
+<div id="popup-good">Great! ✨</div>
+
+<div class="container">
+    <h1>From 'Boring' to 'Fun!': Lucy's Story 🗺️</h1>
+    
+    <div class="progress-container" id="mainProgress">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="score-badge">Score: <span id="currentScore">0</span> / 14</div>
+    </div>
+
+    <!-- メインゲーム画面 -->
+    <div id="story-box"></div>
+
+    <!-- 結果画面 -->
+    <div id="result-page">
+        <h2>Wonderful Story! 🌟</h2>
+        <p>You followed Lucy's journey!<br>Now Lucy loves Social Studies!</p>
+        <div class="score-big"><span id="finalScore">0</span> / 14</div>
+        <div class="btn-container">
+            <button class="report-btn" onclick="sendEmailReport()">Send Score to Tamaki-sensei ✉️</button>
+            <button class="next-btn" style="display:inline-block; background: var(--success-green); box-shadow:0 4px 0 #4ea236;" onclick="location.reload()">Try Again 🔄</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const storyData = [
+        {
+            scene: "1. One Year Ago...",
+            imgName: "lucy1.jpg",
+            dialogue: [
+                { speaker: "lucy", text: "I don't like social studies!" },
+                { speaker: "mother", text: "Why not?" },
+                { speaker: "lucy", text: "It's boring!" },
+                { speaker: "mother", text: "Really?" },
+                { speaker: "lucy", text: "Yes!" }
+            ],
+            questions: [
+                { q: "Does Lucy like social studies?", a: "No, she doesn't.", choices: ["Yes, she does.", "No, she doesn't."] },
+                { q: "What does Lucy think about social studies?", a: "It's boring.", choices: ["It's boring.", "It's fun."] }
+            ]
+        },
+        {
+            scene: "2. Lucy's Dream",
+            imgName: "lucy2.jpg",
+            dialogue: [
+                { speaker: "mother", text: "So, what subject do you like?" },
+                { speaker: "lucy", text: "I like English!" },
+                { speaker: "mother", text: "Great!" },
+                { speaker: "lucy", text: "I want to go to America, Canada, and Australia!" },
+                { speaker: "lucy", text: "I want to make many friends around the world!" },
+                { speaker: "mother", text: "Wonderful!" }
+            ],
+            questions: [
+                { q: "What subject does Lucy like?", a: "English.", choices: ["English.", "Math."] },
+                { q: "What does Lucy want to make around the world?", a: "Many friends.", choices: ["Many friends.", "Big cakes."] }
+            ]
+        },
+        {
+            scene: "3. A Big Map",
+            imgName: "lucy3.jpg",
+            dialogue: [
+                { speaker: "mother", text: "Here's a big map! Can you find America?" },
+                { speaker: "lucy", text: "No." },
+                { speaker: "mother", text: "Can you find Canada?" },
+                { speaker: "lucy", text: "No." },
+                { speaker: "mother", text: "Can you find Australia?" },
+                { speaker: "lucy", text: "No." }
+            ],
+            questions: [
+                { q: "What does Mother show Lucy?", a: "A big map.", choices: ["A big map.", "A picture book."] },
+                { q: "Could Lucy find Australia at first?", a: "No, she couldn't.", choices: ["Yes, she could.", "No, she couldn't."] }
+            ]
+        },
+        {
+            scene: "4. Reading a Map",
+            imgName: "lucy4.jpg",
+            dialogue: [
+                { speaker: "lucy", text: "Mom! I'm bored!" },
+                { speaker: "mother", text: "Oh, you're not bored." },
+                { speaker: "lucy", text: "Yes, I am." },
+                { speaker: "mother", text: "No, you're not! Let me show you." },
+                { speaker: "mother", text: "Reading a map is fun!" }
+            ],
+            questions: [
+                { q: "Is Lucy bored?", a: "Yes, she is.", choices: ["Yes, she is.", "No, she isn't."] },
+                { q: "What does Mother say about reading a map?", a: "It is fun!", choices: ["It is fun!", "It is boring."] }
+            ]
+        },
+        {
+            scene: "5. Finding Countries!",
+            imgName: "lucy5.jpg",
+            dialogue: [
+                { speaker: "mother", text: "Look! Here is America. And this is Canada." },
+                { speaker: "lucy", text: "Wow! They are huge!" },
+                { speaker: "mother", text: "And look down here. This is Australia!" },
+                { speaker: "lucy", text: "Cool! I can find them now!" }
+            ],
+            questions: [
+                { q: "Are America and Canada huge?", a: "Yes, they are.", choices: ["Yes, they are.", "No, they aren't."] },
+                { q: "Can Lucy find the countries now?", a: "Yes, she can.", choices: ["Yes, she can.", "No, she can't."] }
+            ]
+        },
+        {
+            scene: "6. Pyramids and History",
+            imgName: "lucy6.jpg",
+            dialogue: [
+                { speaker: "mother", text: "Look at this country in Africa. It's Egypt." },
+                { speaker: "lucy", text: "Egypt? What is in Egypt?" },
+                { speaker: "mother", text: "There are giant Pyramids and ancient stories!" },
+                { speaker: "lucy", text: "Ancient stories? Like a treasure hunt?" },
+                { speaker: "mother", text: "Yes! That is Social Studies!" }
+            ],
+            questions: [
+                { q: "What is in Egypt?", a: "Giant Pyramids.", choices: ["Giant Pyramids.", "Big soccer fields."] },
+                { q: "Is learning ancient stories part of Social Studies?", a: "Yes, it is.", choices: ["Yes, it is.", "No, it isn't."] }
+            ]
+        },
+        {
+            scene: "7. Lucy's New Favorite Subject!",
+            imgName: "lucy7.jpg",
+            dialogue: [
+                { speaker: "lucy", text: "Social studies is not boring!" },
+                { speaker: "mother", text: "Right?" },
+                { speaker: "lucy", text: "It's like a trip around the world!" },
+                { speaker: "lucy", text: "I want to go to Egypt and see the Pyramids!" },
+                { speaker: "mother", text: "Let's learn more about the world together!" }
+            ],
+            questions: [
+                { q: "Where does Lucy want to go now?", a: "To Egypt.", choices: ["To Egypt.", "To the supermarket."] },
+                { q: "Is Social Studies boring for Lucy now?", a: "No, it isn't.", choices: ["Yes, it is.", "No, it isn't."] }
+            ]
+        }
+    ];
+
+    let currentSceneIdx = 0;
+    let currentScore = 0;
+    let preferredVoice = null;
+    let firstTry = true;
+
+    function loadVoices() {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) return;
+        preferredVoice = 
+            voices.find(v => v.lang === "en-US" && v.name.includes("Google US English")) ||
+            voices.find(v => v.lang === "en-US" && v.name.includes("Samantha")) ||
+            voices.find(v => v.lang.startsWith("en-US")) ||
+            voices.find(v => v.lang.startsWith("en"));
+    }
+    
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        loadVoices();
+    }
+
+    function speakText(text) {
+        window.speechSynthesis.cancel();
+        let cleanedText = text.replace(/["'?!.,“]/g, "");
+
+        const uttr = new SpeechSynthesisUtterance(cleanedText);
+        if (preferredVoice) uttr.voice = preferredVoice;
+        uttr.rate = 0.65;
+        uttr.pitch = 1.15;
+        window.speechSynthesis.speak(uttr);
+    }
+
+    /* 文末の「!」「.」「?」で文を分解し、文ごとに0.5秒の間（ポーズ）を入れて読み上げる機能 */
+    async function speakLinesSequence(sceneIdx) {
+        window.speechSynthesis.cancel();
+        const dialogue = storyData[sceneIdx].dialogue;
+        
+        for (let i = 0; i < dialogue.length; i++) {
+            if (currentSceneIdx !== sceneIdx) break; 
+            
+            const sentences = dialogue[i].text.match(/[^.!?]+[.!?]+/g) || [dialogue[i].text];
+            
+            for (let j = 0; j < sentences.length; j++) {
+                if (currentSceneIdx !== sceneIdx) break;
+                await playSinglePhrase(sentences[j].trim());
+                if (currentSceneIdx !== sceneIdx) break;
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+            
+            if (currentSceneIdx !== sceneIdx) break;
+            await new Promise(resolve => setTimeout(resolve, 600));
+        }
+    }
+
+    function playSinglePhrase(phrase) {
+        return new Promise(resolve => {
+            let cleaned = phrase.replace(/["'?!.,“]/g, "");
+            
+            const uttr = new SpeechSynthesisUtterance(cleaned);
+            if (preferredVoice) uttr.voice = preferredVoice;
+            uttr.rate = 0.65;
+            uttr.pitch = 1.15;
+            uttr.onend = () => resolve();
+            window.speechSynthesis.speak(uttr);
+        });
+    }
+
+    function createClickableText(lineStr) {
+        const words = lineStr.split(" ");
+        return words.map(word => {
+            const cleanWord = word.replace(/[^a-zA-Z0-9']/g, "");
+            if(cleanWord.length === 0) return word;
+            return `<span class="clickable-word" onclick="event.stopPropagation(); speakText('${cleanWord}')">${word}</span>`;
+        }).join(" ");
+    }
+
+    function toggleOverlay(sIdx, show) {
+        const overlay = document.getElementById(`overlay-${sIdx}`);
+        if (show) overlay.classList.add('active');
+        else overlay.classList.remove('active');
+    }
+
+    function initApp() {
+        const box = document.getElementById('story-box');
+        box.innerHTML = '';
+
+        storyData.forEach((data, sIdx) => {
+            const card = document.createElement('div');
+            card.className = `scene-card ${sIdx === 0 ? 'active' : ''}`;
+            card.id = `scene-${sIdx}`;
+
+            let linesHtml = '';
+            data.dialogue.forEach((line, lIdx) => {
+                const icon = line.speaker === "lucy" ? "👧" : "👩";
+                const clickableLine = createClickableText(line.text);
+                linesHtml += `
+                    <div class="story-line" id="s${sIdx}-l${lIdx}">
+                        <span class="speaker-icon">${icon}</span>
+                        <p class="story-text">${clickableLine}</p>
+                    </div>
+                `;
+            });
+
+            let audioBtnHtml = `<button class="speaker-btn" onclick="speakLinesSequence(${sIdx})">🔊 Play All</button>`;
+            audioBtnHtml += `<button class="picture-btn" onclick="toggleOverlay(${sIdx}, true)">🎨 Picture</button>`;
+
+            let quizHtml = '';
+            data.questions.forEach((q, qIdx) => {
+                const shuffledChoices = [...q.choices].sort(() => Math.random() - 0.5);
+                
+                let choicesHtml = '';
+                shuffledChoices.forEach(c => {
+                    choicesHtml += `<button class="choice-btn" onclick="checkAnswer(this, '${c.replace(/'/g, "\\'")}', '${q.a.replace(/'/g, "\\'")}', ${sIdx}, ${qIdx})">${c}</button>`;
+                });
+                
+                quizHtml += `
+                    <div class="quiz-box ${qIdx > 0 ? 'locked' : ''}" id="scene-${sIdx}-q-${qIdx}">
+                        <div class="question-title">Question ${qIdx + 1}</div>
+                        <div class="question-row">
+                            <button class="q-audio-btn" onclick="speakText('${q.q.replace(/'/g, "\\'")}')">🔊</button>
+                            <div class="question-text">${q.q}</div>
+                        </div>
+                        <div class="choices-row">${choicesHtml}</div>
+                    </div>
+                `;
+            });
+
+            card.innerHTML = `
+                <div class="scene-header">${data.scene}</div>
+                <div class="content-grid">
+                    <div class="story-side">
+                        <div class="illustration-overlay" id="overlay-${sIdx}">
+                            <button class="close-overlay-btn" onclick="toggleOverlay(${sIdx}, false)">×</button>
+                            <img src="images-lucy-story/${data.imgName}" class="illustration-image" alt="${data.scene}">
+                        </div>
+                        <div style="display: flex; flex-direction: column;">
+                            ${linesHtml}
+                        </div>
+                        <div class="audio-controls">${audioBtnHtml}</div>
+                    </div>
+                    <div class="quiz-side">
+                        ${quizHtml}
+                    </div>
+                </div>
+                <div class="nav-row">
+                    <button class="next-btn" id="next-btn-${sIdx}" onclick="goNext(${sIdx})">Next Scene ➔</button>
+                </div>
+            `;
+            box.appendChild(card);
+        });
+        updateProgressBar();
+    }
+
+    function cleanStr(str) {
+        if (!str) return "";
+        return str.replace(/\s+/g, '').replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?"']/g, "").toLowerCase();
+    }
+
+    function checkAnswer(btn, chosen, correct, sIdx, qIdx) {
+        const quizBox = document.getElementById(`scene-${sIdx}-q-${qIdx}`);
+        const buttons = quizBox.querySelectorAll('.choice-btn');
+
+        if (cleanStr(chosen) === cleanStr(correct)) {
+            btn.classList.add('correct');
+            showPopup(); 
+            if (firstTry) {
+                currentScore++;
+                document.getElementById('currentScore').textContent = currentScore;
+            }
+            buttons.forEach(b => { 
+                b.classList.add('disabled'); 
+                if(b !== btn) b.style.opacity = '0.4'; 
+            });
+            
+            if (qIdx < storyData[sIdx].questions.length - 1) {
+                const nextQuizBox = document.getElementById(`scene-${sIdx}-q-${qIdx + 1}`);
+                nextQuizBox.classList.remove('locked');
+                firstTry = true;
+            } else {
+                document.getElementById(`next-btn-${sIdx}`).style.display = 'inline-block';
+            }
+        } else {
+            btn.classList.add('wrong');
+            btn.classList.add('disabled');
+            speakText("Try again.");
+            firstTry = false;
+        }
+    }
+
+    function showPopup() {
+        const popup = document.getElementById('popup-good');
+        popup.classList.remove('animate-popup');
+        void popup.offsetWidth; 
+        popup.classList.add('animate-popup');
+    }
+
+    function updateProgressBar() {
+        const percent = (currentSceneIdx / storyData.length) * 100;
+        document.getElementById('progressFill').style.width = percent + '%';
+    }
+
+    function goNext(current) {
+        window.speechSynthesis.cancel();
+        document.getElementById(`scene-${current}`).classList.remove('active');
+        currentSceneIdx++;
+        
+        if (currentSceneIdx < storyData.length) {
+            document.getElementById(`scene-${currentSceneIdx}`).classList.add('active');
+            updateProgressBar();
+            firstTry = true;
+        } else {
+            updateProgressBar();
+            document.getElementById('story-box').style.display = 'none';
+            document.getElementById('result-page').style.display = 'block';
+            document.getElementById('finalScore').textContent = currentScore;
+        }
+    }
+
+    function sendEmailReport() {
+        const studentName = prompt("Please enter your name (おなまえを おしえてね):") || "Student";
+        const email = "tamaki@eigostudio-stepforward.com";
+        const subject = encodeURIComponent(`[Lucy Story] ${studentName}'s Score Report`);
+        
+        const bodyText = `Hi Tamaki-sensei,\n\nI finished Lucy's Social Studies Adventure!\n\nName: ${studentName}\nScore: ${currentScore} / 14\n\nThank you!`;
+        const body = encodeURIComponent(bodyText);
+        
+        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+    }
+
+    window.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
