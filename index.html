@@ -8,9 +8,8 @@
     
     <style>
         body {
-            /* 全体にKosugi Maruを適用 */
             font-family: 'Kosugi Maru', sans-serif;
-            background-color: #f0f8ff; /* 少し青みがかった優しい背景色 */
+            background-color: #f0f8ff;
             color: #333;
             text-align: center;
             padding: 20px;
@@ -19,34 +18,66 @@
         h1 {
             color: #2c3e50;
             margin-bottom: 30px;
-            font-size: 28px;
-            /* タイトルに少し影をつけて目立たせる */
+            font-size: 32px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
         ul {
             list-style: none;
             padding: 0;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-            gap: 12px;
-            max-width: 1000px;
+            /* 基本3カラム設定（画面幅に応じて自動調整） */
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 1100px;
             margin: 0 auto;
         }
-        li a {
-            display: block;
-            padding: 15px 5px;
-            background-color: #ffffff;
-            border: 3px solid #ffcc00; /* 元気な黄色い枠線 */
-            border-radius: 15px; /* 角をさらに丸く */
-            text-decoration: none;
-            color: #d35400; /* オレンジ系の文字色 */
-            font-weight: bold;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 0 #e6b800; /* ボタンっぽく立体的な影 */
+
+        /* タブレット・スマホ用のレスポンシブ対応 */
+        @media (max-width: 900px) {
+            ul { grid-template-columns: repeat(2, 1fr); }
         }
-        /* マウスを乗せた時やタップした時 */
+        @media (max-width: 550px) {
+            ul { grid-template-columns: 1fr; }
+        }
+
+        li {
+            display: flex;
+        }
+
+        li a {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 16px 12px;
+            background-color: #ffffff;
+            border: 3px solid #ffcc00;
+            border-radius: 16px;
+            text-decoration: none;
+            color: #2c3e50;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 0 #e6b800;
+        }
+
+        /* タイトル部分を強調 */
+        li a strong {
+            display: block;
+            font-size: 1.15rem;
+            color: #d35400;
+            margin-bottom: 6px;
+        }
+
+        /* 説明文の文字サイズ調整 */
+        li a span {
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: normal;
+        }
+
         li a:hover {
-            transform: translateY(2px); /* 少し沈む動き */
+            transform: translateY(2px);
             box-shadow: 0 2px 0 #e6b800;
             background-color: #fffdf0;
         }
@@ -56,182 +87,38 @@
 
     <h1>1st Grade Reading</h1>
     <ul>
-      <li><a href="A-Trip-To-The-City-Reading.html">A Trip To The City<br>
-Can you read it?
-</a></li>
-
-<li><a href="A-Trip-To-The-City-Activity.html">A Trip To The City<br>
-Activity 1
-</a></li>
-
-         <li><a href="Emily-at-the-Fair-Reading.html">Emily at the Fair<br>
-Can you read it?
-</a></li>
-
-        <li><a href="Emily-at-the-Fair-Activity.html">Emily at the Fair<br>
-Activity
-</a></li>
-
-        <li><a href="A-Big-Bug-Reading.html">A Big Bug!<br>
-Can you read it?
-</a></li>
-
-        <li><a href="A-Big-Bug-Activity.html">A Big Bug!<br>
-Activity
-</a></li>
-
- <li><a href="Your introduction.html">Your Introduction<br>
-Create your own introduction!
-</a></li>
-
-        <li><a href="Sarah_Asks_for_Help-Reading.html">Sarah Asks for Help<br>
-Story Book Edition<br>
-            Read the story!
-</a></li>
-
-<li><a href="Sarah_Asks_for_Help-Listening-Quiz.html">Sarah Asks for Help<br>
-Listening Quiz<br>
-            Listen and find the matching picture!
-</a></li>
-        
-        <li><a href="Sarah_Asks_for_Help.html">Sarah Asks for Help<br>
-Board Game!<br>
-            Roll the Dice!
-</a></li>
-
- <li><a href="Sarah_Asks_for_Help_2players.html">Sarah Asks for Help<br>
-Board Game!<br>
-            2 PLAYERS! 
-</a></li>
-
-        <li><a href="School-Words.html">School Words<br>
-Vocabulary Quiz<br>
-            Listen and Choose / Read and Choose
-</a></li>
-
-        <li><a href="School-Prepositions.html">School Words & Prepositions<br>
-On and Under<br>
-            シャッフル機能付き、毎回問題が変わる
-</a></li>
-
-        <li><a href="School-Reading-Lily's_Sticker_Hunt.html">School - Reading<br>
-Lily's Sticker Hunt<br>
-            Read the story
-</a></li>
-
-        <li><a href="School-Board-Game-2Players.html">School - Board Game<br>
-Lily's Sticker Hunt<br>
-            Two Players!
-</a></li>
-
-        <li><a href="Sakura's-Silly-Morning-Vocabulary.html">Vocabulary<br>
-Sakura's Silly Morning<br>
-            Choose the correct one!
-</a></li>
-
-        <li><a href="Sakura's-Silly-Morning-Interactive-Reading.html">Interactive Reading<br>
-Sakura's Silly Morning<br>
-            Look! Think! then Read!
-</a></li>
-
-        <li><a href="Sakura's-Silly-Morning-Interactive-Read-and-Answer.html">Interactive Reading<br>
-Sakura's Silly Morning<br>
-            Read / Look at the picture <br>
-            6 scenes / 3 questions each
-</a></li>
-
-        <li><a href="International-Birthday-Party-Reading.html">Interactive Reading<br>
-June's International Birthday Party!<br>
-            Read / Look at the picture <br>
-            8 scenes / 3 questions each
-</a></li>
-
-        <li><a href="Survival-School-English-Quiz.html">10 Useful Phrases<br>
-Let's practice and get ready for school!<br>
-            What do you say in these school situations?<br>
-            Simple phrases only!
-</a></li>
-
-        <li><a href="Survival-School-English-Role-Play.html">Role Play<br>
-Let's practice and get ready for school!<br>
-            School Survival Phrases!<br>
-            Simple phrases only!
-</a></li>
-
-        <li><a href="My-Favorite-Subject.html">7 School Subjects<br>
-Meet seven children.<br>
-            Can you tell their favorite subjects?<br>
-            読み上げ機能付き<br>
-            報告メール機能付き<br>
-            Pictureボタンでイラスト表示
-</a></li>
-
-        <li><a href="My-Favorite-Subject-vocab.html">Vocabulary Quiz from<br>
-7 School Subjects<br>
-            You need the password!<br>
-            30 Questions!
-</a></li>
-
-        <li><a href="My-Favorite-Subject-boardgame.html">Boardgame based on<br>
-"What's My Favorite Subject?" story<br>
-            電子黒板モード、先生が操作
-            You need the password!<br>
-            サイコロ、チャレンジカード、録音など<br>
-            1〜4 プレイヤー対応<br>
-            音声オンオフ機能付き
-</a></li>
-
-        <li><a href="My-Favorite-Subject-boardgame-PC_mode.html">Boardgame based on<br>
-"What's My Favorite Subject?" story<br>
-            PCモード、宿題用<br>
-            You need the password!<br>
-            サイコロ、チャレンジカード、録音など<br>
-            1〜4 プレイヤー対応
-</a></li>
-
-        <li><a href="My-Favorite-Subject-Lucy.html">Read and Answer the Questions<br>
-"from Boring to Fun" Lucy's story<br>
-            Surprise! Lucy used to hate social studies!<br>
-            Now, it's her favorite subject!<br>
-            読み上げ機能、イラスト切り替え、報告メール機能月
-            </a></li>
-           
-        <li><a href="Rainbow.html">Rainbow!<br>
-Favorite Color!<br>
-            Learn the seven colors of the rainbow!
-</a></li>
-
-        <li><a href="Pink.html">Pink! 4 Activities!<br>
-Read lyrics!<br>
-            Drag the item into correct basket!<br>
-            Wordsearch! <br>
-            Yes, I do! / No, I don't!
-</a></li>
-
-        <li><a href="Meet-Joy.html">Meet Joy!<br>
-Introduction Song - Joy the Ant!<br>
-            Drag and drop numbers & snacks!<br>
-            Action Wordsearch! <br>
-            The whole lyrics at the end!
-</a></li>
-
-        <li><a href="Marching-Marching.html">Marching Marching!<br>
-Lyrics with pictures!<br>
-            Matching game!<br>
-            Wordsearch! 
-</a></li>
-
-        <li><a href="Spring-team-spelling-game.html">Spelling Game<br>
-2 Teams!!<br>
-            Spring Words<br>
-            Cherry blossoms / picnic / look / beautiful
-</a></li>
-
-        
-
-        
-        
-          </ul>
+        <li><a href="A-Trip-To-The-City-Reading.html"><strong>A Trip To The City</strong><span>Can you read it?</span></a></li>
+        <li><a href="A-Trip-To-The-City-Activity.html"><strong>A Trip To The City</strong><span>Activity 1</span></a></li>
+        <li><a href="Emily-at-the-Fair-Reading.html"><strong>Emily at the Fair</strong><span>Can you read it?</span></a></li>
+        <li><a href="Emily-at-the-Fair-Activity.html"><strong>Emily at the Fair</strong><span>Activity</span></a></li>
+        <li><a href="A-Big-Bug-Reading.html"><strong>A Big Bug!</strong><span>Can you read it?</span></a></li>
+        <li><a href="A-Big-Bug-Activity.html"><strong>A Big Bug!</strong><span>Activity</span></a></li>
+        <li><a href="Your introduction.html"><strong>Your Introduction</strong><span>Create your own introduction!</span></a></li>
+        <li><a href="Sarah_Asks_for_Help-Reading.html"><strong>Sarah Asks for Help</strong><span>Story Book Edition<br>Read the story!</span></a></li>
+        <li><a href="Sarah_Asks_for_Help-Listening-Quiz.html"><strong>Sarah Asks for Help</strong><span>Listening Quiz<br>Listen and find the matching picture!</span></a></li>
+        <li><a href="Sarah_Asks_for_Help.html"><strong>Sarah Asks for Help</strong><span>Board Game!<br>Roll the Dice!</span></a></li>
+        <li><a href="Sarah_Asks_for_Help_2players.html"><strong>Sarah Asks for Help</strong><span>Board Game!<br>2 PLAYERS!</span></a></li>
+        <li><a href="School-Words.html"><strong>School Words</strong><span>Vocabulary Quiz<br>Listen and Choose / Read and Choose</span></a></li>
+        <li><a href="School-Prepositions.html"><strong>School Words & Prepositions</strong><span>On and Under<br>シャッフル機能付き、毎回問題が変わる</span></a></li>
+        <li><a href="School-Reading-Lily's_Sticker_Hunt.html"><strong>School - Reading</strong><span>Lily's Sticker Hunt<br>Read the story</span></a></li>
+        <li><a href="School-Board-Game-2Players.html"><strong>School - Board Game</strong><span>Lily's Sticker Hunt<br>Two Players!</span></a></li>
+        <li><a href="Sakura's-Silly-Morning-Vocabulary.html"><strong>Vocabulary</strong><span>Sakura's Silly Morning<br>Choose the correct one!</span></a></li>
+        <li><a href="Sakura's-Silly-Morning-Interactive-Reading.html"><strong>Interactive Reading</strong><span>Sakura's Silly Morning<br>Look! Think! then Read!</span></a></li>
+        <li><a href="Sakura's-Silly-Morning-Interactive-Read-and-Answer.html"><strong>Interactive Reading</strong><span>Sakura's Silly Morning<br>Read / Look at the picture<br>6 scenes / 3 questions each</span></a></li>
+        <li><a href="International-Birthday-Party-Reading.html"><strong>Interactive Reading</strong><span>June's International Birthday Party!<br>Read / Look at the picture<br>8 scenes / 3 questions each</span></a></li>
+        <li><a href="Survival-School-English-Quiz.html"><strong>10 Useful Phrases</strong><span>Let's practice and get ready for school!<br>What do you say in these school situations?<br>Simple phrases only!</span></a></li>
+        <li><a href="Survival-School-English-Role-Play.html"><strong>Role Play</strong><span>Let's practice and get ready for school!<br>School Survival Phrases!<br>Simple phrases only!</span></a></li>
+        <li><a href="My-Favorite-Subject.html"><strong>7 School Subjects</strong><span>Meet seven children.<br>Can you tell their favorite subjects?<br>読み上げ機能付き / 報告メール機能付き / Pictureボタンでイラスト表示</span></a></li>
+        <li><a href="My-Favorite-Subject-vocab.html"><strong>Vocabulary Quiz</strong><span>from 7 School Subjects<br>You need the password!<br>30 Questions!</span></a></li>
+        <li><a href="My-Favorite-Subject-boardgame.html"><strong>Boardgame</strong><span>based on "What's My Favorite Subject?" story<br>電子黒板モード、先生が操作<br>You need the password!</span></a></li>
+        <li><a href="My-Favorite-Subject-boardgame-PC_mode.html"><strong>Boardgame (PC Mode)</strong><span>based on "What's My Favorite Subject?" story<br>PCモード、宿題用<br>You need the password!</span></a></li>
+        <li><a href="My-Favorite-Subject-Lucy.html"><strong>From 'Boring' to 'Fun!'</strong><span>Lucy's story<br>Surprise! Lucy used to hate social studies!<br>Now, it's her favorite subject!</span></a></li>
+        <li><a href="Rainbow.html"><strong>Rainbow!</strong><span>Favorite Color!<br>Learn the seven colors of the rainbow!</span></a></li>
+        <li><a href="Pink.html"><strong>Pink! 4 Activities!</strong><span>Read lyrics! / Drag item / Wordsearch / Yes, I do!</span></a></li>
+        <li><a href="Meet-Joy.html"><strong>Meet Joy!</strong><span>Introduction Song - Joy the Ant!<br>Numbers & snacks / Wordsearch</span></a></li>
+        <li><a href="Marching-Marching.html"><strong>Marching Marching!</strong><span>Lyrics with pictures!<br>Matching game / Wordsearch</span></a></li>
+        <li><a href="Spring-team-spelling-game.html"><strong>Spelling Game</strong><span>2 Teams!!<br>Spring Words</span></a></li>
+    </ul>
 
 </body>
 </html>
